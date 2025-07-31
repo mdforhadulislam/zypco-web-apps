@@ -2,26 +2,55 @@
   "name": "zypco-web-apps",
   "version": "0.1.0",
   "private": true,
+  "description": "Zypco web apps - a modern Next.js 15 + React 19 project styled with Tailwind CSS v4.",
+  "author": "Forhadul Islam <mdforhadul44@gmail.com>",
+  "license": "MIT",
+  "keywords": [
+    "nextjs",
+    "react",
+    "tailwindcss",
+    "typescript",
+    "web-app",
+    "frontend",
+    "shadcn",
+    "turbopack"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/zypco-web-apps.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/zypco-web-apps/issues"
+  },
+  "homepage": "https://zypco.com",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check-types": "tsc --noEmit",
+    "format": "prettier --write ."
   },
   "dependencies": {
+    "next": "15.4.5",
     "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "next": "15.4.5"
+    "react-dom": "19.1.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.4.5",
-    "@eslint/eslintrc": "^3"
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }
