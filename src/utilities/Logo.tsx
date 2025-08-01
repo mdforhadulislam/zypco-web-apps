@@ -21,8 +21,8 @@ const Logo: React.FC<LogoProps> = ({isFooter = false, width, height}) => {
         />:<Image
         src="/logo.jpg"
         alt="Zypco Logo"
-        width={100}
-        height={100}
+        width={80}
+        height={80}
         className="object-contain w-[60px] h-[60px]"
         priority 
     />}
