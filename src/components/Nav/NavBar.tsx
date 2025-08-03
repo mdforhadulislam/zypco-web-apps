@@ -1,6 +1,3 @@
-
-import Link from "next/link";
-import Logo from "@/utilities/Logo";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -10,11 +7,23 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Book, CircleCheckIcon, CircleHelpIcon, CircleIcon, Menu, Sunset, Trees, Zap } from "lucide-react";
+import Logo from "@/utilities/Logo";
+import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
+import Link from "next/link";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../ui/accordion";
 import { Button } from "../ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
-
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../ui/sheet";
 
 interface MenuItem {
   title: string;
@@ -24,17 +33,18 @@ interface MenuItem {
   items?: MenuItem[];
 }
 
-
 const components = [
   {
     title: "Alert Dialog",
     href: "/docs/primitives/alert-dialog",
-    description: "A modal dialog that interrupts the user with important content and expects a response.",
+    description:
+      "A modal dialog that interrupts the user with important content and expects a response.",
   },
   {
     title: "Hover Card",
     href: "/docs/primitives/hover-card",
-    description: "For sighted users to preview content available behind a link.",
+    description:
+      "For sighted users to preview content available behind a link.",
   },
   {
     title: "Progress",
@@ -59,14 +69,13 @@ const components = [
 ];
 
 const nav = {
-  
-  logo : {
+  logo: {
     url: "https://www.shadcnblocks.com",
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
     alt: "logo",
     title: "Shadcnblocks.com",
   },
-  menu :[
+  menu: [
     { title: "Home", url: "#" },
     {
       title: "Products",
@@ -137,35 +146,46 @@ const nav = {
       title: "Blog",
       url: "#",
     },
-  ]
-}
+  ],
+};
 
 const NavBar = () => {
   return (
     <section className="w-full shadow-sm bg-white z-50">
-      <div className="flex items-center justify-between px-6 py-2">
+      <div className="flex items-center justify-between px-4 py-2">
         {/* Logo */}
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4">
           <Logo />
 
           {/* NavigationMenu */}
           <NavigationMenu className="hidden lg:flex">
-            <NavigationMenuList className="space-x-[4px]">
-
+            <NavigationMenuList className="space-x-1">
               <NavigationMenuItem>
-                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                  <Link href="/" className="font-semibold color-1 hover:bg-1/10 hover:color-1">Home</Link>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link
+                    href="/"
+                    className="font-semibold color-1 hover:bg-1/10 hover:color-1"
+                  >
+                    Home
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-
-
               <NavigationMenuItem className="font-semibold color-1 hover:bg-1/10 hover:color-1">
-                <NavigationMenuTrigger className="font-semibold color-1 hover:bg-1/10 hover:color-1">Ship & Track</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="font-semibold color-1 hover:bg-1/10 hover:color-1">
+                  Ship & Track
+                </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid w-[600px] gap-2 p-2 grid-cols-2">
                     {components.map((component) => (
-                      <ListItem key={component.title} href={component.href} title={component.title}>
+                      <ListItem
+                        key={component.title}
+                        href={component.href}
+                        title={component.title}
+                      >
                         {component.description}
                       </ListItem>
                     ))}
@@ -173,14 +193,18 @@ const NavBar = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-
-              
               <NavigationMenuItem className="font-semibold color-1 hover:bg-1/10 hover:color-1">
-                <NavigationMenuTrigger className="font-semibold color-1 hover:bg-1/10 hover:color-1">Logistics Solutions</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="font-semibold color-1 hover:bg-1/10 hover:color-1">
+                  Logistics Solutions
+                </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid w-[600px] gap-2 p-2 grid-cols-2">
                     {components.map((component) => (
-                      <ListItem key={component.title} href={component.href} title={component.title}>
+                      <ListItem
+                        key={component.title}
+                        href={component.href}
+                        title={component.title}
+                      >
                         {component.description}
                       </ListItem>
                     ))}
@@ -188,10 +212,10 @@ const NavBar = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-
-
               <NavigationMenuItem className="font-semibold color-1 hover:bg-1/10 hover:color-1">
-                <NavigationMenuTrigger className="font-semibold color-1 hover:bg-1/10 hover:color-1">About Us</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="font-semibold color-1 hover:bg-1/10 hover:color-1">
+                  About Us
+                </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid gap-2 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr] p-2">
                     <li className="row-span-3">
@@ -200,9 +224,12 @@ const NavBar = () => {
                           href="/"
                           className="flex h-full w-full flex-col justify-end rounded-md p-4 bg-muted/30 no-underline outline-none select-none focus:shadow-md"
                         >
-                          <div className="mb-2 text-lg font-semibold">shadcn/ui</div>
+                          <div className="mb-2 text-lg font-semibold">
+                            shadcn/ui
+                          </div>
                           <p className="text-sm text-muted-foreground leading-tight">
-                            Beautifully designed components built with Tailwind CSS.
+                            Beautifully designed components built with Tailwind
+                            CSS.
                           </p>
                         </Link>
                       </NavigationMenuLink>
@@ -213,25 +240,41 @@ const NavBar = () => {
                     <ListItem href="/docs/installation" title="Installation">
                       How to install and structure your app.
                     </ListItem>
-                    <ListItem href="/docs/primitives/typography" title="Typography">
+                    <ListItem
+                      href="/docs/primitives/typography"
+                      title="Typography"
+                    >
                       Styles for text elements.
                     </ListItem>
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-
-              
               <NavigationMenuItem>
-                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                  <Link href="/docs" className="font-semibold color-1 hover:bg-1/10 hover:color-1">Our Service</Link>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link
+                    href="/docs"
+                    className="font-semibold color-1 hover:bg-1/10 hover:color-1"
+                  >
+                    Our Service
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-
               <NavigationMenuItem>
-                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                  <Link href="/docs" className="font-semibold color-1 hover:bg-1/10 hover:color-1">Contact</Link>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link
+                    href="/docs"
+                    className="font-semibold color-1 hover:bg-1/10 hover:color-1"
+                  >
+                    Contact
+                  </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
@@ -239,73 +282,68 @@ const NavBar = () => {
         </div>
 
         {/* Right side buttons */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
           <ul className="hidden lg:flex space-x-4 text-sm font-medium text-gray-700">
             <li>
-              <Link href="#career" className="color-2 font-semibold cursor-pointer">Career</Link>
+              <Link
+                href="#career"
+                className="color-2 font-semibold cursor-pointer"
+              >
+                Career
+              </Link>
             </li>
             <li>
-              <Link href="#corporate"  className="color-2 font-semibold cursor-pointer">Zypco Corporate</Link>
+              <Link
+                href="#corporate"
+                className="color-2 font-semibold cursor-pointer"
+              >
+                Zypco Corporate
+              </Link>
             </li>
           </ul>
-          <Button className="bg-2 font-semibold hover:bg-2/70 px-8 py-6 rounded-4xl">Login</Button>
+          <Button className="bg-2 font-semibold hover:bg-2/70 px-6 py-6 rounded-4xl">
+            Login
+          </Button>
 
-
-
-
-
-        {/* Mobile Menu */}
-        <div className="block lg:hidden">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <a href={nav.logo.url} className="flex items-center gap-2">
-              <img
-                src={nav.logo.src}
-                className="max-h-8 dark:invert"
-                alt={nav.logo.alt}
-              />
-            </a>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="size-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>
-                    <a href={nav.logo.url} className="flex items-center gap-2">
-                      <img
-                        src={nav.logo.src}
-                        className="max-h-8 dark:invert"
-                        alt={nav.logo.alt}
-                      />
-                    </a>
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-6 p-4">
-                  <Accordion
-                    type="single"
-                    collapsible
-                    className="flex w-full flex-col gap-4"
+          {/* Mobile Menu */}
+          <div className="block lg:hidden">
+            <div className="flex items-center justify-between">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="bg-2-10  px-6 py-6 hover:bg-2-90 hover:text-white color-2"
                   >
-                    {nav.menu.map((item) => renderMobileMenuItem(item))}
-                  </Accordion>
+                    <Menu className="size-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>
+                      <a
+                        href={nav.logo.url}
+                        className="flex items-center gap-2"
+                      >
+                        <Logo />
+                      </a>
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="flex flex-col gap-6 p-4">
+                    <Accordion
+                      type="single"
+                      collapsible
+                      className="flex w-full flex-col gap-4"
+                    >
+                      {nav.menu.map((item) => renderMobileMenuItem(item))}
+                    </Accordion>
 
-                  <div className="flex flex-col gap-3">
-                    <Button asChild variant="outline">
-                      <a href="#">Hello</a>
-                    </Button>
-                    <Button asChild>
-                      <a href={"#"}>Hello</a>
-                    </Button>
+                    <div className="flex flex-col gap-3"></div>
                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
-        </div>
-
         </div>
       </div>
     </section>
@@ -332,10 +370,6 @@ function ListItem({
     </li>
   );
 }
-
-
-
-
 
 const renderMenuItem = (item: MenuItem) => {
   if (item.items) {
@@ -406,8 +440,5 @@ const SubMenuLink = ({ item }: { item: MenuItem }) => {
     </a>
   );
 };
-
-
-
 
 export default NavBar;
