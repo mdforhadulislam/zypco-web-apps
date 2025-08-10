@@ -65,6 +65,7 @@ const Globe: React.FC<GlobeProps> = ({
   
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   const globeRef = useRef<any>(null); // To store the cobe globe instance
 
   // Refs for interactive rotation and dragging state
@@ -130,6 +131,7 @@ const Globe: React.FC<GlobeProps> = ({
         markers: [
 
         ],
+        /* eslint-disable @typescript-eslint/no-explicit-any */
         onRender: (state: Record<string, any>) => {
           if (!isDragging.current) {
             // Only auto-rotate if not currently dragging
@@ -229,7 +231,7 @@ const Globe: React.FC<GlobeProps> = ({
   return (
     <div
       className={cn(
-        "flex items-center justify-center align-middle z-[0] mx-auto",
+        "flex items-center justify-center align-middle z-[10] mx-auto",
         className
       )}
       style={{
