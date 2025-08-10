@@ -17,11 +17,11 @@ const HeroHomeSection = () => {
   className={` container left-0 absolute -bottom-[30%] sm:-bottom-[60%] md:-bottom-[80%] lg:-bottom-[110%] xl:-bottom-[200%] m-auto`}
 />
 
-        <div className="w-full h-auto pt-16 pb-5 z-[100] relative">
-          <h1 className="text-5xl sm:text-5xl  font-extrabold text-white overflow-hidden z-[100]">
+        <div className="w-full h-auto pt-20 pb-5 z-[100] relative flex justify-center text-center align-middle items-center flex-col">
+          <h1 className="text-5xl sm:text-5xl  font-extrabold text-white overflow-hidden z-[10]">
             ZYPCO COURIER SOLUTATIONS
           </h1>
-          <h3 className="text-base sm:text-2xl md:text-3xl font-semibold text-white z-[100]">
+          <h3 className="text-base sm:text-2xl md:text-3xl font-semibold text-white z-[10]">
             ZIP IT SHIP IT ZYPCO
           </h3>
         </div>
