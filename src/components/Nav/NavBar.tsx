@@ -148,8 +148,8 @@ const NavData = [
 
 const NavBar = () => {
   return (
-    <section className="w-full shadow-sm bg-white z-50">
-      <div className="flex items-center justify-between px-4 py-2 z-30">
+    <section className="w-full shadow-sm bg-white z-[100]">
+      <div className="flex items-center justify-between px-4 py-2  ">
         {/* Logo */}
         <div className="flex items-center gap-4">
           <Logo />
