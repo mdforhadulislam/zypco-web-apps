@@ -18,8 +18,8 @@ const HeroHomeSectionBox = () => {
         </div>
 
         <div className="p-4">
-          <h3 className="font-bold text-lg">Can’t Find Your Order Details?</h3>
-          <h4 className="font-medium text-base">
+          <h3 className="font-bold text-base md:text-lg">Can’t Find Your Order Details?</h3>
+          <h4 className="font-medium text-sm md:text-base">
             We have sent your AWB (tracking) number to you via email and
             WhatsApp upon booking the shipment.
           </h4>
