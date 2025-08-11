@@ -3,7 +3,7 @@ import { Input } from "../ui/input";
 
 const HeroHomeSectionBox = () => {
   return (
-    <div className="w-full h-auto flex items-center align-middle justify-center pt-5 pb-16 relative z-[20] m-auto">
+    <div className="w-full h-auto flex items-center align-middle justify-center pt-5 pb-28 sm:pb-16 relative z-[20] m-auto">
       <div className=" w-[700px] bg-white rounded-lg shadow-2xl p-1 ">
         <div className=" w-full h-auto p-3 border-b mb-2">
           <div className=" border-[#008000] border rounded-md mb-3">
