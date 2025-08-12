@@ -185,7 +185,7 @@ useEffect(()=>{
   return (
     <header  className={`z-[40] w-full  bg-white ${
         navBarScrolled
-          ? " fixed w-full h-auto animate-in duration-100"
+          ? " fixed w-full h-auto animate-in duration-100 shadow-lg"
           : "animate-in duration-100 w-full lg:px-6 m-auto fixed "
       }`}>
       <div className="flex items-center justify-between px-4 py-2  ">
