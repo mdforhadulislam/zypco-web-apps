@@ -59,21 +59,21 @@ const NavData = [
     items: [
       {
         title: "Track Shipment",
-        href: "/track",
+        href: "/service/track",
         description:
           "Track your parcel in real-time and stay updated throughout its journey.",
         icon: <PackageSearch className="size-5 shrink-0" />,
       },
       {
         title: "Create Shipment",
-        href: "/create",
+        href: "/service/create",
         description:
           "Easily create a new shipment and schedule pickups with just a few clicks.",
         icon: <PackagePlus className="size-5 shrink-0" />,
       },
       {
         title: "Calculate Shipping Charge",
-        href: "/calculate",
+        href: "/service/calculate",
         description:
           "Quickly estimate your shipping charges based on weight and destination.",
         icon: <Calculator className="size-5 shrink-0" />,
@@ -82,25 +82,25 @@ const NavData = [
   },
   {
     title: "Logistics Solutions",
-    href: "/logistics",
+    href: "/service/logistics",
     items: [
       {
         title: "E-commerce Solutions",
-        href: "/ecommerce",
+        href: "/service/ecommerce",
         description:
           "Smart and scalable logistics services designed for online businesses and marketplaces.",
         icon: <ShoppingCart className="size-5 shrink-0" />,
       },
       {
         title: "Business Solutions",
-        href: "/business",
+        href: "/service/business",
         description:
           "Reliable logistics support to streamline and optimize your business operations.",
         icon: <Building2 className="size-5 shrink-0" />,
       },
       {
         title: "Industry Solutions",
-        href: "/industry",
+        href: "/service/industry",
         description:
           "Customized logistics services for various industries to meet specific supply chain needs.",
         icon: <Factory className="size-5 shrink-0" />,
@@ -113,28 +113,28 @@ const NavData = [
     items: [
       {
         title: "Our Story",
-        href: "/our-story",
+        href: "/about/our-story",
         description:
           "Discover how Zypco Courier started and our mission to revolutionize delivery services.",
         icon: <Users className="size-5 shrink-0" />,
       },
       {
         title: "Our Services",
-        href: "/our-services",
+        href: "/about/our-services",
         description:
           "Explore the wide range of courier and logistics services we provide across the globe.",
         icon: <Cog className="size-5 shrink-0" />,
       },
       {
         title: "Our Work Process",
-        href: "/our-team",
+        href: "/about/our-team",
         description:
           "Meet the dedicated professionals driving Zypco Courier’s success and innovation.",
         icon: <BriefcaseBusiness className="size-5 shrink-0" />,
       },
       {
         title: "Our Team",
-        href: "/our-team",
+        href: "/about/our-team",
         description:
           "A passionate team committed to delivering excellence in logistics and customer care.",
         icon: <ShieldHalf className="size-5 shrink-0" />,
@@ -219,7 +219,7 @@ useEffect(()=>{
                     <li className="row-span-4">
                       <NavigationMenuLink asChild>
                         <Link
-                          href="/"
+                          href="/about"
                           className="flex h-full w-full flex-col justify-end rounded-md p-4 bg-muted/30 no-underline outline-none select-none focus:shadow-md"
                           style={{
                             backgroundImage: `url('/logo.jpg')`,
@@ -312,7 +312,7 @@ useEffect(()=>{
                   className={navigationMenuTriggerStyle()}
                 >
                   <Link
-                    href="/docs"
+                    href="/contact"
                     className="font-semibold color-1 hover:bg-1/10 hover:color-1"
                   >
                     Contact
@@ -328,7 +328,7 @@ useEffect(()=>{
           <ul className="hidden lg:flex space-x-4 text-sm font-medium text-gray-700">
             <li>
               <Link
-                href="#career"
+                href="/career"
                 className="color-2 font-semibold cursor-pointer"
               >
                 Career
@@ -336,7 +336,7 @@ useEffect(()=>{
             </li>
             <li>
               <Link
-                href="#corporate"
+                href="/corporate"
                 className="color-2 font-semibold cursor-pointer"
               >
                 Zypco Corporate
