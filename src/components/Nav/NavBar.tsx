@@ -1,3 +1,4 @@
+"use client"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -8,8 +9,21 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import Logo from "@/utilities/Logo";
-import { Book, Box, BriefcaseBusiness, Building2, Calculator, Cog, Factory, Menu, PackagePlus, PackageSearch, ShieldHalf, ShoppingCart, Sunset, Trees, Users, Zap } from "lucide-react";
+import {
+  BriefcaseBusiness,
+  Building2,
+  Calculator,
+  Cog,
+  Factory,
+  Menu,
+  PackagePlus,
+  PackageSearch,
+  ShieldHalf,
+  ShoppingCart,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -37,7 +51,7 @@ const NavData = [
   {
     title: "Home",
     href: "/",
-     items:[]
+    items: [],
   },
   {
     title: "Ship & Track",
@@ -48,14 +62,14 @@ const NavData = [
         href: "/track",
         description:
           "Track your parcel in real-time and stay updated throughout its journey.",
-        icon:  <PackageSearch className="size-5 shrink-0"  />, 
+        icon: <PackageSearch className="size-5 shrink-0" />,
       },
       {
         title: "Create Shipment",
         href: "/create",
         description:
           "Easily create a new shipment and schedule pickups with just a few clicks.",
-        icon: <PackagePlus  className="size-5 shrink-0" />,
+        icon: <PackagePlus className="size-5 shrink-0" />,
       },
       {
         title: "Calculate Shipping Charge",
@@ -102,14 +116,14 @@ const NavData = [
         href: "/our-story",
         description:
           "Discover how Zypco Courier started and our mission to revolutionize delivery services.",
-        icon: <Users  className="size-5 shrink-0" />,
+        icon: <Users className="size-5 shrink-0" />,
       },
       {
         title: "Our Services",
         href: "/our-services",
         description:
           "Explore the wide range of courier and logistics services we provide across the globe.",
-        icon: <Cog  className="size-5 shrink-0" />,
+        icon: <Cog className="size-5 shrink-0" />,
       },
       {
         title: "Our Work Process",
@@ -130,25 +144,50 @@ const NavData = [
   {
     title: "Contact",
     href: "/contact",
-    items:[]
+    items: [],
   },
 
   {
-    title:"Career",
-    href:"/Career",
-       items:[]
+    title: "Career",
+    href: "/Career",
+    items: [],
   },
   {
-    title:"Zypco Corporate",
-    href:"/",
-    items:[]
-  }
+    title: "Zypco Corporate",
+    href: "/",
+    items: [],
+  },
 ];
-
+ 
 
 const NavBar = () => {
+
+  
+
+const [navBarScrolled, setNavBarScrolled] = useState<boolean>(false);
+
+const handleScroll = () => {
+  const offset = window.scrollY;
+
+  if (offset > 120) {
+    setNavBarScrolled(true);
+  } else {
+    setNavBarScrolled(false);
+  }
+};
+
+useEffect(()=>{
+  
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+},[])
+// className="shadow-sm  z-[40]"
   return (
-    <section className="w-full shadow-sm bg-white z-[40]">
+    <header  className={`z-[40] w-full  bg-white ${
+        navBarScrolled
+          ? " fixed w-full h-auto animate-in duration-100"
+          : "animate-in duration-100 w-full lg:px-6 m-auto fixed "
+      }`}>
       <div className="flex items-center justify-between px-4 py-2  ">
         {/* Logo */}
         <div className="flex items-center gap-4">
@@ -321,13 +360,10 @@ const NavBar = () => {
                     <Menu className="size-6" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="overflow-y-auto">
+                <SheetContent side="left" className="overflow-y-auto ">
                   <SheetHeader className="border-b py-2">
                     <SheetTitle>
-                      <a
-                        href={'/'}
-                        className="flex items-center gap-2"
-                      >
+                      <a href={"/"} className="flex items-center gap-2">
                         <Logo />
                       </a>
                     </SheetTitle>
@@ -345,18 +381,20 @@ const NavBar = () => {
                   </div>
 
                   <div className="w-full h-auto flex gap-3 justify-center align-middle items-center">
-                    <Button className="px-3 py-6 w-[45%] bg-2 font-bold">Login</Button>
-                    <Button className="px-3 py-6 w-[45%] bg-2 font-bold">SingUp</Button>
-
+                    <Button className="px-3 py-6 w-[45%] bg-2 font-bold">
+                      Login
+                    </Button>
+                    <Button className="px-3 py-6 w-[45%] bg-2 font-bold">
+                      SingUp
+                    </Button>
                   </div>
-
                 </SheetContent>
               </Sheet>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </header>
   );
 };
 
@@ -387,7 +425,9 @@ const SubMenuLink = ({ item }: { item: MenuItem }) => {
       className="  hover:color-1 flex select-none flex-row gap-4 rounded-md p-3 leading-none no-underline outline-none hover:bg-1/10 group transition-all duration-250"
       href={item.href}
     >
-      <div className="text-foreground group-hover:text-green-700 transition-all duration-250">{item.icon}</div>
+      <div className="text-foreground group-hover:text-green-700 transition-all duration-250">
+        {item.icon}
+      </div>
       <div>
         <div className="text-sm font-semibold ">{item.title}</div>
         {item.description && (
@@ -403,7 +443,11 @@ const SubMenuLink = ({ item }: { item: MenuItem }) => {
 const renderMobileMenuItem = (item: MenuItem) => {
   if (item.items?.length) {
     return (
-      <AccordionItem key={item.title} value={item.title} className="border-b-0 ">
+      <AccordionItem
+        key={item.title}
+        value={item.title}
+        className="border-b-0 "
+      >
         <AccordionTrigger className="text-md py-0 font-semibold hover:no-underline cursor-pointer color-1">
           {item.title}
         </AccordionTrigger>
@@ -416,17 +460,24 @@ const renderMobileMenuItem = (item: MenuItem) => {
     );
   }
 
-  if(item.title == "Career" || item.title=="Zypco Corporate"){
-    
-  return (
-    <a key={item.title} href={item.href} className="text-md font-semibold cursor-pointer color-2">
-      {item.title}
-    </a>
-  );
+  if (item.title == "Career" || item.title == "Zypco Corporate") {
+    return (
+      <a
+        key={item.title}
+        href={item.href}
+        className="text-md font-semibold cursor-pointer color-2"
+      >
+        {item.title}
+      </a>
+    );
   }
 
   return (
-    <a key={item.title} href={item.href} className="text-md font-semibold cursor-pointer color-1">
+    <a
+      key={item.title}
+      href={item.href}
+      className="text-md font-semibold cursor-pointer color-1"
+    >
       {item.title}
     </a>
   );

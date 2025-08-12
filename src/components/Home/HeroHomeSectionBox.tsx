@@ -3,10 +3,10 @@ import { Input } from "../ui/input";
 
 const HeroHomeSectionBox = () => {
   return (
-    <div className="w-full h-auto flex items-center align-middle justify-center pt-5 pb-28 sm:pb-16 relative z-[20] m-auto">
-      <div className=" w-[700px] bg-white rounded-lg shadow-2xl p-1 ">
+    <div className="w-full h-auto flex items-center align-middle justify-center pt-5 pb-32 sm:pb-20 relative z-[20] m-auto">
+      <div className=" w-[650px] bg-white rounded-lg shadow-2xl p-1 ">
         <div className=" w-full h-auto p-3 border-b mb-2">
-          <div className=" border-[#008000] border rounded-md mb-3">
+          <div className=" border-[#008000] border rounded-lg mb-3">
             <Input
               className=" outline-0 border-none p-5 text-lg md:text-lg "
               placeholder="Enter Tracking Number"

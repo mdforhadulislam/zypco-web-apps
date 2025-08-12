@@ -98,6 +98,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <NavBar />
+        <div className="w-full h-[70px]"></div>
       {children}
       <FooterBar />
 
