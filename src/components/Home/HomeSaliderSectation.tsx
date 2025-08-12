@@ -47,7 +47,7 @@ const HomeSaliderSectation = () => {
   }, [api]);
 
   return (
-    <div className="w-full h-auto py-16 pb-0 bg-white px-5">
+    <div className="w-full h-auto py-16 bg-white px-5">
       <div className="container h-auto m-auto p-10">
         <Carousel setApi={setApi}>
           <CarouselContent>
