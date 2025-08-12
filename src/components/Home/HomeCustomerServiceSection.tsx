@@ -3,7 +3,7 @@ import { BriefcaseBusiness, Headset, LaptopMinimalCheck } from "lucide-react";
 const HomeCustomerServiceSection = () => {
   return (
     <div className="w-full h-auto p-4">
-      <div className="container py-10 pb-28 m-auto">
+      <div className="container py-4 pb-28 m-auto">
         <div className="w-full h-auto flex flex-col md:flex-row  gap-8 justify-between items-center align-middle">
           <div className="w-full p-10 rounded-md h-full shadow-lg border flex flex-col justify-center align-middle items-center">
             <div className="p-5">
