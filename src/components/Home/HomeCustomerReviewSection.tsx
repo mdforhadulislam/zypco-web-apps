@@ -1,7 +1,6 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   Carousel,
@@ -122,7 +121,9 @@ const HomeCustomerReviewSection = () => {
                           </AvatarFallback>
                         </Avatar>
                         <div className="text-base">
-                          <p className="font-medium text-lg">{testimonial.name}</p>
+                          <p className="font-medium text-lg">
+                            {testimonial.name}
+                          </p>
                           {/* <p className="text-muted-foreground">{testimonial.role}</p> */}
                         </div>
                       </div>
