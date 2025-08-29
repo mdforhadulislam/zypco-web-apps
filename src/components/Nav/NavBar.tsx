@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -158,36 +158,33 @@ const NavData = [
     items: [],
   },
 ];
- 
 
 const NavBar = () => {
+  const [navBarScrolled, setNavBarScrolled] = useState<boolean>(false);
 
-  
+  const handleScroll = () => {
+    const offset = window.scrollY;
 
-const [navBarScrolled, setNavBarScrolled] = useState<boolean>(false);
+    if (offset > 120) {
+      setNavBarScrolled(true);
+    } else {
+      setNavBarScrolled(false);
+    }
+  };
 
-const handleScroll = () => {
-  const offset = window.scrollY;
-
-  if (offset > 120) {
-    setNavBarScrolled(true);
-  } else {
-    setNavBarScrolled(false);
-  }
-};
-
-useEffect(()=>{
-  
+  useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-},[])
-// className="shadow-sm  z-[40]"
+  }, []);
+  // className="shadow-sm  z-[40]"
   return (
-    <header  className={`z-[40] w-full  bg-white ${
+    <header
+      className={`z-[40] w-full  bg-[#241F21] ${
         navBarScrolled
           ? " fixed w-full h-auto animate-in duration-100 shadow-lg"
           : "animate-in duration-100 w-full lg:px-6 m-auto fixed "
-      }`}>
+      }`}
+    >
       <div className="flex items-center justify-between px-4 py-2  ">
         {/* Logo */}
         <div className="flex items-center gap-4">
@@ -203,36 +200,37 @@ useEffect(()=>{
                 >
                   <Link
                     href="/"
-                    className="font-semibold color-1 hover:bg-1/10 hover:color-1"
+                    className="font-semibold text-[#FEF400] hover:text-[#FEF400]"
                   >
                     Home
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-              <NavigationMenuItem className="font-semibold color-1 hover:bg-1/10 hover:color-1">
-                <NavigationMenuTrigger className="font-semibold color-1 hover:bg-1/10 hover:color-1">
+              <NavigationMenuItem className="font-semibold text-[#FEF400] hover:text-[#FEF400]">
+                <NavigationMenuTrigger className="font-semibold text-[#FEF400] hover:text-[#FEF400]">
                   About Us
                 </NavigationMenuTrigger>
-                <NavigationMenuContent>
+                <NavigationMenuContent className="bg-[#241F21] border-[#241F21] border">
                   <ul className="grid gap-2 md:w-[400px] lg:w-[500px] lg:grid-cols-[.85fr_1fr] p-2">
                     <li className="row-span-4">
                       <NavigationMenuLink asChild>
                         <Link
                           href="/about"
-                          className="flex h-full w-full flex-col justify-end rounded-md p-4 bg-muted/30 no-underline outline-none select-none focus:shadow-md"
+                          className="flex h-full w-full flex-col justify-end rounded-md p-4 bg-black no-underline outline-none select-none focus:shadow-md"
                           style={{
-                            backgroundImage: `url('/logo.jpg')`,
-                            backgroundSize: "cover",
+                            backgroundImage: `url('/icon.png')`,
+                            backgroundSize: "80%",
                             backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat",
                             height: "100%",
                             width: "100%",
                           }}
                         >
-                          <div className="mb-2 text-lg font-semibold">
+                          <div className="mb-2 text-lg font-semibold text-white">
                             Zypco Courier
                           </div>
-                          <p className="text-sm text-muted-foreground leading-tight">
+                          <p className="text-sm   leading-tight text-white/80">
                             Beautifully designed components built with Tailwind
                             CSS.
                           </p>
@@ -253,11 +251,11 @@ useEffect(()=>{
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              <NavigationMenuItem className="font-semibold color-1 hover:bg-1/10 hover:color-1">
-                <NavigationMenuTrigger className="font-semibold color-1 hover:bg-1/10 hover:color-1">
+              <NavigationMenuItem className="font-semibold text-[#FEF400] hover:text-[#FEF400]">
+                <NavigationMenuTrigger className="font-semibold text-[#FEF400] hover:text-[#FEF400]">
                   {NavData?.[1]?.title}
                 </NavigationMenuTrigger>
-                <NavigationMenuContent>
+                <NavigationMenuContent className="bg-[#241F21] border-[#241F21] border">
                   <ul className=" flex w-[800px] gap-2 p-2  ">
                     {NavData?.[1]?.items.map((component) => (
                       <ListItem
@@ -279,11 +277,11 @@ useEffect(()=>{
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              <NavigationMenuItem className="font-semibold color-1 hover:bg-1/10 hover:color-1">
-                <NavigationMenuTrigger className="font-semibold color-1 hover:bg-1/10 hover:color-1">
+              <NavigationMenuItem className="font-semibold text-[#FEF400] hover:text-[#FEF400]">
+                <NavigationMenuTrigger className="font-semibold text-[#FEF400] hover:text-[#FEF400]">
                   Logistics Solutions
                 </NavigationMenuTrigger>
-                <NavigationMenuContent>
+                <NavigationMenuContent className="bg-[#241F21] border-[#241F21] border">
                   <ul className=" flex w-[800px] gap-2 p-2  ">
                     {NavData?.[2]?.items.map((component) => (
                       <ListItem
@@ -313,7 +311,7 @@ useEffect(()=>{
                 >
                   <Link
                     href="/contact"
-                    className="font-semibold color-1 hover:bg-1/10 hover:color-1"
+                    className="hover:text-[#FEF400] font-semibold text-[#FEF400] "
                   >
                     Contact
                   </Link>
@@ -329,7 +327,7 @@ useEffect(()=>{
             <li>
               <Link
                 href="/career"
-                className="color-2 font-semibold cursor-pointer"
+                className="text-[#FEF400] hover:text-[#FEF400]  font-semibold cursor-pointer"
               >
                 Career
               </Link>
@@ -337,13 +335,13 @@ useEffect(()=>{
             <li>
               <Link
                 href="/corporate"
-                className="color-2 font-semibold cursor-pointer"
+                className="text-[#FEF400] hover:text-[#FEF400]  font-semibold cursor-pointer"
               >
                 Zypco Corporate
               </Link>
             </li>
           </ul>
-          <Button className="bg-2 font-semibold hover:bg-2/70 px-6 py-6 rounded-4xl">
+          <Button className="bg-2 font-semibold  text-[#241F21] bg-[#FEF400]  hover:bg-[#FEF400]/90 px-6 py-6 rounded-4xl">
             Login
           </Button>
 
@@ -355,7 +353,7 @@ useEffect(()=>{
                   <Button
                     variant="outline"
                     size="icon"
-                    className="bg-2-10  px-6 py-6 hover:bg-2-90 hover:text-white color-2"
+                    className=" px-6 py-6 hover:text-[#241F21] text-[#FEF400] hover:bg-[#FEF400] bg-[] border border-[#FEF400]"
                   >
                     <Menu className="size-6" />
                   </Button>
@@ -381,10 +379,10 @@ useEffect(()=>{
                   </div>
 
                   <div className="w-full h-auto flex gap-3 justify-center align-middle items-center">
-                    <Button className="px-3 py-6 w-[45%] bg-2 font-bold">
+                    <Button className="px-3 py-6 w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 cursor-pointer font-bold">
                       Login
                     </Button>
-                    <Button className="px-3 py-6 w-[45%] bg-2 font-bold">
+                    <Button className="px-3 py-6 w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 cursor-pointer font-bold">
                       SingUp
                     </Button>
                   </div>
@@ -409,10 +407,10 @@ function ListItem({
       <NavigationMenuLink asChild>
         <Link
           href={href}
-          className="block rounded-sm px-3 py-2 hover:bg-muted transition text-sm font-medium leading-tight"
+          className="block rounded-sm px-3 py-2 transition text-sm font-medium leading-tight"
         >
-          <div>{title}</div>
-          <p className="text-muted-foreground text-xs">{children}</p>
+          <div className="text-white">{title}</div>
+          <p className="text-white/80 text-xs">{children}</p>
         </Link>
       </NavigationMenuLink>
     </li>
@@ -422,10 +420,10 @@ function ListItem({
 const SubMenuLink = ({ item }: { item: MenuItem }) => {
   return (
     <a
-      className="  hover:color-1 flex select-none flex-row gap-4 rounded-md p-3 leading-none no-underline outline-none hover:bg-1/10 group transition-all duration-250"
+      className="  hover:text-[#241F21] flex select-none flex-row gap-4 rounded-md p-3 leading-none no-underline outline-none hover:bg-[#FEF400]/30 group transition-all duration-250"
       href={item.href}
     >
-      <div className="text-foreground group-hover:text-green-700 transition-all duration-250">
+      <div className="text-foreground group-hover:text-[#241F21] transition-all duration-250">
         {item.icon}
       </div>
       <div>
@@ -448,7 +446,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
         value={item.title}
         className="border-b-0 "
       >
-        <AccordionTrigger className="text-md py-0 font-semibold hover:no-underline cursor-pointer color-1">
+        <AccordionTrigger className="text-md py-0 font-semibold hover:no-underline cursor-pointer text-[#241F21]">
           {item.title}
         </AccordionTrigger>
         <AccordionContent className="mt-2">
@@ -460,26 +458,14 @@ const renderMobileMenuItem = (item: MenuItem) => {
     );
   }
 
-  if (item.title == "Career" || item.title == "Zypco Corporate") {
-    return (
-      <a
-        key={item.title}
-        href={item.href}
-        className="text-md font-semibold cursor-pointer color-2"
-      >
-        {item.title}
-      </a>
-    );
-  }
-
   return (
-    <a
+    <Link
       key={item.title}
       href={item.href}
-      className="text-md font-semibold cursor-pointer color-1"
+      className="text-md font-semibold cursor-pointer text-[#241F21]"
     >
       {item.title}
-    </a>
+    </Link>
   );
 };
 

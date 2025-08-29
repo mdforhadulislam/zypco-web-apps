@@ -3,15 +3,15 @@ import { Input } from "../ui/input";
 
 const HeroHomeSectionBox = () => {
   return (
-    <div className="w-full h-auto flex items-center align-middle justify-center pt-5 pb-32 sm:pb-20 relative z-[20] m-auto">
+    <div className="w-full h-auto flex items-center align-middle justify-center pt-5 pb-36 sm:pb-24 relative z-[20] m-auto">
       <div className=" w-[650px] bg-white rounded-lg shadow-2xl p-1 ">
-        <div className=" w-full h-auto p-3 border-b mb-2">
-          <div className=" border-[#008000] border rounded-lg mb-3">
+        <div className=" w-full h-auto p-3 border-b border-[#FEF400] mb-2">
+          <div className=" border-[#FEF400] border rounded-lg mb-3">
             <Input
               className=" outline-0 border-none p-5 text-lg md:text-lg "
               placeholder="Enter Tracking Number"
             />
-            <button className=" text-white rounded-b-md w-full h-auto p-3 bg-1 cursor-pointer">
+            <button className=" text-[#241F21] font-semibold rounded-b-md w-full h-auto p-3 bg-[#FEF400] cursor-pointer">
               Track shipment
             </button>
           </div>

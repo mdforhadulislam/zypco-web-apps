@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     siteName: "Zypco Web Apps",
     images: [
       {
-        url: "/logo.jpg",
+        url: "/logo.png",
         width: 1200,
         height: 630,
         alt: "Zypco Web App Preview",
@@ -74,13 +74,13 @@ export const metadata: Metadata = {
     images: ["/logo.jpg"],
   },
   icons: {
-    icon: "/fav.jpg",
-    shortcut: "/fav.jpg",
-    apple: "/fav.jpg",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
     other: [
       {
         rel: "mask-icon",
-        url: "/fav.jpg",
+        url: "/icon.png",
       },
     ],
   },

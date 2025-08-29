@@ -98,16 +98,16 @@ const ourCompany = [
 
 const FooterBar = () => {
   return (
-    <footer className="w-full h-auto bg-2">
+    <footer className="w-full h-auto bg-[#FEF400]">
       <div className="container h-auto m-auto p-5">
         <div className="w-full h-auto p-2 py-6">
           <div className="w-full h-auto grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-5">
-            <div className="lg:border-r border-white border-dashed">
+            <div className="lg:border-r border-[#241F21] border-dashed">
               <div className={"flex gap-4 pb-4"}>
-                <Logo isFooter={true} width={200} height={100} />
+                <Logo isFooter={true} width={300} height={180} />
               </div>
 
-              <div className="text-sm font-semibold pr-2 text-white py-1">
+              <div className="text-sm font-semibold pr-2 text-[#241F21] py-1">
                 Lorem ipsum dolor sit amet consectetur, adipisicing elit.
                 Perferendis ratione delectus quae consequatur officiis modi qui
                 quasi quisquam aperiam quia cum cupiditate, consectetur ut magni
@@ -152,22 +152,22 @@ const FooterBar = () => {
                 </Link>
               </div>
             </div>
-            <div className="group lg:border-r border-white border-dashed relative">
-              <h3 className=" text-lg text-white ">Solutions</h3>
+            <div className="group lg:border-r border-[#241F21] border-dashed relative">
+              <h3 className=" text-lg text-[#241F21] font-semibold ">Solutions</h3>
 
-              <span className="group-hover:w-[200px] w-[120px] transition-all duration-600 h-[2px] bg-white block"></span>
+              <span className="group-hover:w-[200px] w-[120px] transition-all duration-600 h-[2px] bg-[#241F21] block"></span>
 
-              <ul className="w-full h-auto text-gray-300 py-2 pt-4 ">
+              <ul className="w-full h-auto text-gray-600 py-2 pt-4 ">
                 {solutionsFeatures.map((item, index) => (
                   <li
                     key={index}
                     className="py-1 flex justify-start items-center align-middle gap-2"
                   >
-                    <IoIosArrowForward className="w-5 h-5 hover:text-white duration-300 transition-all" />
+                    <IoIosArrowForward className="w-5 h-5 hover:text-[#241F21] duration-300 transition-all" />
 
                     <Link
                       href={item.link}
-                      className=" text-base hover:text-white duration-300 transition-all"
+                      className=" text-base hover:text-[#241F21] duration-300 transition-all"
                     >
                       {item.title}
                     </Link>
@@ -176,20 +176,20 @@ const FooterBar = () => {
               </ul>
             </div>
             <div className="group ">
-              <h3 className=" text-lg text-white ">Our Company</h3>
+              <h3 className=" text-lg text-[#241F21] ">Our Company</h3>
 
-              <span className="group-hover:w-[200px] w-[120px] transition-all duration-600 h-[2px] bg-white block"></span>
+              <span className="group-hover:w-[200px] w-[120px] transition-all duration-600 h-[2px] bg-[#241F21] block"></span>
 
-              <ul className="w-full h-auto text-gray-300 py-2 pt-4">
+              <ul className="w-full h-auto text-gray-600 py-2 pt-4">
                 {ourCompany.map((item, index) => (
                   <li
                     key={index}
                     className="py-1 flex justify-start items-center align-middle gap-2"
                   >
-                    <IoIosArrowForward className="w-5 h-5 hover:text-white duration-300 transition-all" />
+                    <IoIosArrowForward className="w-5 h-5 hover:text-[#241F21] duration-300 transition-all" />
                     <Link
                       href={item.link}
-                      className=" text-base hover:text-white duration-300 transition-all"
+                      className=" text-base hover:text-[#241F21] duration-300 transition-all"
                     >
                       {item.title}
                     </Link>
@@ -199,8 +199,8 @@ const FooterBar = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-between align-middle py-4 pb-0 flex-row border-t border-white border-dashed">
-          <div className={"text-sm w-full text-center text-white "}>
+        <div className="flex items-center justify-between align-middle py-4 pb-0 flex-row border-t border-[#241F21] border-dashed">
+          <div className={"text-sm w-full text-center text-[#241F21] "}>
             ©<Link href="/">`Zypco Courier Solutation`</Link> All right
             reserved.
           </div>

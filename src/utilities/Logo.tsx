@@ -12,7 +12,7 @@ const Logo: React.FC<LogoProps> = ({isFooter = false, width, height}) => {
     <div>
         {isFooter ? 
             <Image
-            src="/footer-logo.jpg"
+            src="/logo.jpg"
             alt="Zypco Logo"
             width={width}
             height={height}
@@ -21,9 +21,9 @@ const Logo: React.FC<LogoProps> = ({isFooter = false, width, height}) => {
         />:<Image
         src="/logo.jpg"
         alt="Zypco Logo"
-        width={80}
+        width={140}
         height={80}
-        className="object-contain w-[60px] h-[60px]"
+        className="object-contain w-[120px] h-[70px]"
         priority 
     />}
         
