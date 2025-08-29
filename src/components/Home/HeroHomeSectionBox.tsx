@@ -1,4 +1,4 @@
-"use client";
+
 import { Input } from "../ui/input";
 
 const HeroHomeSectionBox = () => {
