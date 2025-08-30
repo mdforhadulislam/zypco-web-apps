@@ -1,12 +1,12 @@
 import PageHeader from '@/utilities/PageHeader'
 import React from 'react'
 
-const ZypcoService = () => {
+const RefundPolicy = () => {
   return (
     <div className="w-full h-auto bg-[#241F21]">
-      <PageHeader title="ABOUT US" subtitle="OUR SERVICES" />
+      <PageHeader title="ABOUT US" subtitle="REFUND POLICY" />
     </div>
   );
 }
 
-export default ZypcoService
+export default RefundPolicy

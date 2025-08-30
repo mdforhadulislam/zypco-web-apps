@@ -1,8 +1,11 @@
+import PageHeader from '@/utilities/PageHeader'
 import React from 'react'
 
 const ZypcoCorporate = () => {
   return (
-    <div>ZypcoCorporate</div>
+    
+    <div className="w-full h-auto bg-[#241F21]">
+      <PageHeader title="ZYPCO CORPORATE" subtitle="" /></div>
   )
 }
 

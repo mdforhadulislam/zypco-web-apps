@@ -7,92 +7,107 @@ import { IoLogoLinkedin } from "react-icons/io5";
 import { LuInstagram } from "react-icons/lu";
 
 const solutionsFeatures = [
+  
+  {
+    id: 35681,
+    title: "DHL Courier",
+    link: "/about/our-services/",
+    
+  },
+  
+  {
+    id: 35682,
+    title: "FEDEX Courier",
+    link: "/about/our-services/",
+    
+  },
+  
+  {
+    id: 35683,
+    title: "UPS Courier",
+    link: "/about/our-services/",
+    
+  },
+  
+  {
+    id: 35684,
+    title: "ARAMEX Courier",
+    link: "/about/our-services/",
+    
+  },
+  {
+    id: 35685,
+    title: "DPD Courier",
+    link: "/about/our-services/",
+    
+  },
   {
     id: 1213,
     title: "Air Freight",
     link: "/about/our-services/",
-    titleBn: "বাই এয়ার",
+    
   },
   {
-    id: 3568,
+    id: 35686,
     title: "Sea Freight",
     link: "/about/our-services/",
-    titleBn: "বাই সী",
+    
   },
   {
     id: 4668,
     title: "Custom Clearnces",
     link: "/about/our-services/",
-    titleBn: "কাস্টম ক্লিয়ারেঞ্ছ",
-  },
-  {
-    id: 89865,
-    title: "Export Shipments",
-    link: "/about/our-services/",
-    titleBn: "রপ্তানি চালান",
-  },
-  {
-    id: 565465,
-    title: "Courier Service",
-    link: "/about/our-services/",
-    titleBn: "কুরিয়ার সার্ভিস",
+    
   },
   {
     id: 565465,
     title: "Shipment Tracking",
-    link: "/track/",
-    titleBn: "চালান ট্র্যাকিং",
+    link: "/ship-and-track/track-shipment",
+    
   },
   {
-    id: 565465,
-    title: "Price Chart",
-    link: "/price/",
-    titleBn: "মূল্য চার্ট তালিকা",
+    id: 5654658,
+    title: "Courier Price Check",
+    link: "/ship-and-track/calculate-shipping-charge",
+
   },
 ];
 
 const ourCompany = [
   {
     id: 1234513,
-    title: "About Us",
-    link: "/about/why-finex/",
-    titleBn: "আমাদের সম্পর্কে",
-  },
-  {
-    id: 353468,
-    title: "Our Blog",
-    link: "/blog/",
-    titleBn: "আমাদের ব্লগ",
+    title: "Our Story",
+    link: "/about/",
+    
   },
   {
     id: 4245668,
     title: "Our Team",
-    link: "/about/our-team-member/",
-    titleBn: "আমাদের দলের সদস্য",
+    link: "/about/our-team/",
+  
   },
   {
     id: 565343465,
     title: "Help & Support",
     link: "/about/help-&-support/",
-    titleBn: "সহযোগিতা এবং সমর্থন",
+  
   },
   {
-    id: 56543465,
+    id: 565434654,
     title: "Trust & Safety",
-    link: "/about/trust&safety/",
-    titleBn: "আস্থা ও নিরাপত্তা",
+    link: "/about/trust-and-safety/",
   },
   {
-    id: 562354265,
+    id: 5623542653,
     title: "Privacy Policy",
     link: "/about/privacy-policy/",
-    titleBn: "গোপনীয়তা নীতি",
+    
   },
   {
-    id: 562354265,
+    id: 5623542652,
     title: "Refund Policy",
     link: "/about/refund-policy/",
-    titleBn: "ফেরত নীতি",
+    
   },
 ];
 
