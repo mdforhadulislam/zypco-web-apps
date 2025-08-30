@@ -55,25 +55,25 @@ const NavData = [
   },
   {
     title: "Ship & Track",
-    href: "/",
+    href: "/ship-and-track",
     items: [
       {
         title: "Track Shipment",
-        href: "/service/track",
+        href: "/ship-and-track/track-shipment",
         description:
           "Track your parcel in real-time and stay updated throughout its journey.",
         icon: <PackageSearch className="size-5 shrink-0" />,
       },
       {
         title: "Create Shipment",
-        href: "/service/create",
+        href: "/ship-and-track/create-shipment",
         description:
           "Easily create a new shipment and schedule pickups with just a few clicks.",
         icon: <PackagePlus className="size-5 shrink-0" />,
       },
       {
         title: "Calculate Shipping Charge",
-        href: "/service/calculate",
+        href: "/ship-and-track/claculate-shipping-charge",
         description:
           "Quickly estimate your shipping charges based on weight and destination.",
         icon: <Calculator className="size-5 shrink-0" />,
@@ -82,25 +82,25 @@ const NavData = [
   },
   {
     title: "Logistics Solutions",
-    href: "/service/logistics",
+    href: "/logistics-solutions",
     items: [
       {
         title: "E-commerce Solutions",
-        href: "/service/ecommerce",
+        href: "/logistics-solutions/e-commerce-solutions",
         description:
           "Smart and scalable logistics services designed for online businesses and marketplaces.",
         icon: <ShoppingCart className="size-5 shrink-0" />,
       },
       {
         title: "Business Solutions",
-        href: "/service/business",
+        href: "/logistics-solutions/bussiness-solution",
         description:
           "Reliable logistics support to streamline and optimize your business operations.",
         icon: <Building2 className="size-5 shrink-0" />,
       },
       {
         title: "Industry Solutions",
-        href: "/service/industry",
+        href: "/logistics-solutions/industry-solutions",
         description:
           "Customized logistics services for various industries to meet specific supply chain needs.",
         icon: <Factory className="size-5 shrink-0" />,
@@ -127,7 +127,7 @@ const NavData = [
       },
       {
         title: "Our Work Process",
-        href: "/about/our-team",
+        href: "/about/our-work-process",
         description:
           "Meet the dedicated professionals driving Zypco Courier’s success and innovation.",
         icon: <BriefcaseBusiness className="size-5 shrink-0" />,
@@ -149,12 +149,12 @@ const NavData = [
 
   {
     title: "Career",
-    href: "/Career",
+    href: "/career",
     items: [],
   },
   {
     title: "Zypco Corporate",
-    href: "/",
+    href: "/zypco-corporate",
     items: [],
   },
 ];
@@ -334,7 +334,7 @@ const NavBar = () => {
             </li>
             <li>
               <Link
-                href="/corporate"
+                href="/zypco-corporate"
                 className="text-[#FEF400] hover:text-[#FEF400]  font-semibold cursor-pointer"
               >
                 Zypco Corporate
@@ -361,9 +361,9 @@ const NavBar = () => {
                 <SheetContent side="left" className="overflow-y-auto ">
                   <SheetHeader className="border-b py-2">
                     <SheetTitle>
-                      <a href={"/"} className="flex items-center gap-2">
+                      <Link href={"/"} className="flex items-center gap-2">
                         <Logo />
-                      </a>
+                      </Link>
                     </SheetTitle>
                   </SheetHeader>
                   <div className="flex flex-col gap-6 p-4 py-1">
@@ -419,7 +419,7 @@ function ListItem({
 
 const SubMenuLink = ({ item }: { item: MenuItem }) => {
   return (
-    <a
+    <Link
       className="  hover:text-[#241F21] flex select-none flex-row gap-4 rounded-md p-3 leading-none no-underline outline-none hover:bg-[#FEF400]/30 group transition-all duration-250"
       href={item.href}
     >
@@ -434,7 +434,7 @@ const SubMenuLink = ({ item }: { item: MenuItem }) => {
           </p>
         )}
       </div>
-    </a>
+    </Link>
   );
 };
 

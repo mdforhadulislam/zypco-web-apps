@@ -1,11 +1,11 @@
+import FooterBar from "@/components/Footer/FooterBar";
+import NavBar from "@/components/Nav/NavBar";
 import type { Metadata } from "next";
 import "./globals.css";
-import NavBar from "@/components/Nav/NavBar";
-import FooterBar from "@/components/Footer/FooterBar";
 
 export const metadata: Metadata = {
   title: {
-    default: "Zypco – About",
+    default: "Zypco – Logistics Solutions",
     template: "%s | Zypco",
   },
   description:
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Zypco – About",
+    title: "Zypco – Logistics Solutions",
     description:
       "Build powerful and modern frontend apps with Next.js and Tailwind.",
     url: "https://zypco.com",
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@zypco",
     creator: "@zypco",
-    title: "Zypco – About",
+    title: "Zypco – Logistics Solutions",
     description:
       "Next.js 15 + React 19 + Tailwind CSS v4 = Lightning fast apps",
     images: ["/logo.jpg"],
@@ -89,7 +89,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AboutLayout({
+export default function LogisticsSolutionsLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -99,9 +99,8 @@ export default function AboutLayout({
       <body>
         <NavBar />
         <div className="w-full h-[85px]"></div>
-      {children}
-      <FooterBar />
-
+        {children}
+        <FooterBar />
       </body>
     </html>
   );

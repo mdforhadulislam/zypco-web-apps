@@ -1,9 +1,5 @@
-import React from 'react'
-
 const ZypcoAbout = () => {
-  return (
-    <div>ZypcoAbout</div>
-  )
-}
+  return <div>ZypcoAbout</div>;
+};
 
-export default ZypcoAbout
+export default ZypcoAbout;

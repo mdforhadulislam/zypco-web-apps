@@ -5,7 +5,7 @@ import FooterBar from "@/components/Footer/FooterBar";
 
 export const metadata: Metadata = {
   title: {
-    default: "Zypco – About",
+    default: "Zypco – Contact",
     template: "%s | Zypco",
   },
   description:
@@ -47,14 +47,14 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Zypco – About",
+    title: "Zypco – Contact",
     description:
       "Build powerful and modern frontend apps with Next.js and Tailwind.",
     url: "https://zypco.com",
     siteName: "Zypco Web Apps",
     images: [
       {
-        url: "/logo.jpg",
+        url: "/logo.png",
         width: 1200,
         height: 630,
         alt: "Zypco Web App Preview",
@@ -68,19 +68,19 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@zypco",
     creator: "@zypco",
-    title: "Zypco – About",
+    title: "Zypco – Contact",
     description:
       "Next.js 15 + React 19 + Tailwind CSS v4 = Lightning fast apps",
     images: ["/logo.jpg"],
   },
   icons: {
-    icon: "/fav.jpg",
-    shortcut: "/fav.jpg",
-    apple: "/fav.jpg",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
     other: [
       {
         rel: "mask-icon",
-        url: "/fav.jpg",
+        url: "/icon.png",
       },
     ],
   },
@@ -89,7 +89,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AboutLayout({
+export default function ContactLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

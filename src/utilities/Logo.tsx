@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link';
 import React from 'react'
 
 interface LogoProps {
@@ -9,7 +10,7 @@ interface LogoProps {
 
 const Logo: React.FC<LogoProps> = ({isFooter = false, width, height}) => {
   return (
-    <div>
+    <Link href={"/"}>
         {isFooter ? 
             <Image
             src="/logo.jpg"
@@ -29,7 +30,7 @@ const Logo: React.FC<LogoProps> = ({isFooter = false, width, height}) => {
         
 
 
-    </div>
+    </Link>
   )
 }
 
