@@ -1,14 +1,11 @@
-import AboutUsOurStorySection from '@/components/About/AboutUsOurStorySection';
-import PageHeader from '@/utilities/PageHeader';
-import React from 'react'
+import PageHeader from "@/utilities/PageHeader";
 
 const ZypcoStory = () => {
   return (
     <div className="w-full h-auto bg-[#241F21]">
-    <PageHeader title="ABOUT US" subtitle="OUR STORY" />
-    <AboutUsOurStorySection />
-  </div>
-  )
-}
+      <PageHeader title="ABOUT US" subtitle="OUR STORY" />
+    </div>
+  );
+};
 
-export default ZypcoStory
+export default ZypcoStory;

@@ -68,7 +68,7 @@ const solutionsFeatures = [
   {
     id: 5654658,
     title: "Courier Price Check",
-    link: "/ship-and-track/calculate-shipping-charge",
+    link: "/ship-and-track/claculate-shipping-charge",
 
   },
 ];
@@ -89,7 +89,7 @@ const ourCompany = [
   {
     id: 565343465,
     title: "Help & Support",
-    link: "/about/help-&-support/",
+    link: "/about/help-and-support/",
   
   },
   {
