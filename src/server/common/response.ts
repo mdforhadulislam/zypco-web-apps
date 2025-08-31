@@ -21,13 +21,7 @@ type BasePayload = {
   debugInfo?: DebugInfo;
   data?: unknown;
   error?: unknown;
-  meta?: {
-    total?: number;
-    page?: number;
-    limit?: number;
-    totalPages?: number;
-    [key: string]: unknown;
-  };
+  meta?: Record<string, unknown>;
 };
 
 type SuccessOptions = {
@@ -36,13 +30,7 @@ type SuccessOptions = {
   message: string;
   data?: unknown;
   debug?: boolean;
-  meta?: {
-    total?: number;
-    page?: number;
-    limit?: number;
-    totalPages?: number;
-    [key: string]: unknown;
-  };
+  meta?: Record<string, unknown>;
 };
 
 type ErrorOptions = {
@@ -51,35 +39,21 @@ type ErrorOptions = {
   message: string;
   error?: unknown;
   debug?: boolean;
-  meta?: {
-    total?: number;
-    page?: number;
-    limit?: number;
-    totalPages?: number;
-    [key: string]: unknown;
-  };
+  meta?: Record<string, unknown>;
 };
 
 const getIpFromRequest = (req: NextRequest): string => {
   const forwardedFor = req.headers.get("x-forwarded-for");
-  if (forwardedFor) {
-    return forwardedFor.split(",")[0].trim();
-  }
+  if (forwardedFor) return forwardedFor.split(",")[0].trim();
   
   const realIp = req.headers.get("x-real-ip");
-  if (realIp) {
-    return realIp;
-  }
+  if (realIp) return realIp;
   
   const vercelIp = req.headers.get("x-vercel-forwarded-for");
-  if (vercelIp) {
-    return vercelIp;
-  }
+  if (vercelIp) return vercelIp;
   
   const connectionIp = req.headers.get("x-remote-addr");
-  if (connectionIp) {
-    return connectionIp;
-  }
+  if (connectionIp) return connectionIp;
   
   return "unknown";
 };
@@ -91,13 +65,7 @@ function buildPayload(options: {
   data?: unknown;
   error?: unknown;
   debug?: boolean;
-  meta?: {
-    total?: number;
-    page?: number;
-    limit?: number;
-    totalPages?: number;
-    [key: string]: unknown;
-  };
+  meta?: Record<string, unknown>;
 }): BasePayload {
   const { req, status, message, data, error, debug, meta } = options;
   const now = Date.now();
@@ -109,17 +77,9 @@ function buildPayload(options: {
     uptime: process.uptime(),
   };
   
-  if (data !== undefined) {
-    payload.data = data;
-  }
-  
-  if (error !== undefined && error !== null) {
-    payload.error = error;
-  }
-  
-  if (meta !== undefined) {
-    payload.meta = meta;
-  }
+  if (data !== undefined) payload.data = data;
+  if (error !== undefined && error !== null) payload.error = error;
+  if (meta !== undefined) payload.meta = meta;
   
   if (req) {
     payload.path = req.nextUrl.pathname;
@@ -142,13 +102,13 @@ function buildPayload(options: {
 }
 
 export function successResponse(options: SuccessOptions) {
-  const { status = 200, message, data = [], req, debug = true, meta } = options;
+  const { status = 200, message, data = {}, req, debug = true, meta } = options;
   const payload = buildPayload({ status, message, data, req, debug, meta });
-  return NextResponse.json(payload, { status: 200 });
+  return NextResponse.json(payload, { status });
 }
 
 export function errorResponse(options: ErrorOptions) {
   const { status = 500, message, error, req, debug = true, meta } = options;
   const payload = buildPayload({ status, message, error, req, debug, meta });
-  return NextResponse.json(payload, { status: 200 });
+  return NextResponse.json(payload, { status });
 }
