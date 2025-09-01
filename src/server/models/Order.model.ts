@@ -1,3 +1,4 @@
+import { Model } from "mongoose";
 import { Document, Schema, model } from "mongoose";
 
 // Address Sub-schema
@@ -97,4 +98,5 @@ const orderSchema = new Schema<IOrder>(
 );
 
 // Export Order Model
-export const Order = model<IOrder>("Order", orderSchema);
+export const Order = (model<IOrder>("Order") as Model<IOrder>) || model<IOrder>("Order", orderSchema);
+

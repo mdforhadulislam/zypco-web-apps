@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
@@ -130,4 +130,4 @@ userSchema.methods.generateEmailVerificationToken = function(): string {
 };
 
 // Create and export User model
-export const User = model<IUser>('User', userSchema);
+export const User = (model<IUser>("User") as Model<IUser>) || model<IUser>("User", userSchema);

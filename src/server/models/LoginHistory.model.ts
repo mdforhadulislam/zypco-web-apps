@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Model } from 'mongoose';
 import { User } from './User.model'; // Import User model
 
 // Interface for LoginHistory document
@@ -24,11 +24,13 @@ const loginHistorySchema = new Schema<ILoginHistory>({
   },
   ipAddress: {
     type: String,
-    required: [true, 'IP address is required']
+    required: false,
+    default: null
   },
   userAgent: {
     type: String,
-    required: [true, 'User agent is required']
+    default: null,
+    required: false
   },
   success: {
     type: Boolean,
@@ -41,4 +43,4 @@ const loginHistorySchema = new Schema<ILoginHistory>({
 }, { timestamps: true });
 
 // Export the model
-export const LoginHistory = model<ILoginHistory>('LoginHistory', loginHistorySchema);
+export const LoginHistory = (model<ILoginHistory>('LoginHistory', loginHistorySchema) as Model<ILoginHistory>) || model<ILoginHistory>('LoginHistory', loginHistorySchema);

@@ -1,46 +1,76 @@
+import { Model } from "mongoose";
 import { Schema, model, Document, Types } from "mongoose";
 
-// Address Interface
 export interface IAddress extends Document {
-  user: Types.ObjectId;           // User reference
-  name: string;                   // Name of the person at this address
+  user: Types.ObjectId;           // Linked User
+  name: string;                   // Person Name
   label?: string;                 // e.g., "Home", "Office"
-  addressLine: string;            // Street address
-  area?: string;                  // Neighborhood / area
-  subCity?: string;               // Sub-city / locality
+  addressLine: string;            // Street Address
+  area?: string;                  // Neighborhood / Area
+  subCity?: string;               // Sub-city / Locality
   city: string;                   // City
   state?: string;                 // State / Province
-  zipCode?: string;               // Postal code
-  country: Types.ObjectId;        // Country reference
-  phone?: string;                 // Optional phone number
-  isDefault: boolean;             // Default address flag
+  zipCode?: string;               // Postal / ZIP Code
+  country: Types.ObjectId;        // Linked Country
+  phone?: string;                 // Optional Contact Number
+  isDefault: boolean;             // Default Address?
+  location?: {
+    type: "Point";
+    coordinates: [number, number]; // [longitude, latitude]
+  };
   createdAt: Date;
   updatedAt: Date;
 }
-
-// Address Schema
+ 
 const addressSchema = new Schema<IAddress>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    name: { type: String, required: true, trim: true },   // New field: Name
-    label: { type: String, default: "" },
-    addressLine: { type: String, required: true },
-    area: { type: String, default: "" },
-    subCity: { type: String, default: "" },
-    city: { type: String, required: true },
-    state: { type: String, default: "" },
-    zipCode: { type: String, default: "" },
+    name: { type: String, required: true, trim: true },
+    label: { type: String, trim: true, default: "Home" },
+    addressLine: { type: String, required: true, trim: true },
+    area: { type: String, trim: true, default: "" },
+    subCity: { type: String, trim: true, default: "" },
+    city: { type: String, required: true, trim: true },
+    state: { type: String, trim: true, default: "" },
+    zipCode: { type: String, trim: true, default: "" },
     country: { type: Schema.Types.ObjectId, ref: "Country", required: true },
-    phone: { type: String, default: "" },
+    phone: { type: String, trim: true, default: "" },
     isDefault: { type: Boolean, default: false },
+
+    // GeoJSON for Maps (Leaflet, Google Maps, Mapbox)
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        required: true,
+        validate: {
+          validator: function (coords: number[]) {
+            return coords.length === 2;
+          },
+          message: "Coordinates must be [longitude, latitude]",
+        },
+      },
+    },
   },
   { timestamps: true }
-);
-
-// Indexes for faster queries
+); 
 addressSchema.index({ user: 1, isDefault: -1 });
 addressSchema.index({ country: 1, state: 1, city: 1, subCity: 1 });
 addressSchema.index({ area: 1 });
-
-// Export Address Model
-export const Address = model<IAddress>("Address", addressSchema);
+addressSchema.index({ location: "2dsphere" }); // For geospatial queries
+ 
+addressSchema.pre<IAddress>("save", async function (next) {
+  // যদি কোনো address default হিসেবে set হয়, একই user এর অন্য সব address default = false করে দিবে
+  if (this.isDefault) {
+    await (this.constructor as typeof Address).updateMany(
+      { user: this.user, _id: { $ne: this._id } },
+      { $set: { isDefault: false } }
+    );
+  }
+  next();
+});
+export const Address = (model<IAddress>("Address", addressSchema) as Model<IAddress>) || model<IAddress>("Address", addressSchema);

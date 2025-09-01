@@ -1,3 +1,4 @@
+import { Model } from "mongoose";
 import { Schema, model, Document, Types } from "mongoose";
 
 // Blog Interface
@@ -75,4 +76,4 @@ blogSchema.pre('save', function(next) {
 blogSchema.index({ title: "text", content: "text", tags: 1 });
 blogSchema.index({ category: 1, createdAt: -1 });
 
-export const Blog = model<IBlog>("Blog", blogSchema);
+export const Blog = (model<IBlog>("Blog") as Model<IBlog>) || model<IBlog>("Blog", blogSchema);

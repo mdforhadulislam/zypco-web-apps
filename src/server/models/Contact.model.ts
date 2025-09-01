@@ -1,4 +1,4 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Document, Types, Model } from "mongoose";
 
 // Contact Interface
 export interface IContact extends Document {
@@ -69,4 +69,4 @@ contactSchema.index({ status: 1, createdAt: -1 });
 contactSchema.index({ email: 1 });
 
 // Export Contact Model
-export const Contact = model<IContact>("Contact", contactSchema);
+export const Contact = (model<IContact>("Contact") as Model<IContact>) || model<IContact>("Contact", contactSchema);

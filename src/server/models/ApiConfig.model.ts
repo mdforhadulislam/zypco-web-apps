@@ -1,4 +1,4 @@
-import { Schema, model, Document, Types } from 'mongoose';
+import { Schema, model, Document, Types, Model } from 'mongoose';
 
 // Interface for API Config
 export interface IApiConfig extends Document {
@@ -58,4 +58,4 @@ const apiConfigSchema = new Schema<IApiConfig>(
 apiConfigSchema.index({ key: 1, isActive: 1 });
 
 // Model export
-export const ApiConfig = model<IApiConfig>('ApiConfig', apiConfigSchema);
+export const ApiConfig = (model<IApiConfig>('ApiConfig', apiConfigSchema) as Model<IApiConfig>) || model<IApiConfig>('ApiConfig', apiConfigSchema);

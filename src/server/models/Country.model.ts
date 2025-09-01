@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Model } from "mongoose";
 
 // Interface
 export interface ICountry extends Document {
@@ -71,4 +71,4 @@ countrySchema.index({ code: 1 });
 countrySchema.index({ zone: 1 }); // optional zone index for faster filtering
 
 // Export model
-export const Country = model<ICountry>("Country", countrySchema);
+export const Country = (model<ICountry>("Country") as Model<ICountry>) || model<ICountry>("Country", countrySchema);

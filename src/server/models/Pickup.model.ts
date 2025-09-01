@@ -1,4 +1,4 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Document, Types, Model } from "mongoose";
 
 // Pickup Interface
 export interface IPickup extends Document {
@@ -35,5 +35,5 @@ const pickupSchema = new Schema<IPickup>(
 pickupSchema.index({ user: 1, order: 1 });
 pickupSchema.index({ status: 1, preferredDate: 1 });
 
-// Export Pickup Model
-export const Pickup = model<IPickup>("Pickup", pickupSchema);
+// Export Pickup Model 
+export const Pickup = (model<IPickup>("Pickup") as Model<IPickup>) || model<IPickup>("Pickup", pickupSchema);
