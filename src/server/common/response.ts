@@ -98,7 +98,7 @@ function buildPayload(options: {
     };
   }
   
-  return payload;
+  return payload; 
 }
 
 export function successResponse(options: SuccessOptions) {
