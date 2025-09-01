@@ -1,4 +1,4 @@
-// import Globe from "@/components/ui/globe";
+import Globe from "@/components/ui/globe";
 import Link from "next/link";
 
 interface PageHeaderProps {
@@ -16,7 +16,7 @@ const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
           {subtitle ? <Link href="#"> / {subtitle}</Link> : null}
         </div>
       </div>
-      {/* <Globe
+      <Globe
         theta={0.2}
         dark={1}
         scale={1.2}
@@ -25,7 +25,7 @@ const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
         markerColor="#FEF400"
         glowColor="#FEF400"
         className={` container left-0 absolute -bottom-[65%] sm:-bottom-[120%] md:-bottom-[160%] lg:-bottom-[240%] xl:-bottom-[310%] 2xl:-bottom-[390%] m-auto`}
-      /> */}
+      />
     </div>
   );
 };
