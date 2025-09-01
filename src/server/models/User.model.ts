@@ -1,14 +1,14 @@
-import { Schema, model, Document, Model } from 'mongoose';
-import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { Document, Model, Schema, model } from "mongoose";
 
-// Interface for User document
-interface IUser extends Document {
+// User interface
+export interface IUser extends Document {
   name: string;
   phone: string;
   email: string;
   password: string;
-  role: string;
+  role: "user" | "admin" | "moderator";
   isActive: boolean;
   isVerified: boolean;
   avatar?: string;
@@ -16,118 +16,73 @@ interface IUser extends Document {
     notifications: {
       email: boolean;
       sms: boolean;
-      push: boolean;
     };
-    language: string;
   };
-  lastLogin?: Date;
-  loginCount: number;
-  createdAt: Date;
-  verificationToken?: string;
-  verificationExpires?: Date;
+  nid: {
+    front?: string;
+    back?: string;
+  };
+  emailVerification: {
+    code: string | null;
+    expires: Date | null;
+  };
 
-  // Methods
   comparePassword(candidatePassword: string): Promise<boolean>;
-  generateEmailVerificationToken(): string;
+  generateVerificationCode(): string;
 }
 
-// User schema
-const userSchema = new Schema<IUser>({
-  name: {
-    type: String,
-    required: [true, 'Name is required'],
-    trim: true,
-    minlength: [2, 'Name must be at least 2 characters long']
-  },
-  phone: {
-    type: String,
-    required: [true, 'Phone number is required'],
-    unique: true,
-    trim: true,
-    match: [/^[\d\s+\-\(\)]{10,15}$/, 'Please enter a valid phone number']
-  },
-  email: {
-    type: String,
-    required: [true, 'Email is required'],
-    unique: true,
-    lowercase: true,
-    match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
-  },
-  password: {
-    type: String,
-    required: [true, 'Password is required'],
-    minlength: [8, 'Password must be at least 8 characters long'],
-    select: false
-  },
-  role: {
-    type: String,
-    enum: ['user', 'admin', 'moderator'],
-    default: 'user'
-  },
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  isVerified: {
-    type: Boolean,
-    default: false
-  },
-  avatar: {
-    type: String,
-    default: null
-  },
-  preferences: {
-    notifications: {
-      email: { type: Boolean, default: true },
-      sms: { type: Boolean, default: false },
-      push: { type: Boolean, default: true }
+// User Schema
+const userSchema = new Schema<IUser>(
+  {
+    name: { type: String, required: true },
+    phone: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: {
+      type: String,
+      enum: ["user", "admin", "moderator"],
+      default: "user",
     },
-    language: { type: String, default: 'en' }
+    isActive: { type: Boolean, default: true },
+    isVerified: { type: Boolean, default: false },
+    avatar: { type: String },
+    preferences: {
+      notifications: {
+        email: { type: Boolean, default: true },
+        sms: { type: Boolean, default: true },
+      },
+    },
+    nid: {
+      front: { type: String },
+      back: { type: String },
+    },
+    emailVerification: {
+      code: { type: String, default: null },
+      expires: { type: Date, default: null },
+    },
   },
-  lastLogin: Date,
-  loginCount: {
-    type: Number,
-    default: 0
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  verificationToken: {
-    type: String,
-    default: null
-  },
-  verificationExpires: {
-    type: Date,
-    default: null
-  }
-}, { timestamps: true });
+  { timestamps: true }
+);
 
-// Password hashing middleware
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  try {
-    const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err:any) {
-    next(err);
-  }
+// Password hashing
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
 });
 
-// Compare password method
-userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+// Compare Password
+userSchema.methods.comparePassword = async function (candidatePassword: string) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Generate email verification token
-userSchema.methods.generateEmailVerificationToken = function(): string {
-  const token = crypto.randomBytes(32).toString('hex');
-  this.verificationToken = token;
-  this.verificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-  return token;
+// Generate email verification code
+userSchema.methods.generateVerificationCode = function () {
+  const code = crypto.randomBytes(3).toString("hex").toUpperCase(); // 6-digit hex code
+  this.emailVerification.code = code;
+  this.emailVerification.expires = new Date(Date.now() + 15 * 60 * 1000); // 15 min expiry
+  return code;
 };
 
-// Create and export User model
+// Export User model
 export const User = (model<IUser>("User") as Model<IUser>) || model<IUser>("User", userSchema);
