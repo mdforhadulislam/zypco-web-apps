@@ -1,41 +1,64 @@
-// src/app/api/v1/auth/singup/route.ts
-import { NextRequest } from "next/server"; 
-import { User } from "@/server/models/User.model";
-import { successResponse, errorResponse } from "@/server/common/response";
+// app/api/v1/auth/signup/route.ts
 import connectDB from "@/config/db";
+import { sendVerificationEmail } from "@/lib/email";
+import { errorResponse, successResponse } from "@/server/common/response";
+import { User } from "@/server/models/User.model";
+import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
     const body = await req.json();
-    const { name, phone, email, password } = body ?? {};
+    const { name, phone, email, password } = body;
 
+    // Validate input
     if (!name || !phone || !email || !password) {
-      return errorResponse({ status: 400, message: "name, phone, email and password are required", req });
+      return errorResponse({
+        status: 400,
+        message: "All fields are required",
+        error: "ValidationError",
+      });
     }
 
-    // check phone or email already used
-    const existing = await User.findOne({ $or: [{ phone }, { email }] });
-    if (existing) {
-      return errorResponse({ status: 409, message: "Phone or email already registered", req });
+    // Check if user exists
+    const existingUser = await User.findOne({ $or: [{ phone }, { email }] });
+    if (existingUser) {
+      return errorResponse({
+        status: 409,
+        message: "User already exists",
+        error: "DuplicateEntry",
+      });
     }
 
-    // Create user (let model's pre-save hash password)
-    const userDoc = await User.create({
+    // Create new user
+    const newUser = new User({
       name,
       phone,
       email,
-      password, // plain -> model will hash
-      role: "user",
-      isActive: true,
-      isVerified: false,
+      password,
+      role: "user", // Default role
+      isVerified: false, // Initially unverified
     });
 
-    // hide password in response
-    const user = await User.findById(userDoc._id).select("-password");
+    // Generate verification code
+    const verificationCode = newUser.generateVerificationCode();
+    
+    // Save user to DB
+    await newUser.save();
 
-    return successResponse({ status: 201, message: "Signup successful", data: { user }, req });
-  } catch (err) {
-    return errorResponse({ status: 500, message: "Signup failed", error: err, req });
+    // Send verification email
+    await sendVerificationEmail(newUser.email, verificationCode);
+
+    return successResponse({
+      status: 201,
+      message: "User registered successfully. Please verify your email.",
+      data: { userId: newUser._id },
+    });
+
+  } catch (error) {
+    return errorResponse({
+      status: 500,
+      message: "Server error",
+    });
   }
 }
