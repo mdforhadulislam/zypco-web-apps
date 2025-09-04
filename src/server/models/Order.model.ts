@@ -64,6 +64,7 @@ const paymentSchema = new Schema({
   pExtraCharge: { type: Number, required: true, default: 0 },
   pDiscount: { type: Number, required: true, default: 0 },
   pReceived: { type: Number, required: true, default: 0 },
+  pRefunded: { type: Number, required: true, default: 0 },
 });
 
 // Handover Sub-schema
