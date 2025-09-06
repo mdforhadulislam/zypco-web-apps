@@ -1,0 +1,72 @@
+You are an expert backend architect and API developer.  
+I will provide you with my existing API source files and folders. Your job is to rebuild them into a **modern, advanced-level API system** with the following standards:
+
+### 📌 Source Files
+My current API source files are located in:
+
+F:\New folder (2)\zypco-web-apps\src\app\api\v1\
+
+Inside this folder, I have multiple modules including:
+- analytics
+- auth (accounts, address, api-config, offers, permission, signin, signup, signout, verify-email, signin-history, orders, pickup)
+- blog
+- contact
+- country
+- notification
+- order
+- pickup
+- price
+- review
+- tack
+(and all nested routes like [phone], [id], etc.)
+
+---
+
+### 🎯 Your Task
+1. **Modernize the APIs**
+   - Use clean and modular structure
+   - Follow REST best practices
+   - Ensure consistency across all routes
+   - Add Swagger/OpenAPI documentation
+
+2. **Advanced Features**
+   - Role-based access control (user, admin, super admin, moderator)
+   - JWT authentication with refresh tokens
+   - Secure password hashing (bcrypt/argon2)
+   - Input validation & sanitization
+   - Rate limiting and request throttling
+   - Centralized error handling with standard response format
+   - Global notification system: every request should notify the respective user if applicable
+
+3. **Documentation**
+   - For each API file, generate a `.md` file in a `docs/` folder
+   - Each doc should include:
+     - Endpoint description
+     - Supported methods (GET, POST, PUT, PATCH, DELETE)
+     - Example requests (with headers, body, params)
+     - Example responses (success & error)
+     - Authentication & authorization requirements
+     - Notifications generated
+     - Security considerations
+
+4. **Scalability & Maintainability**
+   - Use service-layer architecture (controller → service → model)
+   - Centralized utilities (auth middleware, response handler, logger)
+   - Config-driven environment variables
+   - Support future microservice expansion
+
+5. **Tech Considerations**
+   - Assume this will run on Next.js API routes with Node.js backend
+   - MongoDB with Mongoose ODM
+   - Cloudinary integration for media uploads
+   - WebSocket/real-time notifications if needed
+
+---
+
+### ✅ Deliverables
+- Complete refactored API code with high-security standards
+- A `docs/` folder with `.md` files describing each API
+- A `README.md` with index of all APIs
+- Production-ready and scalable code
+
+Now, based on the provided source files, generate a **modern, advanced API system** with all the above requirements.
