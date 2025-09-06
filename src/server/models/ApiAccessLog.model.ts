@@ -19,10 +19,10 @@ export interface IApiAccessLog extends Document {
 // Schema definition
 const apiAccessLogSchema = new Schema<IApiAccessLog>(
   {
-    apiKey: { type: Schema.Types.ObjectId, ref: 'ApiConfig', required: true, index: true },
+    apiKey: { type: Schema.Types.ObjectId, ref: 'ApiConfig', required: true },
     user: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     endpoint: { type: String, required: true },
-    method: { type: String, required: true },
+    method: { type: String, required: true, enum: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] },
     status: { type: Number, required: true },
     success: { type: Boolean, required: true, default: true },
     ip: { type: String, required: true },

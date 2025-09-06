@@ -1,27 +1,28 @@
-import { Model } from "mongoose";
-import { Schema, model, Document, Types } from "mongoose";
+import { Document, Model, Schema, Types, model } from "mongoose";
 
 export interface IAddress extends Document {
-  user: Types.ObjectId;           // Linked User
-  name: string;                   // Person Name
-  label?: string;                 // e.g., "Home", "Office"
-  addressLine: string;            // Street Address
-  area?: string;                  // Neighborhood / Area
-  subCity?: string;               // Sub-city / Locality
-  city: string;                   // City
-  state?: string;                 // State / Province
-  zipCode?: string;               // Postal / ZIP Code
-  country: Types.ObjectId;        // Linked Country
-  phone?: string;                 // Optional Contact Number
-  isDefault: boolean;             // Default Address?
+  user: Types.ObjectId; // Linked User
+  name: string; // Person Name
+  label?: string; // e.g., "Home", "Office"
+  addressLine: string; // Street Address
+  area?: string; // Neighborhood / Area
+  subCity?: string; // Sub-city / Locality
+  city: string; // City
+  state?: string; // State / Province
+  zipCode?: string; // Postal / ZIP Code
+  country: Types.ObjectId; // Linked Country
+  phone?: string; // Optional Contact Number
+  isDefault: boolean; // Default Address?
   location?: {
     type: "Point";
     coordinates: [number, number]; // [longitude, latitude]
   };
   createdAt: Date;
   updatedAt: Date;
+  deletedAt?: Date; // Soft delete
+  isDeleted: boolean; // Soft delete flag
 }
- 
+
 const addressSchema = new Schema<IAddress>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -37,7 +38,6 @@ const addressSchema = new Schema<IAddress>(
     phone: { type: String, trim: true, default: "" },
     isDefault: { type: Boolean, default: false },
 
-    // GeoJSON for Maps (Leaflet, Google Maps, Mapbox)
     location: {
       type: {
         type: String,
@@ -48,6 +48,11 @@ const addressSchema = new Schema<IAddress>(
         type: [Number], // [longitude, latitude]
         required: true,
         validate: {
+          /**
+           * Validator for the `coordinates` field.
+           * Ensures that the field is an array of exactly two numbers.
+           * @param coords The coordinates array to validate.
+           */
           validator: function (coords: number[]) {
             return coords.length === 2;
           },
@@ -57,14 +62,13 @@ const addressSchema = new Schema<IAddress>(
     },
   },
   { timestamps: true }
-); 
+);
 addressSchema.index({ user: 1, isDefault: -1 });
 addressSchema.index({ country: 1, state: 1, city: 1, subCity: 1 });
 addressSchema.index({ area: 1 });
 addressSchema.index({ location: "2dsphere" }); // For geospatial queries
- 
+
 addressSchema.pre<IAddress>("save", async function (next) {
-  // যদি কোনো address default হিসেবে set হয়, একই user এর অন্য সব address default = false করে দিবে
   if (this.isDefault) {
     await (this.constructor as typeof Address).updateMany(
       { user: this.user, _id: { $ne: this._id } },
@@ -73,4 +77,7 @@ addressSchema.pre<IAddress>("save", async function (next) {
   }
   next();
 });
-export const Address = (model<IAddress>("Address", addressSchema) as Model<IAddress>) || model<IAddress>("Address", addressSchema);
+
+export const Address =
+  (model<IAddress>("Address", addressSchema) as Model<IAddress>) ||
+  model<IAddress>("Address", addressSchema);
