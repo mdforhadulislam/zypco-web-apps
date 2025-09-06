@@ -1,0 +1,70 @@
+You are an expert backend engineer and technical writer. 
+I will provide you with my API project source code files. Your job:
+
+1. Analyze all API route files I give you.
+2. Generate a complete **API Documentation** in Markdown (`.md`) format inside a `/docs` folder.
+3. For every API endpoint, clearly document:
+   - Endpoint path
+   - HTTP methods supported (GET, POST, PUT, PATCH, DELETE, etc.)
+   - Request parameters (body, query, path params)
+   - Example request and response
+   - Error response format
+   - Authentication / security requirements
+   - Notifications that should be sent to users for each request
+4. Ensure the documentation includes security best practices (JWT/Auth, input validation, rate limiting notes).
+5. Add explanations about how to use each API (step by step).
+6. Organize the `.md` file with proper headings, subheadings, and tables for clarity.
+7. Maintain consistency and completeness — no endpoint should be missed.
+8. Make sure all APIs are written as if they are **production-ready** and explain advanced features if available.
+
+Here are my API source folders/files:
+src\app\api\v1\analytics
+src\app\api\v1\auth\accounts
+src\app\api\v1\auth\accounts\[phone]
+src\app\api\v1\auth\accounts\[phone]\address
+src\app\api\v1\auth\accounts\[phone]\api-config
+src\app\api\v1\auth\accounts\[phone]\offer
+src\app\api\v1\auth\accounts\[phone]\order
+src\app\api\v1\auth\accounts\[phone]\order\[id]
+src\app\api\v1\auth\accounts\[phone]\permission
+src\app\api\v1\auth\accounts\[phone]\pickup
+src\app\api\v1\auth\accounts\[phone]\pickup\[id]
+src\app\api\v1\auth\address
+src\app\api\v1\auth\address\[id]
+src\app\api\v1\auth\api-config
+src\app\api\v1\auth\api-config\[phone]
+src\app\api\v1\auth\offers
+src\app\api\v1\auth\offers\[phone]
+src\app\api\v1\auth\permission
+src\app\api\v1\auth\permission\[phone]
+src\app\api\v1\auth\singin
+src\app\api\v1\auth\singin-history
+src\app\api\v1\auth\singin-history\[phone]
+src\app\api\v1\auth\singout
+src\app\api\v1\auth\singup
+src\app\api\v1\auth\verify-email
+src\app\api\v1\blog
+src\app\api\v1\blog\[id]
+src\app\api\v1\contact
+src\app\api\v1\contact\[id]
+src\app\api\v1\country
+src\app\api\v1\country\[id]
+src\app\api\v1\notification
+src\app\api\v1\notification\[phone]
+src\app\api\v1\notification\[phone]\[id]
+src\app\api\v1\order
+src\app\api\v1\order\[id]
+src\app\api\v1\pickup
+src\app\api\v1\pickup\[phone]
+src\app\api\v1\price
+src\app\api\v1\price\[id]
+src\app\api\v1\review
+src\app\api\v1\review\[phone]
+src\app\api\v1\tack
+
+Finally:
+- Make sure every endpoint has detailed description.
+- Add usage examples with `curl` and `JavaScript fetch`.
+- Add a Security section describing JWT, HTTPS, input sanitization.
+- Add a Notifications section showing how each user request triggers a notification.
+- Deliver the final docs in proper `.md` format.
