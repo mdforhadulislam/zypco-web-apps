@@ -1,15 +1,20 @@
 import { Schema, model, Document, Model, Types } from 'mongoose';
-import { User } from './User.model'; // Import User model
 
 // Interface for LoginHistory document
 export interface ILoginHistory extends Document {
-  user: Types.ObjectId;            // Reference to User model
+  user?: Types.ObjectId;           // Reference to User model (optional for failed attempts)
+  phone: string;                   // Phone number attempted
   timestamp: Date;
-  ipAddress?: string;
-  userAgent?: string;
+  ipAddress: string;
+  userAgent: string;
   success: boolean;
-  reason?: string;                 // Reason for failure
-  attemptNumber: number;           // Consecutive failed attempts
+  action?: string;                 // 'login' or 'logout'
+  failureReason?: string;          // Reason for failure
+  location?: {                     // Geo location (if available)
+    country?: string;
+    city?: string;
+    region?: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,39 +22,36 @@ export interface ILoginHistory extends Document {
 // LoginHistory schema
 const loginHistorySchema = new Schema<ILoginHistory>(
   {
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    user: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    phone: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
-    ipAddress: { type: String, default: null },
-    userAgent: { type: String, default: null },
+    ipAddress: { type: String, required: true },
+    userAgent: { type: String, required: true },
     success: { type: Boolean, required: true },
-    reason: { type: String, default: null },
-    attemptNumber: { type: Number, default: 1 },
+    action: { 
+      type: String, 
+      enum: ["login", "logout"], 
+      default: "login" 
+    },
+    failureReason: { type: String, default: null },
+    location: {
+      country: { type: String, default: null },
+      city: { type: String, default: null },
+      region: { type: String, default: null }
+    }
   },
   { timestamps: true }
 );
 
-// Pre-save hook to update user's lastLogin and loginCount
-loginHistorySchema.pre<ILoginHistory>('save', async function (next) {
-  if (this.success) {
-    await User.findByIdAndUpdate(this.user, {
-      $set: { lastLogin: this.timestamp },
-      $inc: { loginCount: 1 }
-    });
-    // Reset attemptNumber on successful login
-    this.attemptNumber = 1;
-  } else {
-    // Increment attemptNumber for failed login
-    const lastAttempt = await model<ILoginHistory>('LoginHistory')
-      .findOne({ user: this.user })
-      .sort({ timestamp: -1 });
-    this.attemptNumber = lastAttempt ? lastAttempt.attemptNumber + 1 : 1;
-  }
-  next();
-});
-
-// Indexes for fast analytics queries
-loginHistorySchema.index({ user: 1, success: 1, timestamp: -1 });
+// Indexes for efficient querying
+loginHistorySchema.index({ user: 1, timestamp: -1 });
+loginHistorySchema.index({ phone: 1, timestamp: -1 });
+loginHistorySchema.index({ ipAddress: 1, timestamp: -1 });
 loginHistorySchema.index({ success: 1, timestamp: -1 });
+loginHistorySchema.index({ timestamp: -1 }); // For cleanup queries
+
+// TTL index to auto-delete old records after 6 months
+loginHistorySchema.index({ timestamp: 1 }, { expireAfterSeconds: 15552000 }); // 180 days
 
 // Export LoginHistory model
 export const LoginHistory =
