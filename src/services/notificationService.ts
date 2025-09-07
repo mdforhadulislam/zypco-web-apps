@@ -1,8 +1,7 @@
 import { Notification } from "@/server/models/Notification.model";
 import { User } from "@/server/models/User.model";
 import connectDB from "@/config/db";
-import { emailService } from "./emailService";
-import { smsService } from "./smsService";
+import { emailService } from "./emailService"; 
 
 export interface NotificationData {
   userId?: string;
@@ -32,7 +31,7 @@ export class NotificationService {
   /**
    * Send notification to a user
    */
-  static async sendNotification(notificationData: NotificationData): Promise<{
+  static async sendNotification(p0: { phone: string; email: string; name?: string; }, p1: string, p2: { addressId: unknown; label: string | undefined; addressLine: string; }, notificationData: NotificationData): Promise<{
     success: boolean;
     notificationId?: string;
     error?: string;
@@ -93,17 +92,7 @@ export class NotificationService {
           })
         );
       }
-
-      // SMS notification
-      if (channels.includes("sms") && userPrefs.sms) {
-        deliveryPromises.push(
-          smsService.sendNotificationSMS({
-            to: user.phone,
-            message: `${notificationData.title}: ${notificationData.message}`,
-            type: notificationData.type,
-          })
-        );
-      }
+ 
 
       // Push notification (placeholder - would integrate with FCM/APNS)
       if (channels.includes("push")) {
@@ -131,7 +120,7 @@ export class NotificationService {
       
       return {
         success: true,
-        notificationId: notification._id.toString(),
+        notificationId: notification._id,
       };
 
     } catch (error) {
