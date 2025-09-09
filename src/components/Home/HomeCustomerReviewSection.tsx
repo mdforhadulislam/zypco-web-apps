@@ -77,7 +77,7 @@ const HomeCustomerReviewSection = () => {
   }, [api1, api2]);
 
   return (
-    <section className="py-32 w-full h-auto bg-[#241F21]">
+    <section className="py-32 w-full h-auto bg-[#241F21] px-4">
       <div className="container m-auto">
         {/* <div className="container flex flex-col items-center gap-6">
           <h2 className="mb-2 text-center text-3xl font-semibold lg:text-5xl text-balance">
@@ -96,7 +96,7 @@ const HomeCustomerReviewSection = () => {
               className="w-full"
               setApi={setApi1}
               opts={{
-                align: "start",
+                align: "center",
                 loop: true,
               }}
             >
@@ -141,7 +141,7 @@ const HomeCustomerReviewSection = () => {
               className="w-full"
               setApi={setApi2}
               opts={{
-                align: "start",
+                align: "center",
                 loop: true,
               }}
             >
