@@ -45,6 +45,7 @@ interface MenuItem {
   description?: string;
   icon?: React.ReactNode;
   items?: MenuItem[];
+  setMobileMenuOpen?: (open: boolean) => void;
 }
 
 const NavData = [
@@ -161,6 +162,7 @@ const NavData = [
 
 const NavBar = () => {
   const [navBarScrolled, setNavBarScrolled] = useState<boolean>(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   const handleScroll = () => {
     const offset = window.scrollY;
@@ -348,7 +350,7 @@ const NavBar = () => {
           {/* Mobile Menu */}
           <div className="block lg:hidden">
             <div className="flex items-center justify-between">
-              <Sheet>
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button
                     variant="outline"
@@ -361,7 +363,7 @@ const NavBar = () => {
                 <SheetContent side="left" className="overflow-y-auto ">
                   <SheetHeader className="border-b py-2">
                     <SheetTitle>
-                      <Link href={"/"} className="flex items-center gap-2">
+                      <Link href={"/"} className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
                         <Logo />
                       </Link>
                     </SheetTitle>
@@ -372,7 +374,7 @@ const NavBar = () => {
                       collapsible
                       className="flex w-full flex-col gap-4"
                     >
-                      {NavData.map((item) => renderMobileMenuItem(item))}
+                      {NavData.map((item) => renderMobileMenuItem({...item, setMobileMenuOpen}))}
                     </Accordion>
 
                     <div className="flex flex-col gap-3"></div>
@@ -422,6 +424,7 @@ const SubMenuLink = ({ item }: { item: MenuItem }) => {
     <Link
       className="  hover:text-[#241F21] flex select-none flex-row gap-4 rounded-md p-3 leading-none no-underline outline-none hover:bg-[#FEF400]/30 group transition-all duration-250"
       href={item.href}
+      onClick={() => item.setMobileMenuOpen?.(false)}
     >
       <div className="text-foreground group-hover:text-[#241F21] transition-all duration-250">
         {item.icon}
@@ -444,12 +447,12 @@ const renderMobileMenuItem = (item: MenuItem) => {
       <AccordionItem
         key={item.title}
         value={item.title}
-        className="border-b-0 "
+        className="border-b-0 " 
       >
         <AccordionTrigger className="text-md py-0 font-semibold hover:no-underline cursor-pointer text-[#241F21]">
           {item.title}
         </AccordionTrigger>
-        <AccordionContent className="mt-2">
+        <AccordionContent className="mt-2" onClick={() => item.setMobileMenuOpen?.(false)}>
           {item.items.map((subItem) => (
             <SubMenuLink key={subItem.title} item={subItem} />
           ))}
@@ -463,6 +466,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
       key={item.title}
       href={item.href}
       className="text-md font-semibold cursor-pointer text-[#241F21]"
+      
     >
       {item.title}
     </Link>
