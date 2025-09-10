@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const searvices = [
   {
     title: "DHL Courier",
@@ -50,7 +52,41 @@ const searvices = [
 ];
 
 const OurServiceSection = () => {
-  return <div></div>;
+  return (
+    <section className="w-full h-auto p-4">
+      <div className="container py-20 m-auto">
+        <div className="w-full h-auto flex justify-center align-middle">
+          <h1 className="text-4xl sm:text-5xl font-bold">OUR SERVICES</h1>
+        </div>
+
+        <div className="w-full h-auto flex flex-col gap-4 mt-14">
+          {searvices.map((service, index) => (
+            <div
+              key={index}
+              className="w-full h-auto p-4 border-b border-gray-200"
+            >
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="w-60 h-40">
+                  {" "}
+                  <Image
+                    width={200}
+                    height={200}
+                    alt={service.title}
+                    src={service.logo}
+                    className="w-64 h-36 object-contain"
+                  />
+                </div>
+                <div className="w-auto">
+                  <h2 className="text-xl font-semibold">{service.title}</h2>
+                  <p className="text-gray-600">{service.description}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default OurServiceSection;
