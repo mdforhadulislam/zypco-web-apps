@@ -466,7 +466,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
       key={item.title}
       href={item.href}
       className="text-md font-semibold cursor-pointer text-[#241F21]"
-      
+      onClick={() => item.setMobileMenuOpen?.(false)}
     >
       {item.title}
     </Link>
