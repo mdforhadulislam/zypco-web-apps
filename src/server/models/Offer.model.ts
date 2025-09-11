@@ -94,3 +94,4 @@ offerSchema.index({ "offerDetails.type": 1 });
 
 // Export the model
 export const Offer = (model<IOffer>("Offer") as Model<IOffer>) || model<IOffer>("Offer", offerSchema);
+ 

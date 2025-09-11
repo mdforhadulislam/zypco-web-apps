@@ -60,6 +60,4 @@ permissionSchema.pre("save", function (next) {
 });
 
 // Export the model
-export const Permission =
-  (model<IPermission>("Permission") as Model<IPermission>) ||
-  model<IPermission>("Permission", permissionSchema);
+export const Permission = (model<IPermission>("Permission") as Model<IPermission>) || model<IPermission>("Permission", permissionSchema);

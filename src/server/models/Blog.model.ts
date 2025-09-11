@@ -76,4 +76,6 @@ blogSchema.pre('save', function(next) {
 blogSchema.index({ title: "text", content: "text", tags: 1 });
 blogSchema.index({ category: 1, createdAt: -1 });
 
+
+// Export Blog Model
 export const Blog = (model<IBlog>("Blog") as Model<IBlog>) || model<IBlog>("Blog", blogSchema);

@@ -85,4 +85,8 @@ const priceSchema = new Schema<IPrice>(
 
 priceSchema.index({ "from.country": 1, "to.country": 1 });
 priceSchema.index({ "rate.name": 1 });
+priceSchema.index({ createdAt: -1 });
+// priceSchema.index({ "rate.price.gm500": 1, "rate.price.kg6to10": 1 }); // Example index for specific price fields
+
+// Export Price Model
 export const Price = (model<IPrice>("Price") as Model<IPrice>) || model<IPrice>("Price", priceSchema);

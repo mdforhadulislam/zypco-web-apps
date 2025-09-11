@@ -54,6 +54,4 @@ loginHistorySchema.index({ timestamp: -1 }); // For cleanup queries
 loginHistorySchema.index({ timestamp: 1 }, { expireAfterSeconds: 15552000 }); // 180 days
 
 // Export LoginHistory model
-export const LoginHistory =
-  (model<ILoginHistory>('LoginHistory', loginHistorySchema) as Model<ILoginHistory>) ||
-  model<ILoginHistory>('LoginHistory', loginHistorySchema);
+export const LoginHistory = (model<ILoginHistory>("LoginHistory") as Model<ILoginHistory>) || model<ILoginHistory>("LoginHistory", loginHistorySchema);

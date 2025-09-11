@@ -39,5 +39,5 @@ apiAccessLogSchema.index({ user: 1, timestamp: -1 });
 apiAccessLogSchema.index({ endpoint: 1, status: 1, timestamp: -1 });
 apiAccessLogSchema.index({ success: 1, timestamp: -1 });
 
-// Export Model
+// Export Model 
 export const ApiAccessLog = (model<IApiAccessLog>('ApiAccessLog', apiAccessLogSchema) as Model<IApiAccessLog>) || model<IApiAccessLog>('ApiAccessLog', apiAccessLogSchema);

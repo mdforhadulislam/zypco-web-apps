@@ -81,5 +81,6 @@ trackSchema.pre("validate", async function (next) {
  
 trackSchema.index({ trackId: 1 });
 trackSchema.index({ currentStatus: 1 });
- 
+
+// Export Track Model
 export const Track = (model<ITrack>("Track") as Model<ITrack>) || model<ITrack>("Track", trackSchema);
