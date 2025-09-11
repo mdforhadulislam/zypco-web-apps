@@ -37,13 +37,14 @@ export class EmailService {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
     this.transporter = nodemailer.createTransporter({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.EMAIL_PORT || '587'),
-      secure: false,
-      auth: {
+      config:{
+        service: 'gmail',
+         auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
+      }
+     
     });
 
     this.loadEmailTemplates();
