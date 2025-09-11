@@ -2,19 +2,19 @@ import connectDB from "@/config/db";
 import { errorResponse, successResponse } from "@/server/common/response";
 import { Contact } from "@/server/models/Contact.model";
 import { Types } from "mongoose";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // ==========================
 // GET - fetch single contact
 // ==========================
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
 
-    const { id } = params;
+    const { id } = await params;
     if (!Types.ObjectId.isValid(id)) {
       return errorResponse({ status: 400, message: "Invalid contact ID", req });
     }
