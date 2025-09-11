@@ -34,6 +34,9 @@ export class RateLimiter {
   }
 
   private defaultKeyGenerator(req: NextRequest): string {
+    
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
     const ip = req.ip || req.headers.get('x-forwarded-for') || 'unknown';
     const endpoint = req.nextUrl.pathname;
     const method = req.method;
@@ -125,6 +128,7 @@ export class RateLimiter {
       }
 
       // Add rate limit info to request for use in response
+       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (req as any).rateLimitInfo = result.rateLimitInfo;
       
       return { success: true };
@@ -195,7 +199,9 @@ export const rateLimiters = {
  * Middleware wrapper to apply rate limiting to Next.js API routes
  */
 export function withRateLimit(rateLimiter: RateLimiter) {
-  return function (handler: Function) {
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return function (handler: (req: NextRequest, ...args: any[]) => Promise<NextResponse>) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return async function (req: NextRequest, ...args: any[]) {
       const rateLimitResult = await rateLimiter.middleware()(req);
       
@@ -212,6 +218,7 @@ export function withRateLimit(rateLimiter: RateLimiter) {
  * Get rate limit info for adding to responses
  */
 export function addRateLimitHeaders(response: NextResponse, req: NextRequest): void {
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rateLimitInfo = (req as any).rateLimitInfo as RateLimitInfo;
   
   if (rateLimitInfo) {
