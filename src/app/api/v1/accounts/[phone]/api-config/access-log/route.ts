@@ -3,7 +3,7 @@ import { errorResponse, successResponse } from "@/server/common/response";
 import { ApiAccessLog } from "@/server/models/ApiAccessLog.model";
 import { ApiConfig } from "@/server/models/ApiConfig.model";
 import { User } from "@/server/models/User.model";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 interface AccessLogBody {
   apiKey: string; // ApiConfig ObjectId
@@ -19,11 +19,12 @@ interface AccessLogBody {
 // GET - Fetch all access logs for a user or API key
 export async function GET(
   req: NextRequest,
-  { params }: { params: { phone: string } }
-) {
+  { params }: { params: Promise<{ phone: string;   }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
 
     const user = await User.findOne({ phone });
     if (!user)
@@ -55,11 +56,12 @@ export async function GET(
 // POST - Create a new access log
 export async function POST(
   req: NextRequest,
-  { params }: { params: { phone: string } }
-) {
+  { params }: { params: Promise<{ phone: string;   }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
     const body: AccessLogBody = await req.json();
 
     const user = await User.findOne({ phone });
