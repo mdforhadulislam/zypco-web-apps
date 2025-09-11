@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import { User } from "@/server/models/User.model";
 import { Address, IAddress } from "@/server/models/Address.model";
@@ -53,10 +53,14 @@ async function sendAddressNotification(user: any, event: string, addressData: an
 }
 
 // GET - fetch specific address by ID
-export async function GET(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string; id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone, id } = params;
+
+    const { phone, id } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
@@ -74,10 +78,14 @@ export async function GET(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // PUT - update specific address
-export async function PUT(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string; id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone, id } = params;
+
+    const { phone,id } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
@@ -134,10 +142,14 @@ export async function PUT(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // DELETE - soft delete address
-export async function DELETE(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string; id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone, id } = params;
+
+    const { phone,id } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
