@@ -2,13 +2,17 @@ import connectDB from "@/config/db";
 import { errorResponse, successResponse } from "@/server/common/response";
 import { Review, IReview } from "@/server/models/Review.model";
 import { User } from "@/server/models/User.model";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // GET - fetch all reviews for a user
-export async function GET(req: NextRequest, { params }: { params: { phone: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
@@ -28,10 +32,14 @@ export async function GET(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // POST - create a new review for a user
-export async function POST(req: NextRequest, { params }: { params: { phone: string } }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });

@@ -3,7 +3,7 @@ import { errorResponse, successResponse } from "@/server/common/response";
 import { ApiConfig, IApiConfig } from "@/server/models/ApiConfig.model";
 import { User } from "@/server/models/User.model";
 import { notificationService } from "@/services/notificationService";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 interface ApiConfigBody {
   name?: string;
@@ -19,11 +19,12 @@ interface ApiConfigBody {
 // GET - fetch all API configs for a user
 export async function GET(
   req: NextRequest,
-  { params }: { params: { phone: string } }
-) {
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
 
     const user = await User.findOne({ phone });
     if (!user)
@@ -49,11 +50,12 @@ export async function GET(
 // POST - create a new API config
 export async function POST(
   req: NextRequest,
-  { params }: { params: { phone: string } }
-) {
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
     const body: ApiConfigBody = await req.json();
 
     const user = await User.findOne({ phone });
@@ -111,11 +113,12 @@ export async function POST(
 // PUT - update an existing API config
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { phone: string } }
-) {
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
     const body: ApiConfigBody & { configId: string } = await req.json();
 
     if (!body.configId)
@@ -188,11 +191,12 @@ export async function PUT(
 // DELETE - remove an API config
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { phone: string } }
-) {
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
     const body: { configId: string } = await req.json();
 
     if (!body.configId)

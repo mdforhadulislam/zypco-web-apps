@@ -3,13 +3,17 @@ import { errorResponse, successResponse } from "@/server/common/response";
 import { IOffer, Offer } from "@/server/models/Offer.model";
 import { User } from "@/server/models/User.model";
 import { notificationService } from "@/services/notificationService";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // GET - fetch all offers for a user
-export async function GET(req: NextRequest, { params }: { params: { phone: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
@@ -24,10 +28,14 @@ export async function GET(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // POST - create a new offer
-export async function POST(req: NextRequest, { params }: { params: { phone: string } }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
@@ -64,10 +72,14 @@ export async function POST(req: NextRequest, { params }: { params: { phone: stri
 }
 
 // PUT - update an existing offer
-export async function PUT(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string, id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone, id } = params;
+
+    const { phone, id } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
@@ -105,10 +117,14 @@ export async function PUT(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // DELETE - soft delete an offer (mark inactive)
-export async function DELETE(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string, id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone, id } = params;
+
+    const { phone, id } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });

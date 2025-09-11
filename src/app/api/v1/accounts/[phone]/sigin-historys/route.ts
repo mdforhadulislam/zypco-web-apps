@@ -2,13 +2,17 @@ import connectDB from "@/config/db";
 import { errorResponse, successResponse } from "@/server/common/response";
 import { LoginHistory, ILoginHistory } from "@/server/models/LoginHistory.model";
 import { User } from "@/server/models/User.model";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // GET - fetch login history for a user
-export async function GET(req: NextRequest, { params }: { params: { phone: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
 
     // Find the user (optional, since some records may not have user reference)
     const user = await User.findOne({ phone });
@@ -46,10 +50,14 @@ export async function GET(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // POST - add a new login history record
-export async function POST(req: NextRequest, { params }: { params: { phone: string } }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
 
     const body: Partial<ILoginHistory> = await req.json();
 

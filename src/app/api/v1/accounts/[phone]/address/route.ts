@@ -4,7 +4,7 @@ import { Address, IAddress } from "@/server/models/Address.model";
 import { User } from "@/server/models/User.model";
 import { notificationService } from "@/services/notificationService";
 import { Types } from "mongoose";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 interface AddressBody {
   name: string;
@@ -26,11 +26,12 @@ interface AddressBody {
 // GET - fetch all addresses for a user
 export async function GET(
   req: NextRequest,
-  { params }: { params: { phone: string } }
-) {
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
     const user = await User.findOne({ phone });
     if (!user)
       return errorResponse({ status: 404, message: "User not found", req });
@@ -55,11 +56,12 @@ export async function GET(
 // POST - create new address
 export async function POST(
   req: NextRequest,
-  { params }: { params: { phone: string } }
-) {
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
     const user = await User.findOne({ phone });
     if (!user)
       return errorResponse({ status: 404, message: "User not found", req });
@@ -120,11 +122,12 @@ export async function POST(
 // PUT - update existing address
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { phone: string } }
-) {
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
     const user = await User.findOne({ phone });
     if (!user)
       return errorResponse({ status: 404, message: "User not found", req });
@@ -197,11 +200,12 @@ export async function PUT(
 // DELETE - soft delete address
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { phone: string } }
-) {
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
     const user = await User.findOne({ phone });
     if (!user)
       return errorResponse({ status: 404, message: "User not found", req });

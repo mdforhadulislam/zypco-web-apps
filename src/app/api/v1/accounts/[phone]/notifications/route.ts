@@ -1,15 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import { User } from "@/server/models/User.model";
 import { Notification } from "@/server/models/Notification.model";
 import { successResponse, errorResponse } from "@/server/common/response";
 
 // GET - fetch notifications for a user
-export async function GET(req: NextRequest, { params }: { params: { phone: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
@@ -29,10 +33,14 @@ export async function GET(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // PUT - mark a notification as read/unread or update
-export async function PUT(req: NextRequest, { params }: { params: { phone: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
@@ -61,10 +69,14 @@ export async function PUT(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // DELETE - remove a notification
-export async function DELETE(req: NextRequest, { params }: { params: { phone: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });

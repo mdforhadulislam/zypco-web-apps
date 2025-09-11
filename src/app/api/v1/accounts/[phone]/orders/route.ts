@@ -2,13 +2,17 @@ import connectDB from "@/config/db";
 import { errorResponse, successResponse } from "@/server/common/response";
 import { Order } from "@/server/models/Order.model";
 import { User } from "@/server/models/User.model";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // GET - fetch all orders for a user by phone
-export async function GET(req: NextRequest, { params }: { params: { phone: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone } = params;
+
+    const { phone } = await params;
 
     // Find the user by phone
     const user = await User.findOne({ phone });
