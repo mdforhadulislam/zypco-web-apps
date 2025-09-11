@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import { User } from "@/server/models/User.model";
 import { ApiAccessLog } from "@/server/models/ApiAccessLog.model";
@@ -6,10 +6,14 @@ import { Types } from "mongoose";
 import { successResponse, errorResponse } from "@/server/common/response";
 
 // GET - fetch a single access log by id
-export async function GET(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string; id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone, id } = params;
+
+    const { phone,id } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
@@ -27,10 +31,14 @@ export async function GET(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // DELETE - soft delete or remove a log
-export async function DELETE(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string; id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone, id } = params;
+
+    const { phone, id } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
@@ -48,11 +56,14 @@ export async function DELETE(req: NextRequest, { params }: { params: { phone: st
 }
 
 // PUT - optional: update a log (e.g., mark success/failure manually)
-export async function PUT(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string; id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone, id } = params;
-    
+
+    const { phone,id } = await params;
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
     const body: Partial<ApiAccessLog> = await req.json();
