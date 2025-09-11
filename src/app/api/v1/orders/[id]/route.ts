@@ -32,6 +32,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     const body = await req.json();
 
     // Update document using $set
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const update: any = {};
     if (body.parcel) update.parcel = body.parcel;
     if (body.payment) update.payment = body.payment;

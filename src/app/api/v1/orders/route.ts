@@ -1,8 +1,7 @@
-import { NextRequest } from "next/server";
 import connectDB from "@/config/db";
+import { errorResponse, successResponse } from "@/server/common/response";
 import { Order } from "@/server/models/Order.model";
-import { successResponse, errorResponse } from "@/server/common/response";
-import { Types } from "mongoose";
+import { NextRequest } from "next/server";
 
 type GetQuery = {
   trackId?: string;
@@ -18,24 +17,44 @@ type GetQuery = {
   sortOrder?: string;
   search?: string;
 };
- 
-function validateAndFixItems(items: any[]): { valid: boolean; message?: string } {
-  if (!Array.isArray(items)) return { valid: false, message: "parcel.item must be an array" };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+function validateAndFixItems(items: any[]): {
+  valid: boolean;
+  message?: string;
+} {
+  if (!Array.isArray(items))
+    return { valid: false, message: "parcel.item must be an array" };
 
   for (let i = 0; i < items.length; i++) {
     const it = items[i];
-    if (!it || typeof it !== "object") return { valid: false, message: `parcel.item[${i}] invalid` };
+    if (!it || typeof it !== "object")
+      return { valid: false, message: `parcel.item[${i}] invalid` };
 
     if (!it.name || typeof it.name !== "string" || !it.name.trim()) {
       return { valid: false, message: `parcel.item[${i}].name is required` };
     }
 
-    if (it.quantity == null || Number.isNaN(Number(it.quantity)) || Number(it.quantity) <= 0) {
-      return { valid: false, message: `parcel.item[${i}].quantity must be a positive number` };
+    if (
+      it.quantity == null ||
+      Number.isNaN(Number(it.quantity)) ||
+      Number(it.quantity) <= 0
+    ) {
+      return {
+        valid: false,
+        message: `parcel.item[${i}].quantity must be a positive number`,
+      };
     }
 
-    if (it.unitPrice == null || Number.isNaN(Number(it.unitPrice)) || Number(it.unitPrice) < 0) {
-      return { valid: false, message: `parcel.item[${i}].unitPrice must be a non-negative number` };
+    if (
+      it.unitPrice == null ||
+      Number.isNaN(Number(it.unitPrice)) ||
+      Number(it.unitPrice) < 0
+    ) {
+      return {
+        valid: false,
+        message: `parcel.item[${i}].unitPrice must be a non-negative number`,
+      };
     }
 
     // Ensure totalPrice exists and is correct
@@ -50,7 +69,7 @@ function validateAndFixItems(items: any[]): { valid: boolean; message?: string }
 
   return { valid: true };
 }
- 
+
 export async function GET(req: NextRequest) {
   try {
     await connectDB();
@@ -63,6 +82,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build query
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: any = {};
 
     if (q.trackId) {
@@ -79,7 +99,6 @@ export async function GET(req: NextRequest) {
 
     if (q.priority) query["parcel.priority"] = q.priority;
     if (q.orderType) query["parcel.orderType"] = q.orderType;
-    
 
     if (q.createdFrom || q.createdTo) {
       query.createdAt = {};
@@ -104,14 +123,27 @@ export async function GET(req: NextRequest) {
     }
 
     // Sorting
-    const allowedSortFields = new Set(["createdAt", "orderDate", "trackId", "parcel.priority"]);
-    const sortBy = allowedSortFields.has(q.sortBy || "") ? (q.sortBy as string) : "createdAt";
+    const allowedSortFields = new Set([
+      "createdAt",
+      "orderDate",
+      "trackId",
+      "parcel.priority",
+    ]);
+    const sortBy = allowedSortFields.has(q.sortBy || "")
+      ? (q.sortBy as string)
+      : "createdAt";
     const sortOrder = (q.sortOrder || "desc").toLowerCase() === "asc" ? 1 : -1;
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sortObj: any = {};
     sortObj[sortBy] = sortOrder;
 
     const total = await Order.countDocuments(query);
-    const orders = await Order.find(query).sort(sortObj).skip(skip).limit(limit).lean();
+    const orders = await Order.find(query)
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
     return successResponse({
       status: 200,
@@ -126,7 +158,8 @@ export async function GET(req: NextRequest) {
       req,
     });
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Failed to fetch orders";
+    const msg =
+      error instanceof Error ? error.message : "Failed to fetch orders";
     return errorResponse({ status: 500, message: msg, error, req });
   }
 }
@@ -140,31 +173,53 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const body = (await req.json()) as any;
 
     // Validate parcel existence
     if (!body || !body.parcel || typeof body.parcel !== "object") {
-      return errorResponse({ status: 400, message: "Parcel information is required", req });
+      return errorResponse({
+        status: 400,
+        message: "Parcel information is required",
+        req,
+      });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const parcel = body.parcel as Record<string, any>;
 
     // Validate required parcel fields
     if (!parcel.from) {
-      return errorResponse({ status: 400, message: "parcel.from is required", req });
+      return errorResponse({
+        status: 400,
+        message: "parcel.from is required",
+        req,
+      });
     }
     if (!parcel.to) {
-      return errorResponse({ status: 400, message: "parcel.to is required", req });
+      return errorResponse({
+        status: 400,
+        message: "parcel.to is required",
+        req,
+      });
     }
     if (!parcel.weight && parcel.weight !== 0) {
-      return errorResponse({ status: 400, message: "parcel.weight is required", req });
+      return errorResponse({
+        status: 400,
+        message: "parcel.weight is required",
+        req,
+      });
     }
 
     // If items provided, validate each
     if (parcel.item) {
       const validation = validateAndFixItems(parcel.item);
       if (!validation.valid) {
-        return errorResponse({ status: 400, message: validation.message || "Invalid parcel.item", req });
+        return errorResponse({
+          status: 400,
+          message: validation.message || "Invalid parcel.item",
+          req,
+        });
       }
       // propagate fixed items back
       body.parcel.item = parcel.item;
@@ -183,7 +238,14 @@ export async function POST(req: NextRequest) {
       };
     } else {
       // coerce numeric fields
-      const numericFields = ["pAmount", "pOfferDiscount", "pExtraCharge", "pDiscount", "pReceived", "pRefunded"];
+      const numericFields = [
+        "pAmount",
+        "pOfferDiscount",
+        "pExtraCharge",
+        "pDiscount",
+        "pReceived",
+        "pRefunded",
+      ];
       for (const f of numericFields) {
         if (body.payment[f] == null || Number.isNaN(Number(body.payment[f]))) {
           body.payment[f] = 0;
@@ -205,7 +267,8 @@ export async function POST(req: NextRequest) {
       req,
     });
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Failed to create order";
+    const msg =
+      error instanceof Error ? error.message : "Failed to create order";
     return errorResponse({ status: 500, message: msg, error, req });
   }
 }

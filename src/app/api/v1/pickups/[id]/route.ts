@@ -50,8 +50,11 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
       return errorResponse({ status: 400, message: "Invalid pickup id", req });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const body = (await req.json()) as any;
 
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updatedData: Record<string, any> = {};
 
     if (body.preferredDate) updatedData.preferredDate = new Date(body.preferredDate);

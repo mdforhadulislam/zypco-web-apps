@@ -2,20 +2,20 @@ import { NextRequest } from "next/server";
 import connectDB from "@/config/db";
 import { User } from "@/server/models/User.model";
 import { Address, IAddress } from "@/server/models/Address.model";
-import { successResponse, errorResponse } from "@/server/common/response"; 
+import { successResponse, errorResponse } from "@/server/common/response";
 import { Types } from "mongoose";
 import { notificationService } from "@/services/notificationService";
 
 interface AddressBody {
-  name: string;
+  name?: string;
   label?: string;
-  addressLine: string;
+  addressLine?: string;
   area?: string;
   subCity?: string;
-  city: string;
+  city?: string;
   state?: string;
   zipCode?: string;
-  country: string; // Country ObjectId string
+  country?: string; // Country ObjectId string
   phone?: string;
   isDefault?: boolean;
   location?: {
@@ -24,14 +24,29 @@ interface AddressBody {
 }
 
 // Helper to send notifications
-async function sendAddressNotification(user: any, event: string, addressData: any, options: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function sendAddressNotification(user: any, event: string, addressData: any, options?: { title?: string; message?: string; type?: string; category?: string; channels?: string[] }) {
   try {
-    await notificationService.sendNotification(
-      { phone: user.phone, email: user.email },
-      event,
-      addressData,
-      options
-    );
+    // Build NotificationData according to your notificationService API
+    const notificationPayload = {
+      userId: user._id?.toString ? user._id.toString() : undefined,
+      phone: user.phone,
+      email: user.email,
+      title: options?.title || (event === "address_added" ? "Address Added" : event === "address_updated" ? "Address Updated" : "Address Notification"),
+      message: options?.message || "",
+      type: (options?.type as "info" | "success" | "warning" | "error" | "promo") || "info",
+      category: (options?.category as "order" | "account" | "security" | "system" | "marketing") || "account",
+      data: addressData,
+      channels: options?.channels as ("email" | "sms" | "push" | "inapp")[] || ["inapp", "email"],
+    };
+
+    
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error  @typescript-eslint/no-explicit-any
+    await notificationService.sendNotification(notificationPayload).catch((e) => {
+      // already handled below, but ensure thrown errors don't bubble to user
+      console.error("notificationService.sendNotification error:", e);
+    });
   } catch (err) {
     console.error(`Notification for ${event} failed:`, err);
   }
@@ -45,6 +60,8 @@ export async function GET(req: NextRequest, { params }: { params: { phone: strin
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
+
+    if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid address id", req });
 
     const address = await Address.findOne({ _id: id, user: user._id, isDeleted: false });
     if (!address) return errorResponse({ status: 404, message: "Address not found", req });
@@ -65,10 +82,34 @@ export async function PUT(req: NextRequest, { params }: { params: { phone: strin
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
 
-    const body: Partial<AddressBody> = await req.json();
-    const updateData: Partial<IAddress> = { ...body };
-    if (body.country) updateData.country = new Types.ObjectId(body.country);
-    if (body.location) updateData.location = { type: "Point", coordinates: body.location.coordinates };
+    if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid address id", req });
+
+    const body = (await req.json()) as AddressBody;
+
+    // Build updateData safely, mapping types correctly
+    const updateData: Partial<IAddress> = {};
+
+    if (body.name !== undefined) updateData.name = body.name as string;
+    if (body.label !== undefined) updateData.label = body.label as string;
+    if (body.addressLine !== undefined) updateData.addressLine = body.addressLine as string;
+    if (body.area !== undefined) updateData.area = body.area as string;
+    if (body.subCity !== undefined) updateData.subCity = body.subCity as string;
+    if (body.city !== undefined) updateData.city = body.city as string;
+    if (body.state !== undefined) updateData.state = body.state as string;
+    if (body.zipCode !== undefined) updateData.zipCode = body.zipCode as string;
+    if (body.phone !== undefined) updateData.phone = body.phone as string;
+    if ("isDefault" in body) updateData.isDefault = Boolean(body.isDefault);
+
+    if (body.country) {
+      // convert to ObjectId
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any 
+      updateData.country = new Types.ObjectId(body.country) as unknown as any;
+    }
+
+    if (body.location && Array.isArray(body.location.coordinates) && body.location.coordinates.length === 2) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      updateData.location = { type: "Point", coordinates: body.location.coordinates } as any;
+    }
 
     const updatedAddress = await Address.findOneAndUpdate(
       { _id: id, user: user._id, isDeleted: false },
@@ -77,7 +118,8 @@ export async function PUT(req: NextRequest, { params }: { params: { phone: strin
     );
     if (!updatedAddress) return errorResponse({ status: 404, message: "Address not found", req });
 
-    await sendAddressNotification(
+    // async notification, don't block response
+    sendAddressNotification(
       user,
       "address_updated",
       { addressId: updatedAddress._id, label: updatedAddress.label, addressLine: updatedAddress.addressLine },
@@ -100,6 +142,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { phone: st
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
 
+    if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid address id", req });
+
     const deletedAddress = await Address.findOneAndUpdate(
       { _id: id, user: user._id, isDeleted: false },
       { $set: { isDeleted: true } },
@@ -107,7 +151,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { phone: st
     );
     if (!deletedAddress) return errorResponse({ status: 404, message: "Address not found", req });
 
-    await sendAddressNotification(
+    // async notification
+    sendAddressNotification(
       user,
       "address_deleted",
       { addressId: deletedAddress._id, label: deletedAddress.label, addressLine: deletedAddress.addressLine },

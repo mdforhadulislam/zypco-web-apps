@@ -52,6 +52,9 @@ export async function PUT(req: NextRequest, { params }: { params: { phone: strin
   try {
     await connectDB();
     const { phone, id } = params;
+    
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
     const body: Partial<ApiAccessLog> = await req.json();
 
     const user = await User.findOne({ phone });

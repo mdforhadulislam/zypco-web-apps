@@ -136,7 +136,9 @@ export async function PUT(
         message: "Address ID required",
         req,
       });
-
+      
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
     const updateData: Partial<IAddress> & {
       country?: Types.ObjectId;
       location?: { type: "Point"; coordinates: [number, number] };

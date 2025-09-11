@@ -26,6 +26,8 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build query object
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: any = {};
 
     if (typeof isActiveParam === "string") {
@@ -66,6 +68,7 @@ export async function GET(req: NextRequest) {
     // Validate sortBy allowed fields (prevent injection / invalid field)
     const allowedSortFields = new Set(["name", "code", "createdAt", "updatedAt", "zone"]);
     const finalSortBy = allowedSortFields.has(sortBy) ? sortBy : "createdAt";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sortObj: any = {};
     sortObj[finalSortBy] = sortOrder;
 

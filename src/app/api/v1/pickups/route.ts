@@ -29,6 +29,8 @@ export async function GET(req: NextRequest) {
     const limit = Math.max(1, Math.min(200, parseInt(q.limit || "10", 10)));
     const skip = (page - 1) * limit;
 
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: any = {};
 
     if (q.status) query.status = q.status;
@@ -83,6 +85,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const body = (await req.json()) as any;
 
     if (!body.user || !Types.ObjectId.isValid(body.user)) {

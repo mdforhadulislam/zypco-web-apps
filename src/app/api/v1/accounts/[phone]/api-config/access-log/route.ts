@@ -31,6 +31,7 @@ export async function GET(
 
     const { searchParams } = new URL(req.url);
     const apiKey = searchParams.get("apiKey"); // optional query
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filter: any = { user: user._id };
     if (apiKey) filter.apiKey = apiKey;
 

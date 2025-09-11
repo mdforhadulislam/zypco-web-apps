@@ -20,7 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: { phone: strin
     const page = parseInt(url.searchParams.get("page") || "1", 10);
     const limit = parseInt(url.searchParams.get("limit") || "10", 10);
     const skip = (page - 1) * limit;
-
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: any = { user: user._id };
     if (status) query.status = status;
     if (startDate || endDate) {

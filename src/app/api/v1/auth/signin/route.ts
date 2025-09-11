@@ -4,6 +4,7 @@ import { LoginHistory } from "@/server/models/LoginHistory.model";
 import { User } from "@/server/models/User.model";
 import { notificationService } from "@/services/notificationService";
 import jwt, { Secret, SignOptions } from "jsonwebtoken";
+import { Types } from "mongoose";
 import { NextRequest } from "next/server";
 
 type SigninBody = {
@@ -131,19 +132,12 @@ export async function POST(req: NextRequest) {
       timestamp: new Date(),
     });
 
-    // JWT generation
-    let token: string | undefined;
-    if (process.env.JWT_SECRET) {
-      const secret: Secret = process.env.JWT_SECRET;
-      const options: SignOptions = {
-        expiresIn: 7 * 24 * 60 * 60,
-      };
-      token = jwt.sign(
-        { id: user._id.toString(), role: user.role },
-        secret,
-        options
-      );
-    }
+const userId = user._id as Types.ObjectId; // cast _id to ObjectId
+const token: string = jwt.sign(
+  { id: userId.toString(), role: user.role },
+  process.env.JWT_SECRET as Secret,
+  { expiresIn: 7 * 24 * 60 * 60 } // 7 days
+);
 
     // Send login notification (non-blocking)
     notificationService

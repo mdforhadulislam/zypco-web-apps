@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build query
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: any = {};
     if (category) query.category = category;
     if (status) query.status = status;

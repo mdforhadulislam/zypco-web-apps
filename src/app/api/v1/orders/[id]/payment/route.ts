@@ -25,6 +25,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       "pReceived",
       "pRefunded",
     ];
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const update: Record<string, any> = {};
     for (const field of allowedFields) {
       if (field in body) {

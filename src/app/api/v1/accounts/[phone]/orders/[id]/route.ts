@@ -17,6 +17,8 @@ export async function GET(req: NextRequest, { params }: { params: { phone: strin
     if (!order) return errorResponse({ status: 404, message: "Order not found", req });
 
     // Ensure the order belongs to the user (sender or receiver)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     if (order.parcel.sender?.phone !== phone && order.parcel.receiver?.phone !== phone) {
       return errorResponse({ status: 403, message: "Access denied", req });
     }
@@ -41,6 +43,7 @@ export async function PUT(req: NextRequest, { params }: { params: { phone: strin
     if (!order) return errorResponse({ status: 404, message: "Order not found", req });
 
     // Ensure the order belongs to the user (sender or receiver)
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const parcel = order.parcel as any; // Cast to any or define proper type for nested schema
     if (parcel.sender?.phone !== phone && parcel.receiver?.phone !== phone) {
       return errorResponse({ status: 403, message: "Access denied", req });

@@ -1,13 +1,16 @@
 import connectDB from "@/config/db";
-import { Contact, IContact } from "@/server/models/Contact.model";
-import { successResponse, errorResponse } from "@/server/common/response";
-import { NextRequest } from "next/server";
+import { errorResponse, successResponse } from "@/server/common/response";
+import { Contact } from "@/server/models/Contact.model";
 import { Types } from "mongoose";
+import { NextRequest } from "next/server";
 
 // ==========================
 // GET - fetch single contact
 // ==========================
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     await connectDB();
 
@@ -16,7 +19,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return errorResponse({ status: 400, message: "Invalid contact ID", req });
     }
 
-    const contact = await Contact.findById(id).populate("replies.responder", "name email");
+    const contact = await Contact.findById(id).populate(
+      "replies.responder",
+      "name email"
+    );
     if (!contact) {
       return errorResponse({ status: 404, message: "Contact not found", req });
     }
@@ -28,7 +34,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       req,
     });
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Failed to fetch contact";
+    const msg =
+      error instanceof Error ? error.message : "Failed to fetch contact";
     return errorResponse({ status: 500, message: msg, error, req });
   }
 }
@@ -36,7 +43,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 // ==========================
 // PUT - update contact
 // ==========================
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     await connectDB();
 
@@ -46,7 +56,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const body = await req.json();
-    const updatedContact = await Contact.findByIdAndUpdate(id, body, { new: true });
+    const updatedContact = await Contact.findByIdAndUpdate(id, body, {
+      new: true,
+    });
 
     if (!updatedContact) {
       return errorResponse({ status: 404, message: "Contact not found", req });
@@ -59,7 +71,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       req,
     });
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Failed to update contact";
+    const msg =
+      error instanceof Error ? error.message : "Failed to update contact";
     return errorResponse({ status: 500, message: msg, error, req });
   }
 }
@@ -67,7 +80,10 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 // ==========================
 // DELETE - remove contact
 // ==========================
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     await connectDB();
 
@@ -88,7 +104,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       req,
     });
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Failed to delete contact";
+    const msg =
+      error instanceof Error ? error.message : "Failed to delete contact";
     return errorResponse({ status: 500, message: msg, error, req });
   }
 }

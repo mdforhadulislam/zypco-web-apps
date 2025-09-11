@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         success: false,
         failureReason: "Invalid or expired token on signout",
         timestamp: new Date(),
-      })
+      });
 
       return errorResponse({
         status: 401,
