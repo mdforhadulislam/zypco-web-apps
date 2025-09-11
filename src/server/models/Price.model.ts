@@ -1,4 +1,4 @@
-import { Document, Model, Schema, model } from "mongoose";
+import { Document, Schema, model } from "mongoose";
 
 interface IPriceCategory {
   gm500?: number;
@@ -76,8 +76,8 @@ const rateSchema = new Schema<IRate>(
 
 const priceSchema = new Schema<IPrice>(
   {
-  from: { type: Schema.Types.ObjectId, ref: "Country", default: null },
-  to: { type: Schema.Types.ObjectId, ref: "Country", default: null },
+    from: { type: Schema.Types.ObjectId, ref: "Country", default: null },
+    to: { type: Schema.Types.ObjectId, ref: "Country", default: null },
     rate: { type: [rateSchema], default: [] },
   },
   { timestamps: true }
@@ -89,4 +89,4 @@ priceSchema.index({ createdAt: -1 });
 // priceSchema.index({ "rate.price.gm500": 1, "rate.price.kg6to10": 1 }); // Example index for specific price fields
 
 // Export Price Model
-export const Price = (model<IPrice>("Price") as Model<IPrice>) || model<IPrice>("Price", priceSchema);
+export const Price = model<IPrice>("Price", priceSchema);

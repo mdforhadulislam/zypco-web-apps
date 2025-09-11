@@ -1,5 +1,5 @@
-import { Document, Model, model, Schema, Types } from "mongoose";
- 
+import { Document, model, Schema, Types } from "mongoose";
+
 const trackingStepSchema = new Schema(
   {
     status: {
@@ -29,17 +29,17 @@ const trackingStepSchema = new Schema(
   },
   { _id: false }
 );
- 
+
 export interface ITrack extends Document {
   order: Types.ObjectId; // Reference to Order
-  trackId: string;       // Auto-generated from Order
+  trackId: string; // Auto-generated from Order
   currentStatus: string; // latest status
   history: (typeof trackingStepSchema)[];
   estimatedDelivery?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
- 
+
 const trackSchema = new Schema<ITrack>(
   {
     order: { type: Schema.Types.ObjectId, ref: "Order", required: true },
@@ -65,7 +65,7 @@ const trackSchema = new Schema<ITrack>(
   },
   { timestamps: true }
 );
- 
+
 trackSchema.pre("validate", async function (next) {
   if (!this.trackId && this.order) {
     // Import Order model dynamically
@@ -78,9 +78,9 @@ trackSchema.pre("validate", async function (next) {
   }
   next();
 });
- 
+
 trackSchema.index({ trackId: 1 });
 trackSchema.index({ currentStatus: 1 });
 
 // Export Track Model
-export const Track = (model<ITrack>("Track") as Model<ITrack>) || model<ITrack>("Track", trackSchema);
+export const Track = model<ITrack>("Track", trackSchema);

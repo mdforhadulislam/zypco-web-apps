@@ -1,16 +1,17 @@
-import { Schema, model, Document, Model, Types } from 'mongoose';
+import { Document, Schema, Types, model } from "mongoose";
 
 // Interface for LoginHistory document
 export interface ILoginHistory extends Document {
-  user?: Types.ObjectId;           // Reference to User model (optional for failed attempts)
-  phone: string;                   // Phone number attempted
+  user?: Types.ObjectId; // Reference to User model (optional for failed attempts)
+  phone: string; // Phone number attempted
   timestamp: Date;
   ipAddress: string;
   userAgent: string;
   success: boolean;
-  action?: string;                 // 'login' or 'logout'
-  failureReason?: string;          // Reason for failure
-  location?: {                     // Geo location (if available)
+  action?: string; // 'login' or 'logout'
+  failureReason?: string; // Reason for failure
+  location?: {
+    // Geo location (if available)
     country?: string;
     city?: string;
     region?: string;
@@ -22,23 +23,23 @@ export interface ILoginHistory extends Document {
 // LoginHistory schema
 const loginHistorySchema = new Schema<ILoginHistory>(
   {
-    user: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    user: { type: Schema.Types.ObjectId, ref: "User", default: null },
     phone: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
     ipAddress: { type: String, required: true },
     userAgent: { type: String, required: true },
     success: { type: Boolean, required: true },
-    action: { 
-      type: String, 
-      enum: ["login", "logout"], 
-      default: "login" 
+    action: {
+      type: String,
+      enum: ["login", "logout"],
+      default: "login",
     },
     failureReason: { type: String, default: null },
     location: {
       country: { type: String, default: null },
       city: { type: String, default: null },
-      region: { type: String, default: null }
-    }
+      region: { type: String, default: null },
+    },
   },
   { timestamps: true }
 );
@@ -54,4 +55,7 @@ loginHistorySchema.index({ timestamp: -1 }); // For cleanup queries
 loginHistorySchema.index({ timestamp: 1 }, { expireAfterSeconds: 15552000 }); // 180 days
 
 // Export LoginHistory model
-export const LoginHistory = (model<ILoginHistory>("LoginHistory") as Model<ILoginHistory>) || model<ILoginHistory>("LoginHistory", loginHistorySchema);
+export const LoginHistory = model<ILoginHistory>(
+  "LoginHistory",
+  loginHistorySchema
+);

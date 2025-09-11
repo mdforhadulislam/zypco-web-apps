@@ -1,23 +1,23 @@
-import { Model } from "mongoose";
-import { Schema, model, Document, Types } from "mongoose";
+import { Document, Schema, Types, model } from "mongoose";
 
 // Blog Interface
 export interface IBlog extends Document {
   title: string;
-  slug: string;                     // URL-friendly slug
+  slug: string; // URL-friendly slug
   content: string;
   image?: string;
   author: Types.ObjectId;
-  category: string;                 // service, news, update, promotion
-  tags?: string[];                  // SEO tags / keywords
+  category: string; // service, news, update, promotion
+  tags?: string[]; // SEO tags / keywords
   relatedService?: Types.ObjectId;
-  status: string;                   // draft, review, published, archived
+  status: string; // draft, review, published, archived
   isPublished: boolean;
   views: number;
   likes: number;
   dislikes: number;
-  reactions?: {                      // Optional: social reactions
-    [key: string]: number;           // e.g., { love: 5, wow: 2, sad: 1 }
+  reactions?: {
+    // Optional: social reactions
+    [key: string]: number; // e.g., { love: 5, wow: 2, sad: 1 }
   };
   metaTitle?: string;
   metaDescription?: string;
@@ -35,20 +35,20 @@ const blogSchema = new Schema<IBlog>(
 
     author: { type: Schema.Types.ObjectId, ref: "User", required: true },
 
-    category: { 
-      type: String, 
-      enum: ["service", "news", "update", "promotion"], 
-      default: "service" 
+    category: {
+      type: String,
+      enum: ["service", "news", "update", "promotion"],
+      default: "service",
     },
 
-    tags: [{ type: String }],                 // SEO keywords
+    tags: [{ type: String }], // SEO keywords
 
     relatedService: { type: Schema.Types.ObjectId, ref: "Service" },
 
-    status: { 
-      type: String, 
-      enum: ["draft","review","published","archived"], 
-      default: "draft" 
+    status: {
+      type: String,
+      enum: ["draft", "review", "published", "archived"],
+      default: "draft",
     },
 
     isPublished: { type: Boolean, default: true },
@@ -65,9 +65,9 @@ const blogSchema = new Schema<IBlog>(
 );
 
 // Slug auto-generation from title
-blogSchema.pre('save', function(next) {
-  if (this.isModified('title')) {
-    this.slug = this.title.toLowerCase().replace(/\s+/g,'-');
+blogSchema.pre("save", function (next) {
+  if (this.isModified("title")) {
+    this.slug = this.title.toLowerCase().replace(/\s+/g, "-");
   }
   next();
 });
@@ -76,6 +76,5 @@ blogSchema.pre('save', function(next) {
 blogSchema.index({ title: "text", content: "text", tags: 1 });
 blogSchema.index({ category: 1, createdAt: -1 });
 
-
 // Export Blog Model
-export const Blog = (model<IBlog>("Blog") as Model<IBlog>) || model<IBlog>("Blog", blogSchema);
+export const Blog = model<IBlog>("Blog", blogSchema);

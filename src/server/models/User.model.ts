@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { Document, Model, Schema, model } from "mongoose";
+import { Document, Schema, model } from "mongoose";
 
 // User interface
 export interface IUser extends Document {
@@ -72,7 +72,9 @@ userSchema.pre("save", async function (next) {
 });
 
 // Compare Password
-userSchema.methods.comparePassword = async function (candidatePassword: string) {
+userSchema.methods.comparePassword = async function (
+  candidatePassword: string
+) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
@@ -85,4 +87,4 @@ userSchema.methods.generateVerificationCode = function () {
 };
 
 // Export User model
-export const User = (model<IUser>("User") as Model<IUser>) || model<IUser>("User", userSchema);
+export const User = model<IUser>("User", userSchema);

@@ -1,4 +1,4 @@
-import { Document, Model, Schema, Types, model } from "mongoose";
+import { Document, Schema, Types, model } from "mongoose";
 
 export interface IAddress extends Document {
   user: Types.ObjectId; // Linked User
@@ -78,4 +78,4 @@ addressSchema.pre<IAddress>("save", async function (next) {
   next();
 });
 
-export const Address = (model<IAddress>("Address") as Model<IAddress>) || model<IAddress>("Address", addressSchema); 
+export const Address = model<IAddress>("Address", addressSchema);

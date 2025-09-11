@@ -1,4 +1,4 @@
-import { Document, Model, Schema, Types, model } from "mongoose";
+import { Document, Schema, Types, model } from "mongoose";
 
 // Interface for User Permission document
 export interface IPermission extends Document {
@@ -60,4 +60,4 @@ permissionSchema.pre("save", function (next) {
 });
 
 // Export the model
-export const Permission = (model<IPermission>("Permission") as Model<IPermission>) || model<IPermission>("Permission", permissionSchema);
+export const Permission = model<IPermission>("Permission", permissionSchema);

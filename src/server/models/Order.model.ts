@@ -1,6 +1,4 @@
-import { Model } from "mongoose";
 import { Document, Schema, model } from "mongoose";
-
 
 const counterSchema = new Schema({
   name: { type: String, required: true, unique: true },
@@ -8,8 +6,6 @@ const counterSchema = new Schema({
 });
 
 const Counter = model("Counter", counterSchema);
-
-
 
 // Address Sub-schema
 const addressSchema = new Schema({
@@ -108,7 +104,6 @@ const orderSchema = new Schema<IOrder>(
   { timestamps: true }
 );
 
-
 orderSchema.pre("save", async function (next) {
   if (!this.trackId) {
     try {
@@ -127,9 +122,5 @@ orderSchema.pre("save", async function (next) {
   next();
 });
 
-
-
-
 // Export Order Model
-export const Order = (model<IOrder>("Order") as Model<IOrder>) || model<IOrder>("Order", orderSchema);
-
+export const Order = model<IOrder>("Order", orderSchema);

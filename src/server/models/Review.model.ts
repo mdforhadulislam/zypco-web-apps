@@ -1,14 +1,14 @@
-import { Schema, model, Document, Types, Model } from "mongoose";
+import { Document, Schema, Types, model } from "mongoose";
 
 // Review Interface
 export interface IReview extends Document {
-  user: Types.ObjectId;        // User reference
-  rating: number;              // 1-5 rating
-  comment: string;             // Review comment/body
-  isVerified: boolean;         // Verified purchase or not
-  isFeatured: boolean;         // Featured review by admin
-  helpfulCount: number;        // How many users found this helpful
-  status: string;              // e.g., 'pending', 'approved', 'rejected'
+  user: Types.ObjectId; // User reference
+  rating: number; // 1-5 rating
+  comment: string; // Review comment/body
+  isVerified: boolean; // Verified purchase or not
+  isFeatured: boolean; // Featured review by admin
+  helpfulCount: number; // How many users found this helpful
+  status: string; // e.g., 'pending', 'approved', 'rejected'
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,7 +22,11 @@ const reviewSchema = new Schema<IReview>(
     isVerified: { type: Boolean, default: false },
     isFeatured: { type: Boolean, default: false },
     helpfulCount: { type: Number, default: 0 },
-    status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
   },
   { timestamps: true }
 );
@@ -33,4 +37,4 @@ reviewSchema.index({ rating: -1, createdAt: -1 });
 reviewSchema.index({ status: 1 });
 
 // Export Review Model
-export const Review = (model<IReview>("Review") as Model<IReview>) || model<IReview>("Review", reviewSchema);
+export const Review = model<IReview>("Review", reviewSchema);
