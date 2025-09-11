@@ -45,12 +45,12 @@ export async function GET(
 // ==========================
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
 
-    const { id } = params;
+    const { id } = await params;
     if (!Types.ObjectId.isValid(id)) {
       return errorResponse({ status: 400, message: "Invalid contact ID", req });
     }
@@ -82,12 +82,12 @@ export async function PUT(
 // ==========================
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
 
-    const { id } = params;
+    const { id } = await params;
     if (!Types.ObjectId.isValid(id)) {
       return errorResponse({ status: 400, message: "Invalid contact ID", req });
     }
