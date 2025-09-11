@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/config/db";
-import { User } from "@/server/models/User.model";
+import { errorResponse, successResponse } from "@/server/common/response";
 import { Address, IAddress } from "@/server/models/Address.model";
-import { successResponse, errorResponse } from "@/server/common/response";
-import { Types } from "mongoose";
+import { User } from "@/server/models/User.model";
 import { notificationService } from "@/services/notificationService";
+import { Types } from "mongoose";
+import { NextRequest, NextResponse } from "next/server";
 
 interface AddressBody {
   name?: string;
@@ -41,7 +41,7 @@ async function sendAddressNotification(user: any, event: string, addressData: an
     };
 
     
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    
   // @ts-expect-error  @typescript-eslint/no-explicit-any
     await notificationService.sendNotification(notificationPayload).catch((e) => {
       // already handled below, but ensure thrown errors don't bubble to user

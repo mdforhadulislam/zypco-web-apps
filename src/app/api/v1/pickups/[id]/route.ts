@@ -5,9 +5,6 @@ import { Pickup } from "@/server/models/Pickup.model";
 import { successResponse, errorResponse } from "@/server/common/response";
 import { Types } from "mongoose";
 
-interface Params {
-  id: string;
-}
 
 /**
  * GET - fetch single pickup by id
