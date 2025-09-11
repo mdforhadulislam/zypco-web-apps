@@ -53,6 +53,10 @@ body,
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  
+  --shadow-3xl: 0vw 0vw 0.5vw 0vw rgb(32 32 32 / 12%);
+  --shadow-4xl: 0vw 0vw 0.5vw 0vw rgb(32 32 32 / 20%);
+  --shadow-5xl: 0vw 0.5vw 0.5vw 0vw rgb(32 32 32 / 16%);
 }
 
 :root {

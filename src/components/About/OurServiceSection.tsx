@@ -35,19 +35,19 @@ const searvices = [
     title: "Air Freight",
     description:
       "Zypco’s air freight service provides a fast, reliable solution for large or urgent shipments. Businesses and individuals can ship bulk or oversized cargo internationally with confidence. Zypco handles the logistics from pickup to delivery, including all necessary documentation and customs requirements. Air freight ensures time-sensitive shipments reach their destination quickly, making it ideal for high-priority goods that cannot wait for sea transport.",
-    logo: "/air-freight.png",
+    logo: "/dpd-logo.png",
   },
   {
     title: "Sea Freight",
     description:
       "For heavy or bulk shipments, Zypco offers sea freight services, the most cost-effective option for large-scale international shipping. Perfect for commercial consignments, machinery, or personal goods, sea freight allows customers to ship large volumes safely. Zypco manages container booking, port handling, documentation, and customs clearance, providing a smooth end-to-end solution for importers and exporters looking for affordable and reliable shipping.",
-    logo: "/sea-freight.png",
+    logo: "/dpd-logo.png",
   },
   {
     title: "Customs Clearance",
     description:
       "Zypco ensures smooth customs processing for all international shipments, minimizing delays and avoiding unnecessary charges. Our team handles all duties, taxes, and regulatory compliance, so customers don’t have to worry about complicated procedures. Integrated with our courier and freight services, Zypco’s customs clearance ensures packages pass borders efficiently, safely, and legally, providing peace of mind for every shipment.",
-    logo: "/customs-clearance.png",
+    logo: "/custom-clearance.png",
   },
 ];
 
@@ -65,15 +65,15 @@ const OurServiceSection = () => {
               key={index}
               className="w-full h-auto p-4 border-b border-gray-200"
             >
-              <div className="flex flex-col md:flex-row items-center gap-6">
-                <div className="w-60 h-40">
+              <div className="flex flex-col md:flex-row items-center gap-4">
+                <div className="w-65 h-40">
                   {" "}
                   <Image
                     width={200}
                     height={200}
                     alt={service.title}
                     src={service.logo}
-                    className="w-64 h-36 object-contain"
+                    className="w-70 h-36 object-contain"
                   />
                 </div>
                 <div className="w-auto">

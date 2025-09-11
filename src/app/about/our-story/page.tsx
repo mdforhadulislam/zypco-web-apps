@@ -5,7 +5,7 @@ const ZypcoStory = () => {
   return (
     <>
       <div className="w-full h-auto bg-[#241F21]">
-        <PageHeader title="OUR STORY" subtitle="OUR STORY" />
+        <PageHeader title="ABOUT US" subtitle="OUR STORY" mainLink="/about" subLink="/about/our-story" />
       </div>
       <OurStorySection />
     </>

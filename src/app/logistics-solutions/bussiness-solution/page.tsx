@@ -5,7 +5,7 @@ function BussinessSolution() {
   return (
     
     <div className="w-full h-auto bg-[#241F21]">
-      <PageHeader title="LOGISTICS SOLUTIONS" subtitle="OUR BUSINESS SOLUTIONS" /></div>
+      <PageHeader title="LOGISTICS SOLUTIONS" subtitle="OUR BUSINESS SOLUTIONS" mainLink="/logistics-solutions" subLink="/logistics-solutions/bussiness-solution" /></div>
   )
 }
 

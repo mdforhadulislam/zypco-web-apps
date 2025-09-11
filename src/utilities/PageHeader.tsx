@@ -4,16 +4,25 @@ import Link from "next/link";
 interface PageHeaderProps {
   title: string;
   subtitle: string;
+  mainLink?: string;
+  subLink?: string;
 }
 
-const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
+const PageHeader = ({
+  title,
+  subtitle,
+  mainLink = "/",
+  subLink = "/",
+}: PageHeaderProps) => {
   return (
     <div className="container m-auto h-auto bg-[#241F21] relative overflow-hidden">
       <div className="flex flex-col py-32 sm:py-28 px-4 z-[20] container m-auto">
-        <h1 className="text-4xl sm:text-6xl font-extrabold text-white z-[20]">{title}</h1>
+        <h1 className="text-4xl sm:text-6xl font-extrabold text-white z-[20]">
+          {subtitle}
+        </h1>
         <div className="text-xl sm:text-2xl font-extrabold text-gray-300 z-[20]">
-          <Link href="#">HOME</Link> / <Link href="#">{title}</Link>
-          {subtitle ? <Link href="#"> / {subtitle}</Link> : null}
+          <Link href="/">HOME</Link> / <Link href={mainLink}>{title}</Link>
+          {subtitle !== title ? <Link href={subLink}> / {subtitle}</Link> : null}
         </div>
       </div>
       <Globe

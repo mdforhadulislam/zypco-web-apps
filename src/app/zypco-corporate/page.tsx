@@ -5,7 +5,7 @@ const ZypcoCorporate = () => {
   return (
     
     <div className="w-full h-auto bg-[#241F21]">
-      <PageHeader title="ZYPCO CORPORATE" subtitle="" /></div>
+      <PageHeader title="ZYPCO CORPORATE" subtitle="ZYPCO CORPORATE" mainLink="/zypco-corporate" subLink="/zypco-corporate" /></div>
   )
 }
 
