@@ -5,11 +5,15 @@ import { Order } from "@/server/models/Order.model";
 import { successResponse, errorResponse } from "@/server/common/response";
 import { Types } from "mongoose";
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
 
-    const { id } = params;
+    const { id } = await params;
+
     if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid order id", req });
 
     const body = await req.json();
