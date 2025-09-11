@@ -37,7 +37,7 @@ export class EmailService {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
     this.transporter = nodemailer.createTransporter({
-      host: process.env.EMAIL_HOST,
+      host: process.env.SMTP_HOST,
       port: parseInt(process.env.EMAIL_PORT || '587'),
       secure: false,
       auth: {
