@@ -2,18 +2,19 @@ import connectDB from "@/config/db";
 import { errorResponse, successResponse } from "@/server/common/response";
 import { Blog } from "@/server/models/Blog.model";
 import mongoose from "mongoose";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // ==========================
 // GET - fetch single blog
 // =========================
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { id } = params;
+
+    const { id } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return errorResponse({ status: 400, message: "Invalid blog ID", req });
@@ -43,11 +44,12 @@ export async function GET(
 // ==========================
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { id } = params;
+
+    const { id } = await params;
     const body = await req.json();
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -77,11 +79,12 @@ export async function PUT(
 // ==========================
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { id } = params;
+
+    const { id } = await params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return errorResponse({ status: 400, message: "Invalid blog ID", req });

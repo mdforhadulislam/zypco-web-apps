@@ -1,15 +1,18 @@
 // F:\New folder (2)\zypco-web-apps\src\app\api\v1\orders\[id]\route.ts
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import { Order } from "@/server/models/Order.model";
 import { successResponse, errorResponse } from "@/server/common/response";
 import { Types } from "mongoose";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
 
-    const { id } = params;
+    const { id } = await params;
     if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid order id", req });
 
     const order = await Order.findById(id).lean();
@@ -22,11 +25,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
 
-    const { id } = params;
+    const { id } = await params;
     if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid order id", req });
 
     const body = await req.json();
@@ -50,11 +56,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
 
-    const { id } = params;
+    const { id } = await params;
     if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid order id", req });
 
     const order = await Order.findByIdAndDelete(id);

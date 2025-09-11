@@ -1,13 +1,17 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import { Track } from "@/server/models/Track.model";
 import { successResponse, errorResponse } from "@/server/common/response";
 import { Types } from "mongoose";
 
-export async function GET(req: NextRequest, { params }: { params: { trackID: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{  trackID: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { trackID } = params;
+
+    const { trackID } = await params;
 
     if (!Types.ObjectId.isValid(trackID)) return errorResponse({ status: 400, message: "Invalid trackID", req });
 
@@ -21,10 +25,14 @@ export async function GET(req: NextRequest, { params }: { params: { trackID: str
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { trackID: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{  trackID: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { trackID } = params;
+
+    const { trackID } = await params;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const body = (await req.json()) as any;
 
@@ -60,10 +68,14 @@ export async function PUT(req: NextRequest, { params }: { params: { trackID: str
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { trackID: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{  trackID: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { trackID } = params;
+
+    const { trackID } = await params;
 
     if (!Types.ObjectId.isValid(trackID)) return errorResponse({ status: 400, message: "Invalid trackID", req });
 

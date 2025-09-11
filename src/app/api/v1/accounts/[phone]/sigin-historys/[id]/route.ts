@@ -1,13 +1,17 @@
 import connectDB from "@/config/db";
 import { errorResponse, successResponse } from "@/server/common/response";
 import { LoginHistory } from "@/server/models/LoginHistory.model";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // GET - fetch single login history
-export async function GET(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { id } = params;
+
+    const { id } = await params;
 
     const history = await LoginHistory.findById(id);
     if (!history) return errorResponse({ status: 404, message: "Login history not found", req });
@@ -20,10 +24,15 @@ export async function GET(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // PUT - update login history
-export async function PUT(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { id } = params;
+
+    const { id } = await params;
+
     const body = await req.json();
 
     const updated = await LoginHistory.findByIdAndUpdate(id, body, { new: true });
@@ -37,10 +46,14 @@ export async function PUT(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // DELETE - remove login history
-export async function DELETE(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { id } = params;
+
+    const { id } = await params;
 
     const deleted = await LoginHistory.findByIdAndDelete(id);
     if (!deleted) return errorResponse({ status: 404, message: "Login history not found", req });

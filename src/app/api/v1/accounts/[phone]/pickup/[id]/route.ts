@@ -2,14 +2,18 @@ import connectDB from "@/config/db";
 import { Pickup } from "@/server/models/Pickup.model";
 import { User } from "@/server/models/User.model";
 import { successResponse, errorResponse } from "@/server/common/response";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Types } from "mongoose";
 
 // GET - fetch single pickup
-export async function GET(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string, id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone, id } = params;
+
+    const { phone, id } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
@@ -27,10 +31,14 @@ export async function GET(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // PUT - update pickup
-export async function PUT(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string, id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone, id } = params;
+
+    const { phone, id } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });

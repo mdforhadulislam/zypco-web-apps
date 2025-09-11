@@ -2,13 +2,17 @@ import connectDB from "@/config/db";
 import { errorResponse, successResponse } from "@/server/common/response";
 import { Review, IReview } from "@/server/models/Review.model";
 import { User } from "@/server/models/User.model";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // GET - fetch a single review
-export async function GET(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string, id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone, id } = params;
+
+    const { phone, id } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
@@ -24,10 +28,14 @@ export async function GET(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // PUT - update a review
-export async function PUT(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string, id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone, id } = params;
+
+    const { phone, id } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
@@ -50,10 +58,14 @@ export async function PUT(req: NextRequest, { params }: { params: { phone: strin
 }
 
 // DELETE - remove a review
-export async function DELETE(req: NextRequest, { params }: { params: { phone: string; id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string, id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { phone, id } = params;
+
+    const { phone, id } = await params;
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });

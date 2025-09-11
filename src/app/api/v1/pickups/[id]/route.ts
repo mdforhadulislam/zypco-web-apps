@@ -1,5 +1,5 @@
 // F:\New folder (2)\zypco-web-apps\src\app\api\v1\pickups\[id]\route.ts
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import { Pickup } from "@/server/models/Pickup.model";
 import { successResponse, errorResponse } from "@/server/common/response";
@@ -12,11 +12,14 @@ interface Params {
 /**
  * GET - fetch single pickup by id
  */
-export async function GET(req: NextRequest, { params }: { params: Params }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
 
-    const { id } = params;
+    const { id } = await params;
     if (!Types.ObjectId.isValid(id)) {
       return errorResponse({ status: 400, message: "Invalid pickup id", req });
     }
@@ -41,11 +44,14 @@ export async function GET(req: NextRequest, { params }: { params: Params }) {
 /**
  * PUT - update pickup by id
  */
-export async function PUT(req: NextRequest, { params }: { params: Params }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
 
-    const { id } = params;
+    const { id } = await params;
     if (!Types.ObjectId.isValid(id)) {
       return errorResponse({ status: 400, message: "Invalid pickup id", req });
     }
@@ -84,11 +90,14 @@ export async function PUT(req: NextRequest, { params }: { params: Params }) {
 /**
  * DELETE - delete pickup by id
  */
-export async function DELETE(req: NextRequest, { params }: { params: Params }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
 
-    const { id } = params;
+    const { id } = await params;
     if (!Types.ObjectId.isValid(id)) {
       return errorResponse({ status: 400, message: "Invalid pickup id", req });
     }

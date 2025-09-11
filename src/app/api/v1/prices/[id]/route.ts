@@ -1,13 +1,17 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/config/db";
 import { Price } from "@/server/models/Price.model";
 import { successResponse, errorResponse } from "@/server/common/response";
 import { Types } from "mongoose";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { id } = params;
+
+    const { id } = await params;
 
     if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid ID", req });
 
@@ -21,10 +25,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { id } = params;
+
+    const { id } = await params;
 
     if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid ID", req });
 
@@ -50,10 +58,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
   try {
     await connectDB();
-    const { id } = params;
+
+    const { id } = await params;
 
     if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid ID", req });
 
