@@ -1,6 +1,16 @@
 import { Model } from "mongoose";
 import { Document, Schema, model } from "mongoose";
 
+
+const counterSchema = new Schema({
+  name: { type: String, required: true, unique: true },
+  seq: { type: Number, default: 0 },
+});
+
+const Counter = model("Counter", counterSchema);
+
+
+
 // Address Sub-schema
 const addressSchema = new Schema({
   address: { type: String, default: "" },
@@ -97,6 +107,28 @@ const orderSchema = new Schema<IOrder>(
   },
   { timestamps: true }
 );
+
+
+orderSchema.pre("save", async function (next) {
+  if (!this.trackId) {
+    try {
+      const counter = await Counter.findOneAndUpdate(
+        { name: "order" },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      );
+
+      // Example Format: ZYP000001
+      this.trackId = `ZYP${counter.seq.toString().padStart(8, "0")}`;
+    } catch (err) {
+      return next(err as Error); // ✅ use Error type instead of any
+    }
+  }
+  next();
+});
+
+
+
 
 // Export Order Model
 export const Order = (model<IOrder>("Order") as Model<IOrder>) || model<IOrder>("Order", orderSchema);
