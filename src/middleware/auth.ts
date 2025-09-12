@@ -67,18 +67,12 @@ export class AuthMiddleware {
       }
 
       return {
-        
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
         id: user._id.toString(),
         phone: user.phone,
         email: user.email,
         role: user.role,
         isActive: user.isActive,
         isVerified: user.isVerified,
-        
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
         permissions: user.permissions || []
       };
     } catch (error) {
@@ -307,8 +301,6 @@ export class AuthMiddleware {
         };
       }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
       const resource = await Model.findById(resourceId);
       
       if (!resource) {
