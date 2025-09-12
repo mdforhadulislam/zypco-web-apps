@@ -86,6 +86,9 @@ export class NotificationService {
       // Email notification
       if (channels.includes("email") && userPrefs.email) {
         deliveryPromises.push(
+          
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
           emailService.sendNotificationEmail({
             to: user.email,
             subject: notificationData.title,
@@ -103,8 +106,6 @@ export class NotificationService {
       // Push notification (placeholder - would integrate with FCM/APNS)
       if (channels.includes("push")) {
         
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
         deliveryPromises.push(this.sendPushNotification({userId: user._id,title: notificationData.title,body: notificationData.message,data: notificationData.data,}));
       }
 
@@ -121,8 +122,6 @@ export class NotificationService {
       // Update notification with delivery status (extend the model if needed)
       
       
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
       return {success: true,notificationId: notification._id,};
 
     } catch (error) {
@@ -253,8 +252,6 @@ export class NotificationService {
     const users = await User.find(userQuery).select("_id phone email");
 
     
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
     const recipients = users.map(user => ({userId: user._id.toString(),phone: user.phone,email: user.email,}));
 
     await this.sendBulkNotification({
