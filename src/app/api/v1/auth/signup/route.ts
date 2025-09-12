@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
 
     // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+
     if (existingUser) {
       return errorResponse({
         status: 400,
@@ -40,11 +41,13 @@ export async function POST(req: NextRequest) {
     await newUser.save();
 
     // Send verification email
-    await emailService.sendVerificationEmail({
+    const emailSent = await emailService.sendVerificationEmail({
       email: newUser.email,
       name: newUser.name,
       code,
     });
+
+    console.log("Verification email sent:", emailSent);
 
     return successResponse({
       status: 201,

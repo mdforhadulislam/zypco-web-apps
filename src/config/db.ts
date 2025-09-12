@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 
-declare global { 
+declare global {
+  // Prevent TypeScript errors on `global.mongoose`
+  // eslint-disable-next-line no-var
   var mongoose: {
     conn: mongoose.Mongoose | null;
     promise: Promise<mongoose.Mongoose> | null;
@@ -23,15 +25,12 @@ if (!cached) {
 
 async function connectDB(): Promise<mongoose.Mongoose> {
   if (cached.conn) {
-    // Already connected
-    return cached.conn;
+    return cached.conn; // Already connected
   }
 
   if (!cached.promise) {
     const opts = {
-      bufferCommands: false,      // Disable mongoose buffering
-      useNewUrlParser: true,      // New parser
-      useUnifiedTopology: true,   // Recommended
+      bufferCommands: false, // Disable mongoose buffering
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {

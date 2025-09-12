@@ -1,3 +1,4 @@
+import { models } from "mongoose";
 import { Document, model, Schema, Types } from "mongoose";
 
 const trackingStepSchema = new Schema(
@@ -83,4 +84,4 @@ trackSchema.index({ trackId: 1 });
 trackSchema.index({ currentStatus: 1 });
 
 // Export Track Model
-export const Track = model<ITrack>("Track", trackSchema);
+export const Track = models.Track || model<ITrack>("Track", trackSchema);

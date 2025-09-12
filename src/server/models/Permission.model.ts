@@ -1,3 +1,4 @@
+import { models } from "mongoose";
 import { Document, Schema, Types, model } from "mongoose";
 
 // Interface for User Permission document
@@ -60,4 +61,4 @@ permissionSchema.pre("save", function (next) {
 });
 
 // Export the model
-export const Permission = model<IPermission>("Permission", permissionSchema);
+export const Permission = models.Permission || model<IPermission>("Permission", permissionSchema);

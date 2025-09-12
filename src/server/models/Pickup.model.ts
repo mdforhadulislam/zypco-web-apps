@@ -1,3 +1,4 @@
+import { models } from "mongoose";
 import { Document, Schema, Types, model } from "mongoose";
 
 // Pickup Interface
@@ -42,4 +43,4 @@ pickupSchema.index({ user: 1, moderator: 1, preferredDate: 1 });
 pickupSchema.index({ status: 1, preferredDate: 1 });
 
 // Export Pickup Model
-export const Pickup = model<IPickup>("Pickup", pickupSchema);
+export const Pickup = models.Pickup || model<IPickup>("Pickup", pickupSchema);

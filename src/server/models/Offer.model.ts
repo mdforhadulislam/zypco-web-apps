@@ -1,4 +1,4 @@
-import { Document, Schema, model } from "mongoose";
+import { Document, Schema, model, models } from "mongoose";
 
 // Interface for offer details
 interface IDiscountOffer {
@@ -93,4 +93,4 @@ offerSchema.index({ validUntil: 1, isActive: 1 });
 offerSchema.index({ "offerDetails.type": 1 });
 
 // Export the model
-export const Offer = model<IOffer>("Offer", offerSchema);
+export const Offer = models.Offer || model<IOffer>("Offer", offerSchema);

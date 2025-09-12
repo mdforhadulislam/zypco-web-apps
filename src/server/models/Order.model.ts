@@ -1,3 +1,4 @@
+import { models } from "mongoose";
 import { Document, Schema, model } from "mongoose";
 
 const counterSchema = new Schema({
@@ -123,4 +124,4 @@ orderSchema.pre("save", async function (next) {
 });
 
 // Export Order Model
-export const Order = model<IOrder>("Order", orderSchema);
+export const Order = models.Order || model<IOrder>("Order", orderSchema);

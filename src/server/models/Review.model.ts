@@ -1,4 +1,4 @@
-import { Document, Schema, Types, model } from "mongoose";
+import { Document, Schema, Types, model, models } from "mongoose";
 
 // Review Interface
 export interface IReview extends Document {
@@ -37,4 +37,4 @@ reviewSchema.index({ rating: -1, createdAt: -1 });
 reviewSchema.index({ status: 1 });
 
 // Export Review Model
-export const Review = model<IReview>("Review", reviewSchema);
+export const Review = models.Review || model<IReview>("Review", reviewSchema);

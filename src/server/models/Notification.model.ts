@@ -1,4 +1,4 @@
-import { Document, Schema, Types, model } from "mongoose";
+import { Document, Schema, Types, model, models } from "mongoose";
 
 // Notification Interface
 export interface INotification extends Document {
@@ -34,7 +34,7 @@ notificationSchema.index({ user: 1, read: 1 });
 notificationSchema.index({ sentAt: -1 });
 
 // Export Notification Model
-export const Notification = model<INotification>(
+export const Notification = models.Notification || model<INotification>(
   "Notification",
   notificationSchema
 );

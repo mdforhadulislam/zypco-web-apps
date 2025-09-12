@@ -1,4 +1,4 @@
-import { Document, Schema, Types, model } from "mongoose";
+import { Document, Schema, Types, model, models } from "mongoose";
 
 // Interface for LoginHistory document
 export interface ILoginHistory extends Document {
@@ -55,7 +55,7 @@ loginHistorySchema.index({ timestamp: -1 }); // For cleanup queries
 loginHistorySchema.index({ timestamp: 1 }, { expireAfterSeconds: 15552000 }); // 180 days
 
 // Export LoginHistory model
-export const LoginHistory = model<ILoginHistory>(
+export const LoginHistory = models.LoginHistory || model<ILoginHistory>(
   "LoginHistory",
   loginHistorySchema
 );

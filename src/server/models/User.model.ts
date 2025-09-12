@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { models } from "mongoose";
 import { Document, Schema, model } from "mongoose";
 
 // User interface
@@ -35,8 +36,8 @@ export interface IUser extends Document {
 const userSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
-    phone: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true },
+    phone: { type: String, required: true },
+    email: { type: String, required: true },
     password: { type: String, required: true },
     role: {
       type: String,
@@ -87,4 +88,4 @@ userSchema.methods.generateVerificationCode = function () {
 };
 
 // Export User model
-export const User = model<IUser>("User", userSchema);
+export const User = models.User || model<IUser>("User", userSchema);

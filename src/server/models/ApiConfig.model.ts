@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { Document, Schema, Types, model } from "mongoose";
+import { Document, Schema, Types, model, models } from "mongoose";
 import shortid from "shortid";
 import { User } from "./User.model"; // Import User model
 
@@ -84,4 +84,4 @@ apiConfigSchema.index({ user: 1 });
 apiConfigSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 // Export model
-export const ApiConfig = model<IApiConfig>("ApiConfig", apiConfigSchema);
+export const ApiConfig = models.ApiConfig || model<IApiConfig>("ApiConfig", apiConfigSchema);

@@ -1,4 +1,4 @@
-import { Document, Schema, model } from "mongoose";
+import { Document, Schema, model, models } from "mongoose";
 
 interface IPriceCategory {
   gm500?: number;
@@ -89,4 +89,4 @@ priceSchema.index({ createdAt: -1 });
 // priceSchema.index({ "rate.price.gm500": 1, "rate.price.kg6to10": 1 }); // Example index for specific price fields
 
 // Export Price Model
-export const Price = model<IPrice>("Price", priceSchema);
+export const Price = models.Price || model<IPrice>("Price", priceSchema);

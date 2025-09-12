@@ -1,4 +1,4 @@
-import { Document, Schema, Types, model } from "mongoose";
+import { Document, Schema, Types, model, models } from "mongoose";
 
 // Interface for API Access Log
 export interface IApiAccessLog extends Document {
@@ -44,7 +44,7 @@ apiAccessLogSchema.index({ endpoint: 1, status: 1, timestamp: -1 });
 apiAccessLogSchema.index({ success: 1, timestamp: -1 });
 
 // Export Model
-export const ApiAccessLog = model<IApiAccessLog>(
+export const ApiAccessLog = models.ApiAccessLog || model<IApiAccessLog>(
   "ApiAccessLog",
   apiAccessLogSchema
 );
