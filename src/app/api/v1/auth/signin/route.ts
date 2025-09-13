@@ -3,7 +3,7 @@ import { errorResponse, successResponse } from "@/server/common/response";
 import { LoginHistory } from "@/server/models/LoginHistory.model";
 import { User } from "@/server/models/User.model";
 import { notificationService } from "@/services/notificationService";
-import jwt, { Secret, SignOptions } from "jsonwebtoken";
+import jwt, { Secret } from "jsonwebtoken";
 import { Types } from "mongoose";
 import { NextRequest } from "next/server";
 
@@ -132,12 +132,12 @@ export async function POST(req: NextRequest) {
       timestamp: new Date(),
     });
 
-const userId = user._id as Types.ObjectId; // cast _id to ObjectId
-const token: string = jwt.sign(
-  { id: userId.toString(), role: user.role },
-  process.env.JWT_SECRET as Secret,
-  { expiresIn: 7 * 24 * 60 * 60 } // 7 days
-);
+    const userId = user._id as Types.ObjectId; // cast _id to ObjectId
+    const token: string = jwt.sign(
+      { id: userId.toString(), role: user.role },
+      process.env.JWT_SECRET as Secret,
+      { expiresIn: 7 * 24 * 60 * 60 } // 7 days
+    );
 
     // Send login notification (non-blocking)
     notificationService

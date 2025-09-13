@@ -3,7 +3,8 @@ import crypto from "crypto";
 import { models } from "mongoose";
 import { Document, Schema, model } from "mongoose";
 
-// User interface
+
+
 export interface IUser extends Document {
   name: string;
   phone: string;
