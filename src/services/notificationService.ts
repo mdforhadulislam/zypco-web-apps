@@ -2,7 +2,6 @@
 import connectDB from "@/config/db";
 import { Notification } from "@/server/models/Notification.model";
 import { User } from "@/server/models/User.model";
-import { emailService } from "./emailService";
 
 export interface NotificationData {
   userId?: string;
@@ -15,14 +14,21 @@ export interface NotificationData {
   category: "order" | "account" | "security" | "system" | "marketing";
   actionUrl?: string;
   actionText?: string;
-  
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: Record<string, any>;
   channels?: ("email" | "sms" | "push" | "inapp")[];
   expiresAt?: Date;
 }
 
-export interface BulkNotificationData extends Omit<NotificationData, 'userId' | 'phone' | 'email'> {
+export interface userQueryData{
+  isActive: boolean;
+  role?: { $in: string[] };
+  _id?: { $in: string[] };
+
+}
+
+export interface BulkNotificationData
+  extends Omit<NotificationData, "userId" | "phone" | "email"> {
   recipients: {
     userId?: string;
     phone?: string;
@@ -32,11 +38,11 @@ export interface BulkNotificationData extends Omit<NotificationData, 'userId' | 
 
 export class NotificationService {
   /**
-   * Send notification to a user
+   * Send notification to a single user
    */
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  static async sendNotification(p0?: { phone: string; email: string; name?: string; }, p1?: string, p2?: { addressId: unknown; label: string | undefined; addressLine: string; }, notificationData: NotificationData): Promise<{
+  static async sendNotification(
+    notificationData: NotificationData
+  ): Promise<{
     success: boolean;
     notificationId?: string;
     error?: string;
@@ -44,7 +50,7 @@ export class NotificationService {
     try {
       await connectDB();
 
-      // Find user if not provided with userId
+      // --- Find User ---
       let user = null;
       if (notificationData.userId) {
         user = await User.findById(notificationData.userId);
@@ -58,13 +64,10 @@ export class NotificationService {
         return { success: false, error: "User not found" };
       }
 
-      // Check user notification preferences
-      const userPrefs = user.preferences?.notifications || { email: true, sms: true };
       const channels = notificationData.channels || ["inapp", "email"];
 
-      // Create in-app notification
       const notification = new Notification({
-        user: user._id,
+        userId: user._id,
         title: notificationData.title,
         message: notificationData.message,
         type: notificationData.type,
@@ -74,66 +77,42 @@ export class NotificationService {
         actionText: notificationData.actionText,
         data: notificationData.data,
         sentAt: new Date(),
-        expiresAt: notificationData.expiresAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        expiresAt:
+          notificationData.expiresAt ||
+          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       });
 
-      await notification.save();
+      const savedNotification = await notification.save();
 
-      // Send notifications through various channels
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const deliveryPromises: Promise<any>[] = [];
 
-      // Email notification
-      if (channels.includes("email") && userPrefs.email) {
+      if (channels.includes("push")) {
         deliveryPromises.push(
-          
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-          emailService.sendNotificationEmail({
-            to: user.email,
-            subject: notificationData.title,
+          this.sendPushNotification({
+            userId: user._id.toString(),
             title: notificationData.title,
-            message: notificationData.message,
-            type: notificationData.type,
-            actionUrl: notificationData.actionUrl,
-            actionText: notificationData.actionText,
+            body: notificationData.message,
             data: notificationData.data,
           })
         );
       }
- 
 
-      // Push notification (placeholder - would integrate with FCM/APNS)
-      if (channels.includes("push")) {
-        
-        deliveryPromises.push(this.sendPushNotification({userId: user._id,title: notificationData.title,body: notificationData.message,data: notificationData.data,}));
-      }
-
-      // Wait for all deliveries (but don't fail if some fail)
-      const deliveryResults = await Promise.allSettled(deliveryPromises);
-      
-      // Log delivery results
-      const deliveryStatus = {
-        email: deliveryResults[0]?.status === "fulfilled" ? "sent" : "failed",
-        sms: deliveryResults[1]?.status === "fulfilled" ? "sent" : "failed",
-        push: deliveryResults[2]?.status === "fulfilled" ? "sent" : "failed",
-      };
-
-      // Update notification with delivery status (extend the model if needed)
-      
-      
-      return {success: true,notificationId: notification._id,};
-
+      return { success: true, notificationId: savedNotification._id.toString() };
     } catch (error) {
-      console.error("Error sending notification:", error);
+      console.log(error);
+      
+      console.log("Error sending notification");
       return { success: false, error: "Failed to send notification" };
     }
   }
 
   /**
-   * Send bulk notifications
+   * Send notifications in bulk
    */
-  static async sendBulkNotification(bulkData: BulkNotificationData): Promise<{
+  static async sendBulkNotification(
+    bulkData: BulkNotificationData
+  ): Promise<{
     success: boolean;
     sentCount: number;
     failedCount: number;
@@ -154,10 +133,8 @@ export class NotificationService {
         email: recipient.email,
       };
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
       const result = await this.sendNotification(notificationData);
-      
+
       if (result.success) {
         results.sentCount++;
       } else {
@@ -171,7 +148,7 @@ export class NotificationService {
   }
 
   /**
-   * Send order-related notifications
+   * Order notifications
    */
   static async sendOrderNotification(
     orderData: {
@@ -187,10 +164,8 @@ export class NotificationService {
   ): Promise<void> {
     const notifications = this.getOrderNotificationTemplates(orderData, event);
 
-    // Send to sender
+    // Sender
     if (orderData.senderPhone) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       await this.sendNotification({
         phone: orderData.senderPhone,
         ...notifications.sender,
@@ -198,10 +173,11 @@ export class NotificationService {
       });
     }
 
-    // Send to receiver (for certain events)
-    if (orderData.receiverPhone && ["created", "in_transit", "delivered"].includes(event)) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
+    // Receiver
+    if (
+      orderData.receiverPhone &&
+      ["created", "in_transit", "delivered"].includes(event)
+    ) {
       await this.sendNotification({
         phone: orderData.receiverPhone,
         ...notifications.receiver,
@@ -211,36 +187,33 @@ export class NotificationService {
   }
 
   /**
-   * Send authentication notifications
+   * Authentication notifications
    */
   static async sendAuthNotification(
     userData: { phone: string; email: string; name: string },
     event: "welcome" | "login_alert" | "password_changed" | "account_locked"
   ): Promise<void> {
     const template = this.getAuthNotificationTemplate(userData, event);
-    
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
+
     await this.sendNotification({
       phone: userData.phone,
+      email: userData.email,
       ...template,
-      channels: event === "welcome" ? ["email", "sms", "inapp"] : ["email", "inapp"],
+      channels:
+        event === "welcome" ? ["email", "sms", "inapp"] : ["email", "inapp"],
     });
   }
 
   /**
-   * Send system notifications
+   * System notifications
    */
   static async sendSystemNotification(
     message: string,
     type: "maintenance" | "update" | "alert",
     targetUsers?: "all" | "admin" | string[]
   ): Promise<void> {
-
-
-   
-    // eslint-disable-next-line prefer-const, @typescript-eslint/no-explicit-any
-    let userQuery: any = { isActive: true };
+    // eslint-disable-next-line prefer-const
+    let userQuery:userQueryData = { isActive: true };
 
     if (targetUsers === "admin") {
       userQuery.role = { $in: ["admin", "super_admin"] };
@@ -251,13 +224,20 @@ export class NotificationService {
     await connectDB();
     const users = await User.find(userQuery).select("_id phone email");
 
-    
-    const recipients = users.map(user => ({userId: user._id.toString(),phone: user.phone,email: user.email,}));
+    const recipients = users.map((user) => ({
+      userId: user._id.toString(),
+      phone: user.phone,
+      email: user.email,
+    }));
 
     await this.sendBulkNotification({
       recipients,
-      title: type === "maintenance" ? "System Maintenance" : 
-             type === "update" ? "System Update" : "System Alert",
+      title:
+        type === "maintenance"
+          ? "System Maintenance"
+          : type === "update"
+          ? "System Update"
+          : "System Alert",
       message,
       type: type === "alert" ? "warning" : "info",
       category: "system",
@@ -266,7 +246,7 @@ export class NotificationService {
   }
 
   /**
-   * Push notification placeholder (integrate with FCM/APNS)
+   * Push notification (placeholder)
    */
   private static async sendPushNotification(data: {
     userId: string;
@@ -277,16 +257,7 @@ export class NotificationService {
     data?: Record<string, any>;
   }): Promise<boolean> {
     try {
-      // Placeholder for push notification service
-      // In production, integrate with Firebase Cloud Messaging (FCM) or Apple Push Notification Service (APNS)
-      
-      console.log("Push notification would be sent:", {
-        userId: data.userId,
-        title: data.title,
-        body: data.body,
-        data: data.data,
-      });
-
+      console.log("Push notification would be sent:", data);
       return true;
     } catch (error) {
       console.error("Push notification error:", error);
@@ -295,15 +266,16 @@ export class NotificationService {
   }
 
   /**
-   * Get order notification templates
+   * Order templates
    */
+  
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private static getOrderNotificationTemplates(orderData: any, event: string) {
     const templates = {
       created: {
         sender: {
           title: "Order Confirmed",
-          message: `Your order ${orderData.trackId} has been confirmed and will be picked up soon. Track your shipment for updates.`,
+          message: `Your order ${orderData.trackId} has been confirmed and will be picked up soon.`,
           type: "success" as const,
           category: "order" as const,
           actionUrl: `/orders/${orderData.orderId}`,
@@ -312,16 +284,16 @@ export class NotificationService {
         },
         receiver: {
           title: "Package Coming Your Way",
-          message: `A package with tracking ID ${orderData.trackId} is being sent to you. You'll receive updates on its progress.`,
+          message: `A package with tracking ID ${orderData.trackId} is on its way to you.`,
           type: "info" as const,
           category: "order" as const,
           data: orderData,
-        }
+        },
       },
       picked_up: {
         sender: {
           title: "Package Picked Up",
-          message: `Your package ${orderData.trackId} has been picked up and is now in transit. Track for real-time updates.`,
+          message: `Your package ${orderData.trackId} has been picked up.`,
           type: "success" as const,
           category: "order" as const,
           actionUrl: `/track/${orderData.trackId}`,
@@ -330,32 +302,32 @@ export class NotificationService {
         },
         receiver: {
           title: "Package in Transit",
-          message: `Your incoming package ${orderData.trackId} is now in transit and on its way to you.`,
+          message: `Your incoming package ${orderData.trackId} is in transit.`,
           type: "info" as const,
           category: "order" as const,
           data: orderData,
-        }
+        },
       },
       in_transit: {
         sender: {
           title: "Package Update",
-          message: `Your package ${orderData.trackId} is in transit and making good progress to its destination.`,
+          message: `Your package ${orderData.trackId} is in transit.`,
           type: "info" as const,
           category: "order" as const,
           data: orderData,
         },
         receiver: {
           title: "Package Update",
-          message: `Your package ${orderData.trackId} is in transit and will be delivered soon.`,
+          message: `Your package ${orderData.trackId} is on the way.`,
           type: "info" as const,
           category: "order" as const,
           data: orderData,
-        }
+        },
       },
       delivered: {
         sender: {
           title: "Package Delivered",
-          message: `Great news! Your package ${orderData.trackId} has been successfully delivered. Thank you for choosing Zypco!`,
+          message: `Your package ${orderData.trackId} has been delivered.`,
           type: "success" as const,
           category: "order" as const,
           actionUrl: `/orders/${orderData.orderId}`,
@@ -364,16 +336,16 @@ export class NotificationService {
         },
         receiver: {
           title: "Package Delivered",
-          message: `Your package ${orderData.trackId} has been delivered. We hope you're happy with your shipment!`,
+          message: `Your package ${orderData.trackId} has been delivered.`,
           type: "success" as const,
           category: "order" as const,
           data: orderData,
-        }
+        },
       },
       cancelled: {
         sender: {
           title: "Order Cancelled",
-          message: `Your order ${orderData.trackId} has been cancelled. If you didn't request this, please contact support.`,
+          message: `Your order ${orderData.trackId} has been cancelled.`,
           type: "warning" as const,
           category: "order" as const,
           actionUrl: `/support`,
@@ -382,26 +354,27 @@ export class NotificationService {
         },
         receiver: {
           title: "Order Cancelled",
-          message: `The package ${orderData.trackId} that was being sent to you has been cancelled.`,
+          message: `The package ${orderData.trackId} has been cancelled.`,
           type: "info" as const,
           category: "order" as const,
           data: orderData,
-        }
-      }
+        },
+      },
     };
 
     return templates[event as keyof typeof templates];
   }
 
   /**
-   * Get authentication notification templates
+   * Auth templates
    */
+  
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private static getAuthNotificationTemplate(userData: any, event: string) {
     const templates = {
       welcome: {
         title: "Welcome to Zypco!",
-        message: `Hi ${userData.name}! Welcome to Zypco International Courier. Your account is ready, and you can now ship packages worldwide with confidence.`,
+        message: `Hi ${userData.name}! Welcome to Zypco International Courier.`,
         type: "success" as const,
         category: "account" as const,
         actionUrl: "/dashboard",
@@ -410,7 +383,7 @@ export class NotificationService {
       },
       login_alert: {
         title: "New Login Detected",
-        message: `Hi ${userData.name}, we detected a new login to your account. If this wasn't you, please secure your account immediately.`,
+        message: `Hi ${userData.name}, a new login was detected.`,
         type: "warning" as const,
         category: "security" as const,
         priority: "high" as const,
@@ -420,7 +393,7 @@ export class NotificationService {
       },
       password_changed: {
         title: "Password Changed",
-        message: `Hi ${userData.name}, your password has been successfully changed. If you didn't make this change, please contact support immediately.`,
+        message: `Hi ${userData.name}, your password has been updated.`,
         type: "info" as const,
         category: "security" as const,
         priority: "high" as const,
@@ -430,14 +403,14 @@ export class NotificationService {
       },
       account_locked: {
         title: "Account Locked",
-        message: `Hi ${userData.name}, your account has been temporarily locked due to multiple failed login attempts. Please reset your password to regain access.`,
+        message: `Hi ${userData.name}, your account has been locked.`,
         type: "error" as const,
         category: "security" as const,
         priority: "urgent" as const,
         actionUrl: "/auth/reset-password",
         actionText: "Reset Password",
         data: { timestamp: new Date() },
-      }
+      },
     };
 
     return templates[event as keyof typeof templates];

@@ -16,9 +16,10 @@ export async function GET(
     const { phone } = await params;
 
     const user = await User.findOne({ phone });
+    
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
 
-    const notifications = await Notification.find({ user: user._id }).sort({ createdAt: -1 });
+    const notifications = await Notification.find({ userId: user._id }).sort({ createdAt: -1 });
 
     return successResponse({
       status: 200,

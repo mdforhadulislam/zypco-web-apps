@@ -1,37 +1,46 @@
-import { Document, Schema, Types, model, models } from "mongoose";
+import { Schema, model, models, Document } from "mongoose";
 
-// Notification Interface
 export interface INotification extends Document {
-  user: Types.ObjectId; // User reference
-  title: string; // Notification title
-  message: string; // Notification message/body
-  type: string; // e.g., "info", "success", "warning", "error", "promo"
-  read: boolean; // Has the user read it
-  sentAt: Date; // When notification was created
+  userId: Schema.Types.ObjectId;
+  title: string;
+  message: string;
+  type: "success" | "error" | "info" | "warning";
+  category: "account" | "order" | "payment" | "system" | "security";
+  channels: ("email" | "sms" | "inapp")[];
+  isRead: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// Notification Schema
 const notificationSchema = new Schema<INotification>(
   {
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    title: { type: String, required: true, default: "" },
-    message: { type: String, required: true, default: "" },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    title: { type: String, required: true },
+    message: { type: String, required: true },
     type: {
       type: String,
-      enum: ["info", "success", "warning", "error", "promo"],
+      enum: ["success", "error", "info", "warning"],
       default: "info",
     },
-    read: { type: Boolean, default: false },
-    sentAt: { type: Date, default: Date.now },
+    category: {
+      type: String,
+      enum: ["account", "order", "payment", "system", "security"],
+      default: "system",
+    },
+    channels: {
+      type: [String],
+      enum: ["email", "sms", "inapp"],
+      default: ["inapp"],
+    },
+    isRead: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
+
 // Indexes for faster queries
-notificationSchema.index({ user: 1, read: 1 });
-notificationSchema.index({ sentAt: -1 });
+notificationSchema.index({ userId: 1, isRead: 1 });
+notificationSchema.index({ createdAt: -1 });
 
 // Export Notification Model
 export const Notification = models.Notification || model<INotification>(
