@@ -88,22 +88,16 @@ export async function POST(
 
     // Send notification
     await notificationService
-      .sendNotification(
-        { phone: user.phone, email: user.email },
-        "address_added",
-        {
-          addressId: newAddress._id,
-          label: newAddress.label,
-          addressLine: newAddress.addressLine,
-        },
-        {
-          title: "Address Added",
-          message: `New address "${newAddress.label}" has been added successfully.`,
-          type: "success",
-          category: "account",
-          channels: ["email", "inapp"],
-        }
-      )
+      .sendNotification({
+        userId: newAddress.user,
+        phone: user.phone,
+        email: user.email,
+        title: "Address Added",
+        message: `New address "${newAddress.label}" has been added successfully.`,
+        type: "success",
+        category: "account",
+        channels: ["email", "inapp"],
+      })
       .catch((err) => console.error("Address notification failed:", err));
 
     return successResponse({
@@ -139,9 +133,9 @@ export async function PUT(
         message: "Address ID required",
         req,
       });
-      
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     const updateData: Partial<IAddress> & {
       country?: Types.ObjectId;
       location?: { type: "Point"; coordinates: [number, number] };
@@ -164,22 +158,16 @@ export async function PUT(
 
     // Send notification
     await notificationService
-      .sendNotification(
-        { phone: user.phone, email: user.email },
-        "address_updated",
-        {
-          addressId: updatedAddress._id,
-          label: updatedAddress.label,
-          addressLine: updatedAddress.addressLine,
-        },
-        {
-          title: "Address Updated",
-          message: `Address "${updatedAddress.label}" has been updated successfully.`,
-          type: "info",
-          category: "account",
-          channels: ["email", "inapp"],
-        }
-      )
+      .sendNotification({
+        userId: updatedAddress.user,
+        phone: user.phone,
+        email: user.email,
+        title: "Address Updated",
+        message: `Address "${updatedAddress.label}" has been updated successfully.`,
+        type: "info",
+        category: "account",
+        channels: ["email", "inapp"],
+      })
       .catch((err) =>
         console.error("Address update notification failed:", err)
       );
@@ -229,22 +217,16 @@ export async function DELETE(
 
     // Send notification
     await notificationService
-      .sendNotification(
-        { phone: user.phone, email: user.email },
-        "address_deleted",
-        {
-          addressId: deletedAddress._id,
-          label: deletedAddress.label,
-          addressLine: deletedAddress.addressLine,
-        },
-        {
-          title: "Address Deleted",
-          message: `Address "${deletedAddress.label}" has been deleted successfully.`,
-          type: "warning",
-          category: "account",
-          channels: ["email", "inapp"],
-        }
-      )
+      .sendNotification({
+        userId: user._id,
+        phone: user.phone,
+        email: user.email,
+        title: "Address Deleted",
+        message: `Address "${deletedAddress.label}" has been deleted successfully.`,
+        type: "warning",
+        category: "account",
+        channels: ["email", "inapp"],
+      })
       .catch((err) =>
         console.error("Address delete notification failed:", err)
       );
