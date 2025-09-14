@@ -42,7 +42,6 @@ async function sendAddressNotification(user: any, event: string, addressData: an
 
     
     
-  // @ts-expect-error  @typescript-eslint/no-explicit-any
     await notificationService.sendNotification(notificationPayload).catch((e) => {
       // already handled below, but ensure thrown errors don't bubble to user
       console.error("notificationService.sendNotification error:", e);

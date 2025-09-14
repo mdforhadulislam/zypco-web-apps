@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     default: "Zypco – International Courier Solutations",
     template: "%s | Zypco",
   },
-  description:`Zypco is more than just a courier service — we are your trusted partner for international delivery solutions. Our vision is simple: to make global shipping easier, faster, and more affordable for everyone.
+  description: `Zypco is more than just a courier service — we are your trusted partner for international delivery solutions. Our vision is simple: to make global shipping easier, faster, and more affordable for everyone.
 Through our strong network and agency partnerships with leading international couriers like DHL, FedEx, Aramex, UPS, as well as selected local courier companies, Zypco ensures that our customers enjoy premium delivery services at competitive, discounted rates. This unique model allows us to save you money while keeping your parcels safe and on time.
 
 We also provide assistance with GPO (General Post Office) services, giving you even more flexibility and convenience for your shipments.
@@ -42,7 +42,7 @@ To become a leading international courier company, connecting Bangladesh seamles
     "DHL Express",
     "FEDEX Express",
     "ARAMEX Express",
-    "UPS Express"
+    "UPS Express",
   ],
   authors: [{ name: "Forhadul Islam", url: "/" }],
   creator: "Zypco Team",
@@ -63,7 +63,7 @@ To become a leading international courier company, connecting Bangladesh seamles
   },
   openGraph: {
     title: "Zypco – International Courier Solutations",
-    description:`Zypco is more than just a courier service — we are your trusted partner for international delivery solutions. Our vision is simple: to make global shipping easier, faster, and more affordable for everyone.
+    description: `Zypco is more than just a courier service — we are your trusted partner for international delivery solutions. Our vision is simple: to make global shipping easier, faster, and more affordable for everyone.
 Through our strong network and agency partnerships with leading international couriers like DHL, FedEx, Aramex, UPS, as well as selected local courier companies, Zypco ensures that our customers enjoy premium delivery services at competitive, discounted rates. This unique model allows us to save you money while keeping your parcels safe and on time.
 
 We also provide assistance with GPO (General Post Office) services, giving you even more flexibility and convenience for your shipments.
@@ -104,7 +104,7 @@ To become a leading international courier company, connecting Bangladesh seamles
     site: "@zypco",
     creator: "@zypco",
     title: "Zypco – International Courier Solutations",
-    description:`Zypco is more than just a courier service — we are your trusted partner for international delivery solutions. Our vision is simple: to make global shipping easier, faster, and more affordable for everyone.
+    description: `Zypco is more than just a courier service — we are your trusted partner for international delivery solutions. Our vision is simple: to make global shipping easier, faster, and more affordable for everyone.
 Through our strong network and agency partnerships with leading international couriers like DHL, FedEx, Aramex, UPS, as well as selected local courier companies, Zypco ensures that our customers enjoy premium delivery services at competitive, discounted rates. This unique model allows us to save you money while keeping your parcels safe and on time.
 
 We also provide assistance with GPO (General Post Office) services, giving you even more flexibility and convenience for your shipments.
@@ -154,9 +154,8 @@ export default function RootLayout({
       <body>
         <NavBar />
         <div className="w-full h-[85px]"></div>
-      {children}
-      <FooterBar />
-
+        {children}
+        <FooterBar />
       </body>
     </html>
   );

@@ -24,7 +24,7 @@ const Logo: React.FC<LogoProps> = ({isFooter = false, width, height}) => {
         alt="Zypco Logo"
         width={140}
         height={80}
-        className="object-contain w-[120px] h-[70px]"
+        className={`object-contain w-[${width ? width :"120"}px] h-[${height ? height :"70"}px]`}
         priority 
     />}
         

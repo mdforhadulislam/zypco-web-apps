@@ -1,7 +1,113 @@
-import React from "react";
+"use client"
+import { postRequestSend } from "@/components/ApiCall/methord";
+import { SIGNIN_API } from "@/components/ApiCall/url";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Logo from "@/utilities/Logo";
+import Link from "next/link";
+import { useState } from "react";
 
 const ZypcoLogin = () => {
-  return <> ZypcoLogin </>;
+ const [userCredential, setUserCredential] = useState({
+  phone:"",
+  password:""
+ })
+
+
+ const onChangeHandler = (e: { target: { name: string; value: string; }; })=>{
+  console.log(e);
+  setUserCredential({
+    ...userCredential,
+    [e.target.name]: e.target.value,
+  });
+ }
+ 
+ 
+
+  return (
+    <>
+      <section className="w-full h-auto">
+        <div className="container m-auto flex justify-center align-middle items-center">
+          <div className="w-100 h-auto py-20 px-2 pt-10">
+            <form>
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col items-center gap-2">
+                  <a
+                    href="#"
+                    className="flex flex-col items-center gap-2 font-medium"
+                  >
+                    <div className="flex size-50 items-center justify-center rounded-md">
+                      <Logo width={200} height={80} />
+                    </div>
+                    <span className="sr-only">Zypco</span>
+                  </a>
+                  <h1 className="text-xl font-bold">Welcome to Zypco</h1>
+                  <div className="text-center text-sm">
+                    Don&apos;t have an account?{" "}
+                    <Link
+                      href="/auth/register"
+                      className="underline underline-offset-4"
+                    >
+                      Sign up
+                    </Link>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-5">
+                  <div className="grid gap-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      type="phone"
+                      
+                      name="phone"
+                      placeholder="+8801XXXXXXXXXX"
+                      required
+                      value={userCredential.phone}
+                      onChange={onChangeHandler}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="*******"
+                      
+                      name="password"
+                      required
+                      value={userCredential.password}
+                      onChange={onChangeHandler}
+                    />
+                  </div>
+                  <Button type="button" className="w-full cursor-pointer" onClick={()=>{
+                    postRequestSend(SIGNIN_API,{},userCredential).then(res=>{
+                      if(res.status==200){
+                        console.log(res);
+                        
+                      }
+                    })
+                  }}>
+                    Login
+                  </Button>
+                </div>
+                <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+                  <span className="bg-background text-muted-foreground relative z-10 px-2">
+                    Or
+                  </span>
+                </div>
+              </div>
+            </form>
+            <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+              By clicking continue, you agree to our{" "}
+              <a href="#">Terms of Service</a> and{" "}
+              <a href="#">Privacy Policy</a>.
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
 };
 
 export default ZypcoLogin;
