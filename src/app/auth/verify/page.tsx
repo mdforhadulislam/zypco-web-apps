@@ -20,10 +20,11 @@ const Verify = () => {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState(["", "", "", "", "", ""]); // 6 slots
 
-  // URL থেকে email এবং code নিয়ে আসা
-  useEffect(() => {
     const queryEmail = searchParams.get("email") || "";
     const queryCode = searchParams.get("code") || "";
+    
+  // URL থেকে email এবং code নিয়ে আসা
+  useEffect(() => {
     setEmail(queryEmail);
 
     if (queryCode.length === 6) {
