@@ -163,7 +163,7 @@ const NavData = [
 const NavBar = () => {
   const [navBarScrolled, setNavBarScrolled] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
-
+ 
   const handleScroll = () => {
     const offset = window.scrollY;
 
@@ -343,9 +343,9 @@ const NavBar = () => {
               </Link>
             </li>
           </ul>
-          <Button className="bg-2 font-semibold  text-[#241F21] bg-[#FEF400]  hover:bg-[#FEF400]/90 px-6 py-6 rounded-4xl">
+          <Link href={"/auth/login"} className="bg-2 font-semibold  text-[#241F21] bg-[#FEF400]  hover:bg-[#FEF400]/90 px-6 py-3 rounded-4xl" >
             Login
-          </Button>
+          </Link>
 
           {/* Mobile Menu */}
           <div className="block lg:hidden">
@@ -381,12 +381,12 @@ const NavBar = () => {
                   </div>
 
                   <div className="w-full h-auto flex gap-3 justify-center align-middle items-center">
-                    <Button className="px-3 py-6 w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 cursor-pointer font-bold">
+                    <Link href={"/auth/login"} className="px-3 py-4 flex justify-center align-middle items-center w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 cursor-pointer font-bold text-white rounded-lg">
                       Login
-                    </Button>
-                    <Button className="px-3 py-6 w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 cursor-pointer font-bold">
+                    </Link>
+                    <Link href={"/auth/register"} className="px-3 py-4 text-white w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 rounded-lg cursor-pointer font-bold flex justify-center align-middle items-center">
                       SingUp
-                    </Button>
+                    </Link>
                   </div>
                 </SheetContent>
               </Sheet>

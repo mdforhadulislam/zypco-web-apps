@@ -146,7 +146,7 @@ export class EmailService {
    * Send verification email
    */
   async sendVerificationEmail(userData: { email: string; name: string; code: string }): Promise<boolean> {
-    const verificationUrl = `${process.env.PUBLIC_APP_URL}/auth/verify?code=${userData.code}`;
+    const verificationUrl = `${process.env.PUBLIC_APP_URL}/auth/verify?email=${userData.email}&code=${userData.code}`;
     return this.sendTransactionalEmail({
       to: userData.email,
       subject: "Verify Your Zypco Account",

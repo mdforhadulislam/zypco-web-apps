@@ -47,7 +47,7 @@ const userSchema = new Schema<IUser>(
     },
     isActive: { type: Boolean, default: true },
     isVerified: { type: Boolean, default: false },
-    avatar: { type: String },
+    avatar: { type: String, default:"" },
     preferences: {
       notifications: {
         email: { type: Boolean, default: true },
@@ -55,8 +55,8 @@ const userSchema = new Schema<IUser>(
       },
     },
     nid: {
-      front: { type: String },
-      back: { type: String },
+      front: { type: String, default:"" },
+      back: { type: String, default:"" },
     },
     emailVerification: {
       code: { type: String, default: null },
