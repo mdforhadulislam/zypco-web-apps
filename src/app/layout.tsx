@@ -1,8 +1,6 @@
-import FooterBar from "@/components/Footer/FooterBar";
-import NavBar from "@/components/Nav/NavBar";
-import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/AuthContext";
 import { PermissionProvider } from "@/hooks/PermissionContext";
+import SiteLayout from "@/utilities/SiteLayout";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -157,11 +155,7 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <PermissionProvider>
-            <NavBar />
-            <div className="w-full h-[85px]"></div>
-            {children}
-            <FooterBar />
-            <Toaster expand={false} position="top-center" />
+            <SiteLayout>{children}</SiteLayout>
           </PermissionProvider>
         </AuthProvider>
       </body>
