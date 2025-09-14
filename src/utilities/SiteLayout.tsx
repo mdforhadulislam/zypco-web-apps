@@ -1,8 +1,9 @@
 "use client";
 import FooterBar from "@/components/Footer/FooterBar";
 import NavBar from "@/components/Nav/NavBar";
+import SaidBar from "@/components/Nav/SaidBar";
 import { useAuth } from "@/hooks/AuthContext";
-import { usePathname, useRouter } from "next/navigation"; 
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { Toaster } from "sonner";
 
@@ -12,21 +13,24 @@ export default function SiteLayout({
   children: React.ReactNode;
 }>) {
   const pathName = usePathname().split("/")[1];
-  const router =useRouter()
-  const auth = useAuth()
+  const router = useRouter();
+  const auth = useAuth();
 
-  if(pathName== "auth" && auth.user?.token){
-    router.push("/dashboard")
+  if (pathName == "auth" && auth.user?.token) {
+    router.push("/dashboard");
   }
 
-  if (pathName == "dashboard") {
+  if (pathName == "dashboard" && auth.user?.token) {
     return (
-      <> 
-        {children} 
+      <>
+        <SaidBar />
+        {children}
         <Toaster expand={false} position="top-center" />
       </>
     );
   }
+
+  
 
   return (
     <>
