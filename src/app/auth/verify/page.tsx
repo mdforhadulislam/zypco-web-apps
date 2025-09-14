@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,16 +15,19 @@ const VERIFY_API = "/api/v1/auth/email-verify";
 
 const Verify = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const pathname = usePathname(); // current URL path
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState(["", "", "", "", "", ""]); // 6 slots
 
-    const queryEmail = searchParams.get("email") || "";
-    const queryCode = searchParams.get("code") || "";
-    
   // URL থেকে email এবং code নিয়ে আসা
   useEffect(() => {
+    // window.location.search থেকে query params বের করা
+    const search = typeof window !== "undefined" ? window.location.search : "";
+    const params = new URLSearchParams(search);
+    const queryEmail = params.get("email") || "";
+    const queryCode = params.get("code") || "";
+
     setEmail(queryEmail);
 
     if (queryCode.length === 6) {
@@ -34,7 +37,7 @@ const Verify = () => {
       // Auto-submit যদি 6-digit code থাকে
       handleVerifyAuto(queryEmail, queryCode);
     }
-  }, [ searchParams]);
+  }, [pathname]); // pathname change হলে আবার check করবে
 
   const handleVerifyAuto = async (email: string, codeStr: string) => {
     setLoading(true);
