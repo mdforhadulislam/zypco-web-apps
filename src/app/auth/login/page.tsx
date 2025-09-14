@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { postRequestSend } from "@/components/ApiCall/methord";
 import { SIGNIN_API } from "@/components/ApiCall/url";
 import { Button } from "@/components/ui/button";
@@ -9,21 +9,18 @@ import Link from "next/link";
 import { useState } from "react";
 
 const ZypcoLogin = () => {
- const [userCredential, setUserCredential] = useState({
-  phone:"",
-  password:""
- })
-
-
- const onChangeHandler = (e: { target: { name: string; value: string; }; })=>{
-  console.log(e);
-  setUserCredential({
-    ...userCredential,
-    [e.target.name]: e.target.value,
+  const [userCredential, setUserCredential] = useState({
+    phone: "",
+    password: "",
   });
- }
- 
- 
+
+  const onChangeHandler = (e: { target: { name: string; value: string } }) => {
+    console.log(e);
+    setUserCredential({
+      ...userCredential,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   return (
     <>
@@ -59,7 +56,6 @@ const ZypcoLogin = () => {
                     <Input
                       id="phone"
                       type="phone"
-                      
                       name="phone"
                       placeholder="+8801XXXXXXXXXX"
                       required
@@ -73,21 +69,25 @@ const ZypcoLogin = () => {
                       id="password"
                       type="password"
                       placeholder="*******"
-                      
                       name="password"
                       required
                       value={userCredential.password}
                       onChange={onChangeHandler}
                     />
                   </div>
-                  <Button type="button" className="w-full cursor-pointer" onClick={()=>{
-                    postRequestSend(SIGNIN_API,{},userCredential).then(res=>{
-                      if(res.status==200){
-                        console.log(res);
-                        
-                      }
-                    })
-                  }}>
+                  <Button
+                    type="button"
+                    className="w-full cursor-pointer"
+                    onClick={() => {
+                      postRequestSend(SIGNIN_API, {}, userCredential).then(
+                        (res) => {
+                          if (res.status == 200) {
+                            console.log(res);
+                          }
+                        }
+                      );
+                    }}
+                  >
                     Login
                   </Button>
                 </div>
