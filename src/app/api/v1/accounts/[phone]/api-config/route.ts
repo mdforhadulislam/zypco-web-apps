@@ -81,10 +81,7 @@ export async function POST(
     // Send notification
     await notificationService
       .sendNotification(
-        { phone: user.phone, email: user.email, name: user.name },
-        "API Key Created",
-        { addressId: newConfig._id, label: newConfig.name, addressLine: "" },
-        {
+        { userId:user._id, phone: user.phone, email: user.email ,
           title: "New API Key Created",
           message: `Your new API key "${newConfig.name}" has been created successfully.`,
           type: "success",
@@ -155,14 +152,7 @@ export async function PUT(
     // Send notification
     await notificationService
       .sendNotification(
-        { phone: user.phone, email: user.email, name: user.name },
-        "API Key Updated",
-        {
-          addressId: updatedConfig._id,
-          label: updatedConfig.name,
-          addressLine: "",
-        },
-        {
+        { userId:user._id, phone: user.phone, email: user.email ,
           title: "API Key Updated",
           message: `Your API key "${updatedConfig.name}" has been updated successfully.`,
           type: "info",
@@ -221,14 +211,7 @@ export async function DELETE(
     // Send notification
     await notificationService
       .sendNotification(
-        { phone: user.phone, email: user.email, name: user.name },
-        "API Key Deleted",
-        {
-          addressId: deletedConfig._id,
-          label: deletedConfig.name,
-          addressLine: "",
-        },
-        {
+        { userId:user._id, phone: user.phone, email: user.email ,
           title: "API Key Deleted",
           message: `Your API key "${deletedConfig.name}" has been deleted successfully.`,
           type: "warning",

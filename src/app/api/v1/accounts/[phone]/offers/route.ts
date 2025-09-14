@@ -51,10 +51,7 @@ export async function POST(
 
     // Send notification
     await notificationService.sendNotification(
-      { phone: user.phone, email: user.email, name: user.name },
-      "offer_notification",
-      { addressId: null, label: undefined, addressLine: "N/A" },
-      {
+      { userId:user._id, phone: user.phone, email: user.email ,
         title: "New Offer Added",
         message: `A new offer "${newOffer.name}" has been created successfully.`,
         type: "success",
@@ -96,10 +93,7 @@ export async function PUT(
 
     // Send notification
     await notificationService.sendNotification(
-      { phone: user.phone, email: user.email, name: user.name },
-      "offer_notification",
-      { addressId: null, label: undefined, addressLine: "N/A" },
-      {
+      { userId:user._id, phone: user.phone, email: user.email ,
         title: "Offer Updated",
         message: `The offer "${updatedOffer.name}" has been updated successfully.`,
         type: "info",
@@ -139,10 +133,7 @@ export async function DELETE(
 
     // Send notification
     await notificationService.sendNotification(
-      { phone: user.phone, email: user.email, name: user.name },
-      "offer_notification",
-      { addressId: null, label: undefined, addressLine: "N/A" },
-      {
+      { userId:user._id, phone: user.phone, email: user.email ,
         title: "Offer Deleted",
         message: `The offer "${deletedOffer.name}" has been deleted.`,
         type: "warning",

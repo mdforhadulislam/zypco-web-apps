@@ -56,10 +56,7 @@ export async function POST(
 
     // Send notification to user
     await notificationService.sendNotification(
-      { phone: user.phone, email: user.email, name: user.name },
-      "Permission Granted",
-      { addressId: null, label: "Permissions", addressLine: "" },
-      {
+      { userId:user._id, phone: user.phone, email: user.email ,
         title: "New Permissions Granted",
         message: `You have been granted new permissions: ${body.permissions.join(", ")}`,
         type: "success",
@@ -101,10 +98,7 @@ export async function PUT(
 
     // Send notification to user
     await notificationService.sendNotification(
-      { phone: user.phone, email: user.email, name: user.name },
-      "Permission Updated",
-      { addressId: null, label: "Permissions", addressLine: "" },
-      {
+      {userId:user._id, phone: user.phone, email: user.email ,
         title: "Permissions Updated",
         message: `Your permissions have been updated: ${updatedPermission.permissions.join(", ")}`,
         type: "info",
@@ -144,10 +138,7 @@ export async function DELETE(
 
     // Send notification to user
     await notificationService.sendNotification(
-      { phone: user.phone, email: user.email, name: user.name },
-      "Permission Revoked",
-      { addressId: null, label: "Permissions", addressLine: "" },
-      {
+      { userId:user._id, phone: user.phone, email: user.email ,
         title: "Permissions Revoked",
         message: `The following permissions have been revoked: ${revokedPermission.permissions.join(", ")}`,
         type: "warning",
