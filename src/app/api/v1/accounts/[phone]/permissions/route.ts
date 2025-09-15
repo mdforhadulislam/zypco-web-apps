@@ -18,7 +18,7 @@ export async function GET(
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
 
-    const permissions = await Permission.find({ user: user._id, isActive: true }).sort({ grantedAt: -1 });
+    const permissions = await Permission.findOne({ user: user._id, isActive: true }).sort({ grantedAt: -1 });
     return successResponse({ status: 200, message: "Permissions fetched", data: permissions, req });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Failed to fetch permissions";

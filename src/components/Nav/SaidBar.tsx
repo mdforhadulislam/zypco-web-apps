@@ -1,15 +1,17 @@
 import { usePermission } from "@/hooks/PermissionContext";
 
 const Sidebar = () => {
-  const { hasPermission } = usePermission();
+  const { hasPermission,permissions } = usePermission();
 
+  console.log(permissions);
+  
   return (
     <aside>
       <ul>
-        {hasPermission("dashboard_view") && <li>Dashboard</li>}
-        {hasPermission("orders_view") && <li>Orders</li>}
-        {hasPermission("orders_manage") && <li>Manage Orders</li>}
-        {hasPermission("users_manage") && <li>User Management</li>}
+        {hasPermission("dashboard") && <li>Dashboard</li>}
+        {hasPermission("order") && <li>Orders</li>}
+        {hasPermission("pickup") && <li>Manage Orders</li>}
+        {hasPermission("setting") && <li>User Management</li>}
       </ul>
     </aside>
   );

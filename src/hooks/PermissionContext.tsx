@@ -25,6 +25,9 @@ export const PermissionProvider = ({ children }: { children: React.ReactNode }) 
       const res = await fetch(SINGLE_ACCOUNT_PERMISSION_API(user.phone));
       const data = await res.json();
 
+      console.log(data);
+      
+
       if (res.ok && data?.data) {
         setPermissions(data.data.permissions || []);
       } else {

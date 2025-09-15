@@ -42,7 +42,8 @@ export async function POST(req: NextRequest) {
     const savedUser = await newUser.save();
 
     const setPermission = new Permission({
-      user:savedUser._id
+      user:savedUser._id,
+      permissions:["dashboard", "pickup", "order", "setting"]
     })
 
     await setPermission.save()
