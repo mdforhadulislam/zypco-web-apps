@@ -1,8 +1,9 @@
-import { NextRequest } from "next/server";
-import { successResponse, errorResponse } from "@/server/common/response";
 import connectDB from "@/config/db";
+import { errorResponse, successResponse } from "@/server/common/response";
+import { Permission } from "@/server/models/Permission.model";
 import { User } from "@/server/models/User.model";
 import { emailService } from "@/services/emailService";
+import { NextRequest } from "next/server";
 
 /**
  * POST /api/v1/auth/signup
@@ -39,6 +40,12 @@ export async function POST(req: NextRequest) {
     // Generate verification code
     const code = newUser.generateVerificationCode();
     await newUser.save();
+
+    const setPermission = new Permission({
+      user:newUser._id
+    })
+
+    await setPermission.save()
 
     // Send verification email
     const emailSent = await emailService.sendVerificationEmail({

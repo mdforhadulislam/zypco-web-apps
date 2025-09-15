@@ -25,7 +25,9 @@ const permissionSchema = new Schema<IPermission>(
       {
         type: String,
         required: true,
+        default:["dashboard", "pickup","order","setting"]
       },
+      
     ],
     description: {
       type: String,
@@ -35,6 +37,7 @@ const permissionSchema = new Schema<IPermission>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      default:""
     },
     grantedAt: {
       type: Date,
