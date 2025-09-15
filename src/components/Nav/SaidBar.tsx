@@ -1,9 +1,18 @@
-import React from 'react'
+import { usePermission } from "@/hooks/PermissionContext";
 
-const SaidBar = () => {
+const Sidebar = () => {
+  const { hasPermission } = usePermission();
+
   return (
-    <div>SaidBar</div>
-  )
-}
+    <aside>
+      <ul>
+        {hasPermission("dashboard_view") && <li>Dashboard</li>}
+        {hasPermission("orders_view") && <li>Orders</li>}
+        {hasPermission("orders_manage") && <li>Manage Orders</li>}
+        {hasPermission("users_manage") && <li>User Management</li>}
+      </ul>
+    </aside>
+  );
+};
 
-export default SaidBar
+export default Sidebar;

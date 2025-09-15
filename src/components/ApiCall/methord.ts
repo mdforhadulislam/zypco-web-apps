@@ -40,6 +40,7 @@ export const postRequestSend = async <Req, Res>(
       body: JSON.stringify(dataSend),
     });
     const data = await response.json();
+    
     return data;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error";

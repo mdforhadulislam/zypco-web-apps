@@ -6,7 +6,7 @@ export interface IPermission extends Document {
   user: Types.ObjectId; // Reference to User
   permissions: string[]; // Array of permissions (e.g., ['read:users', 'write:products'])
   description?: string; // Optional description for clarity
-  grantedBy: Types.ObjectId; // Admin who granted the permissions
+  grantedBy: string; // Admin who granted the permissions
   grantedAt: Date;
   revokedAt?: Date; // If permissions are revoked
   isActive: boolean;
@@ -24,7 +24,7 @@ const permissionSchema = new Schema<IPermission>(
     permissions: [
       {
         type: String,
-        required: true,
+        required: false,
         default:["dashboard", "pickup","order","setting"]
       },
       
@@ -34,9 +34,8 @@ const permissionSchema = new Schema<IPermission>(
       default: "",
     },
     grantedBy: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type:String, 
+      required: false,
       default:""
     },
     grantedAt: {

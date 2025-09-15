@@ -1,24 +1,15 @@
 "use client";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
+import { SINGLE_ACCOUNT_PERMISSION_API } from "@/components/ApiCall/url";
 
-type PermissionType = {
-  _id: string;
-  permissions: string[];
-  description?: string;
-  isActive: boolean;
-  grantedBy: string;
-  grantedAt?: string;
-  revokedAt?: string;
-};
+type PermissionType = string; // শুধু string-based permission রাখব
 
 type PermissionContextType = {
   permissions: PermissionType[];
   fetchPermissions: () => Promise<void>;
-  grantPermission: (body: { permissions: string[]; grantedBy: string; description?: string }) => Promise<void>;
-  updatePermission: (id: string, body: Partial<PermissionType>) => Promise<void>;
-  revokePermission: (id: string) => Promise<void>;
+  hasPermission: (perm: string | string[]) => boolean;
 };
 
 const PermissionContext = createContext<PermissionContextType | undefined>(undefined);
@@ -27,57 +18,47 @@ export const PermissionProvider = ({ children }: { children: React.ReactNode }) 
   const { user } = useAuth();
   const [permissions, setPermissions] = useState<PermissionType[]>([]);
 
-  // Fetch permissions
-  const fetchPermissions = async () => {
+  // fetch permissions API call
+  const fetchPermissions = useCallback(async () => {
     if (!user) return;
-    const res = await fetch(`/api/v1/permissions/${user.phone}`);
-    const data = await res.json();
-    if (res.ok) setPermissions(data.data);
+    try {
+      const res = await fetch(SINGLE_ACCOUNT_PERMISSION_API(user.phone));
+      const data = await res.json();
+
+      if (res.ok && data?.data) {
+        setPermissions(data.data.permissions || []);
+      } else {
+        setPermissions([]);
+      }
+    } catch (err) {
+      console.error("Error fetching permissions:", err);
+      toast.error("Failed to load permissions");
+      setPermissions([]);
+    }
+  }, [user]);
+
+  // check permission
+  const hasPermission = (perm: string | string[]) => {
+    if (Array.isArray(perm)) return perm.some((p) => permissions.includes(p));
+    return permissions.includes(perm);
   };
 
-  // Grant new permission
-  const grantPermission = async (body: { permissions: string[]; grantedBy: string; description?: string }) => {
-    if (!user) return;
-    await fetch(`/api/v1/permissions/${user.phone}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    await fetchPermissions();
-  };
-
-  // Update permission
-  const updatePermission = async (id: string, body: Partial<PermissionType>) => {
-    if (!user) return;
-    await fetch(`/api/v1/permissions/${user.phone}/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    await fetchPermissions();
-  };
-
-  // Revoke permission
-  const revokePermission = async (id: string) => {
-    if (!user) return;
-    await fetch(`/api/v1/permissions/${user.phone}/${id}`, {
-      method: "DELETE",
-    });
-    await fetchPermissions();
-  };
+  useEffect(() => {
+    fetchPermissions();
+  }, [fetchPermissions]);
 
   return (
-    <PermissionContext.Provider
-      value={{ permissions, fetchPermissions, grantPermission, updatePermission, revokePermission }}
-    >
+    <PermissionContext.Provider value={{ permissions, fetchPermissions, hasPermission }}>
       {children}
     </PermissionContext.Provider>
   );
 };
 
-// Hook
+// hook
 export const usePermission = () => {
   const context = useContext(PermissionContext);
-  if (!context) toast.error("Server Said Permission Error");
+  if (!context) {
+    throw new Error("usePermission must be used within PermissionProvider");
+  }
   return context;
 };

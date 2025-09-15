@@ -39,10 +39,10 @@ export async function POST(req: NextRequest) {
 
     // Generate verification code
     const code = newUser.generateVerificationCode();
-    await newUser.save();
+    const savedUser = await newUser.save();
 
     const setPermission = new Permission({
-      user:newUser._id
+      user:savedUser._id
     })
 
     await setPermission.save()
@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
 
     console.log("Verification email sent:", emailSent);
 
+    
     return successResponse({
       status: 201,
       message: "Signup successful! Verification email sent.",
