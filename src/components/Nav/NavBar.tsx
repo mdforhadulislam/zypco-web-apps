@@ -10,17 +10,13 @@ import {
 } from "@/components/ui/navigation-menu";
 import Logo from "@/utilities/Logo";
 import {
-  BriefcaseBusiness,
   Building2,
   Calculator,
-  Cog,
   Factory,
   Menu,
   PackagePlus,
   PackageSearch,
-  ShieldHalf,
   ShoppingCart,
-  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -108,40 +104,40 @@ const NavData = [
       },
     ],
   },
-  {
-    title: "About Us",
-    href: "/about",
-    items: [
-      {
-        title: "Our Story",
-        href: "/about/our-story",
-        description:
-          "Discover how Zypco Courier started and our mission to revolutionize delivery services.",
-        icon: <Users className="size-5 shrink-0" />,
-      },
-      {
-        title: "Our Services",
-        href: "/about/our-services",
-        description:
-          "Explore the wide range of courier and logistics services we provide across the globe.",
-        icon: <Cog className="size-5 shrink-0" />,
-      },
-      {
-        title: "Our Work Process",
-        href: "/about/our-work-process",
-        description:
-          "Meet the dedicated professionals driving Zypco Courier’s success and innovation.",
-        icon: <BriefcaseBusiness className="size-5 shrink-0" />,
-      },
-      {
-        title: "Our Team",
-        href: "/about/our-team",
-        description:
-          "A passionate team committed to delivering excellence in logistics and customer care.",
-        icon: <ShieldHalf className="size-5 shrink-0" />,
-      },
-    ],
-  },
+  // {
+  //   title: "About Us",
+  //   href: "/about",
+  //   items: [
+  //     {
+  //       title: "Our Story",
+  //       href: "/about/our-story",
+  //       description:
+  //         "Discover how Zypco Courier started and our mission to revolutionize delivery services.",
+  //       icon: <Users className="size-5 shrink-0" />,
+  //     },
+  //     {
+  //       title: "Our Services",
+  //       href: "/about/our-services",
+  //       description:
+  //         "Explore the wide range of courier and logistics services we provide across the globe.",
+  //       icon: <Cog className="size-5 shrink-0" />,
+  //     },
+  //     {
+  //       title: "Our Work Process",
+  //       href: "/about/our-work-process",
+  //       description:
+  //         "Meet the dedicated professionals driving Zypco Courier’s success and innovation.",
+  //       icon: <BriefcaseBusiness className="size-5 shrink-0" />,
+  //     },
+  //     {
+  //       title: "Our Team",
+  //       href: "/about/our-team",
+  //       description:
+  //         "A passionate team committed to delivering excellence in logistics and customer care.",
+  //       icon: <ShieldHalf className="size-5 shrink-0" />,
+  //     },
+  //   ],
+  // },
   {
     title: "Contact",
     href: "/contact",
@@ -163,7 +159,7 @@ const NavData = [
 const NavBar = () => {
   const [navBarScrolled, setNavBarScrolled] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
- 
+
   const handleScroll = () => {
     const offset = window.scrollY;
 
@@ -181,7 +177,7 @@ const NavBar = () => {
   // className="shadow-sm  z-[40]"
   return (
     <header
-      className={`z-[40] w-full  bg-[#241F21] ${
+      className={`z-[40] w-full  bg-white ${
         navBarScrolled
           ? " fixed w-full h-auto animate-in duration-100 shadow-lg"
           : "animate-in duration-100 w-full lg:px-6 m-auto fixed "
@@ -202,15 +198,15 @@ const NavBar = () => {
                 >
                   <Link
                     href="/"
-                    className="font-semibold text-[#FEF400] hover:text-[#FEF400]"
+                    className="font-semibold text-black hover:text-black"
                   >
                     Home
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-              <NavigationMenuItem className="font-semibold text-[#FEF400] hover:text-[#FEF400]">
-                <NavigationMenuTrigger className="font-semibold text-[#FEF400] hover:text-[#FEF400]">
+              {/* <NavigationMenuItem className="font-semibold text-black hover:text-black">
+                <NavigationMenuTrigger className="font-semibold text-black hover:text-black">
                   About Us
                 </NavigationMenuTrigger>
                 <NavigationMenuContent className="bg-[#241F21] border-[#241F21] border">
@@ -251,10 +247,10 @@ const NavBar = () => {
                     ))}
                   </ul>
                 </NavigationMenuContent>
-              </NavigationMenuItem>
+              </NavigationMenuItem> */}
 
-              <NavigationMenuItem className="font-semibold text-[#FEF400] hover:text-[#FEF400]">
-                <NavigationMenuTrigger className="font-semibold text-[#FEF400] hover:text-[#FEF400]">
+              <NavigationMenuItem className="font-semibold text-black hover:text-black">
+                <NavigationMenuTrigger className="font-semibold text-black hover:text-black">
                   {NavData?.[1]?.title}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent className="bg-[#241F21] border-[#241F21] border">
@@ -279,8 +275,8 @@ const NavBar = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              <NavigationMenuItem className="font-semibold text-[#FEF400] hover:text-[#FEF400]">
-                <NavigationMenuTrigger className="font-semibold text-[#FEF400] hover:text-[#FEF400]">
+              <NavigationMenuItem className="font-semibold text-black hover:text-black">
+                <NavigationMenuTrigger className="font-semibold text-black hover:text-black">
                   Logistics Solutions
                 </NavigationMenuTrigger>
                 <NavigationMenuContent className="bg-[#241F21] border-[#241F21] border">
@@ -313,7 +309,7 @@ const NavBar = () => {
                 >
                   <Link
                     href="/contact"
-                    className="hover:text-[#FEF400] font-semibold text-[#FEF400] "
+                    className="hover:text-black font-semibold text-black "
                   >
                     Contact
                   </Link>
@@ -329,7 +325,7 @@ const NavBar = () => {
             <li>
               <Link
                 href="/career"
-                className="text-[#FEF400] hover:text-[#FEF400]  font-semibold cursor-pointer"
+                className="text-black hover:text-black  font-semibold cursor-pointer"
               >
                 Career
               </Link>
@@ -337,13 +333,16 @@ const NavBar = () => {
             <li>
               <Link
                 href="/zypco-corporate"
-                className="text-[#FEF400] hover:text-[#FEF400]  font-semibold cursor-pointer"
+                className="text-black hover:text-black  font-semibold cursor-pointer"
               >
                 Zypco Corporate
               </Link>
             </li>
           </ul>
-          <Link href={"/auth/login"} className="bg-2 font-semibold  text-[#241F21] bg-[#FEF400]  hover:bg-[#FEF400]/90 px-6 py-3 rounded-4xl" >
+          <Link
+            href={"/auth/login"}
+            className="bg-2 font-semibold  text-[#FEF400] bg-black  hover:bg-black/90 px-6 py-3 rounded-4xl"
+          >
             Login
           </Link>
 
@@ -355,7 +354,7 @@ const NavBar = () => {
                   <Button
                     variant="outline"
                     size="icon"
-                    className=" px-6 py-6 hover:text-[#241F21] text-[#FEF400] hover:bg-[#FEF400] bg-[] border border-[#FEF400]"
+                    className=" px-6 py-6  text-black hover:bg-black hover:text-[#FEF400] border border-black"
                   >
                     <Menu className="size-6" />
                   </Button>
@@ -363,7 +362,11 @@ const NavBar = () => {
                 <SheetContent side="left" className="overflow-y-auto ">
                   <SheetHeader className="border-b py-2">
                     <SheetTitle>
-                      <Link href={"/"} className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
+                      <Link
+                        href={"/"}
+                        className="flex items-center gap-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
                         <Logo />
                       </Link>
                     </SheetTitle>
@@ -374,17 +377,25 @@ const NavBar = () => {
                       collapsible
                       className="flex w-full flex-col gap-4"
                     >
-                      {NavData.map((item) => renderMobileMenuItem({...item, setMobileMenuOpen}))}
+                      {NavData.map((item) =>
+                        renderMobileMenuItem({ ...item, setMobileMenuOpen })
+                      )}
                     </Accordion>
 
                     <div className="flex flex-col gap-3"></div>
                   </div>
 
                   <div className="w-full h-auto flex gap-3 justify-center align-middle items-center">
-                    <Link href={"/auth/login"} className="px-3 py-4 flex justify-center align-middle items-center w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 cursor-pointer font-bold text-white rounded-lg">
+                    <Link
+                      href={"/auth/login"}
+                      className="px-3 py-4 flex justify-center align-middle items-center w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 cursor-pointer font-bold text-white rounded-lg"
+                    >
                       Login
                     </Link>
-                    <Link href={"/auth/register"} className="px-3 py-4 text-white w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 rounded-lg cursor-pointer font-bold flex justify-center align-middle items-center">
+                    <Link
+                      href={"/auth/register"}
+                      className="px-3 py-4 text-white w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 rounded-lg cursor-pointer font-bold flex justify-center align-middle items-center"
+                    >
                       SingUp
                     </Link>
                   </div>
@@ -422,7 +433,7 @@ function ListItem({
 const SubMenuLink = ({ item }: { item: MenuItem }) => {
   return (
     <Link
-      className="  hover:text-[#241F21] flex select-none flex-row gap-4 rounded-md p-3 leading-none no-underline outline-none hover:bg-[#FEF400]/30 group transition-all duration-250"
+      className="  hover:text-[#241F21] flex select-none flex-row gap-4 rounded-md p-3 leading-none no-underline outline-none hover:bg-black/30 group transition-all duration-250"
       href={item.href}
       onClick={() => item.setMobileMenuOpen?.(false)}
     >
@@ -447,12 +458,15 @@ const renderMobileMenuItem = (item: MenuItem) => {
       <AccordionItem
         key={item.title}
         value={item.title}
-        className="border-b-0 " 
+        className="border-b-0 "
       >
         <AccordionTrigger className="text-md py-0 font-semibold hover:no-underline cursor-pointer text-[#241F21]">
           {item.title}
         </AccordionTrigger>
-        <AccordionContent className="mt-2" onClick={() => item.setMobileMenuOpen?.(false)}>
+        <AccordionContent
+          className="mt-2"
+          onClick={() => item.setMobileMenuOpen?.(false)}
+        >
           {item.items.map((subItem) => (
             <SubMenuLink key={subItem.title} item={subItem} />
           ))}

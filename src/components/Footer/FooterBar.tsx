@@ -7,90 +7,92 @@ import { IoLogoLinkedin } from "react-icons/io5";
 import { LuInstagram } from "react-icons/lu";
 
 const solutionsFeatures = [
-  
   {
     id: 35681,
     title: "DHL Courier",
     link: "/about/our-services/",
-    
   },
-  
+
   {
     id: 35682,
     title: "FEDEX Courier",
     link: "/about/our-services/",
-    
   },
-  
+
   {
     id: 35683,
     title: "UPS Courier",
     link: "/about/our-services/",
-    
   },
-  
+
   {
     id: 35684,
     title: "ARAMEX Courier",
     link: "/about/our-services/",
-    
   },
   {
     id: 35685,
     title: "DPD Courier",
     link: "/about/our-services/",
-    
   },
   {
     id: 1213,
     title: "Air Freight",
     link: "/about/our-services/",
-    
   },
   {
     id: 35686,
     title: "Sea Freight",
     link: "/about/our-services/",
-    
   },
   {
     id: 4668,
     title: "Custom Clearnces",
     link: "/about/our-services/",
-    
   },
   {
     id: 565465,
     title: "Shipment Tracking",
     link: "/ship-and-track/track-shipment",
-    
   },
   {
     id: 5654658,
     title: "Courier Price Check",
     link: "/ship-and-track/claculate-shipping-charge",
-
   },
 ];
 
 const ourCompany = [
   {
-    id: 1234513,
-    title: "Our Story",
+    id: 123451345,
+    title: "About Zypco",
     link: "/about/",
-    
   },
   {
-    id: 4245668,
+    id: 1234513677,
+    title: "Our Story",
+    link: "/about/our-story",
+  },
+
+  {
+    id: 1234513886,
     title: "Our Team",
-    link: "/about/our-team/",
-  
+    link: "/about/our-team",
+  },
+  {
+    id: 12342457,
+    title: "Our Services",
+    link: "/about/oour-services",
+  },
+  {
+    id: 12342457,
+    title: "Our Work Process",
+    link: "/about/oour-work-process",
   },
   {
     id: 565343465,
     title: "Help & Support",
     link: "/about/help-and-support/",
-  
   },
   {
     id: 565434654,
@@ -101,19 +103,17 @@ const ourCompany = [
     id: 5623542653,
     title: "Privacy Policy",
     link: "/about/privacy-policy/",
-    
   },
   {
     id: 5623542652,
     title: "Refund Policy",
     link: "/about/refund-policy/",
-    
   },
 ];
 
 const FooterBar = () => {
   return (
-    <footer className="w-full h-auto bg-[#FEF400]">
+    <footer className="w-full h-auto bg-white">
       <div className="container h-auto m-auto p-5">
         <div className="w-full h-auto p-2 py-6">
           <div className="w-full h-auto grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-5">
@@ -168,7 +168,9 @@ const FooterBar = () => {
               </div>
             </div>
             <div className="group lg:border-r border-[#241F21] border-dashed relative">
-              <h3 className=" text-lg text-[#241F21] font-semibold ">Solutions</h3>
+              <h3 className=" text-lg text-[#241F21] font-semibold ">
+                Solutions
+              </h3>
 
               <span className="group-hover:w-[200px] w-[120px] transition-all duration-600 h-[2px] bg-[#241F21] block"></span>
 
