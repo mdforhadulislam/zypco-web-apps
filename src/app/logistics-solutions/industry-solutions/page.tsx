@@ -256,7 +256,7 @@ const IndustrySolutions = () => {
             Get expert logistics solutions tailored to your industry{"'"}s unique requirements. 
             Contact our specialists for a customized consultation.
           </p>
-          <div className="space-x-4">
+          <div className="flex justify-center align-middle gap-3 items-center flex-col sm:flex-row">
             <Link href="/contact">
               <button className="bg-[#FEF400] text-[#241F21] py-3 px-8 rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
                 Industry Consultation

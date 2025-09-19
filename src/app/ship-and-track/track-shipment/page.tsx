@@ -330,8 +330,8 @@ const TrackShipment = () => {
             Can{"'"}t find your package or have questions about delivery? 
             Our customer support team is here to help 24/7.
           </p>
-          <div className="space-x-4">
-            <button className="bg-[#241F21] text-white py-3 px-8 rounded-lg hover:bg-gray-800 transition-colors font-semibold">
+          <div className="flex justify-center align-middle items-center flex-col sm:flex-row gap-3">
+            <button className="bg-[#241F21] text-white py-3 px-8 rounded-lg hover:bg-gray-800 transition-colors font-semibold border-2 border-[#241F21]">
               Contact Support
             </button>
             <button className="border-2 border-[#241F21] text-[#241F21] py-3 px-8 rounded-lg hover:bg-[#241F21] hover:text-white transition-colors font-semibold">

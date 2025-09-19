@@ -11,18 +11,18 @@ const CalculateShippingCharge = () => {
     {
       name: "FedEx",
       logo: "/fedex-logo.png",
-      deliveryTime: "2-4 business days",
+      deliveryTime: "3-5 business days",
     },
     {
       name: "Aramex",
       logo: "/aramex-logo.png",
-      deliveryTime: "3-5 business days",
+      deliveryTime: "5-7 business days",
     },
-    { name: "UPS", logo: "/ups-logo.png", deliveryTime: "2-5 business days" },
+    { name: "UPS", logo: "/ups-logo.png", deliveryTime: "1-3 business days" },
     {
       name: "Local Partner",
       logo: "/logo.jpg",
-      deliveryTime: "1-2 business days",
+      deliveryTime: "1-3 business days",
     },
   ];
 
@@ -335,11 +335,11 @@ const CalculateShippingCharge = () => {
             Found the perfect rate? Create your shipment now and enjoy doorstep
             pickup service.
           </p>
-          <div className="space-x-4">
-            <button className="bg-[#FEF400] text-[#241F21] py-3 px-8 rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
+          <div className="flex justify-center align-middle items-center gap-3 flex-col sm:flex-row">
+            <button className="bg-[#FEF400] text-[#241F21] py-2.5 px-7 rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
               Create Shipment
             </button>
-            <button className="border-2 border-white text-white py-3 px-8 rounded-lg hover:bg-white hover:text-[#241F21] transition-colors font-semibold">
+            <button className="border-2 border-white text-white py-2 px-8 rounded-lg hover:bg-white hover:text-[#241F21] transition-colors font-semibold">
               Get Help
             </button>
           </div>

@@ -294,9 +294,9 @@ const ECommerceSolutions = () => {
             Join thousands of online retailers who trust Zypco for their
             shipping needs. Get started with our e-commerce solutions today.
           </p>
-          <div className="space-x-4">
+          <div className="flex gap-3 flex-col justify-center align-middle items-center sm:flex-row">
             <Link href="/contact">
-              <button className="bg-[#241F21] text-white py-3 px-8 rounded-lg hover:bg-gray-800 transition-colors font-semibold">
+              <button className="bg-[#241F21] text-white py-3 px-8 rounded-lg hover:bg-gray-800 transition-colors font-semibold border-2 border-[#241F21]">
                 Start Free Trial
               </button>
             </Link>

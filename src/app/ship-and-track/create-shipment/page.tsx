@@ -576,8 +576,8 @@ const CreateShipment = () => {
             Our customer support team is available 24/7 to assist you with any
             questions or help you create your shipment.
           </p>
-          <div className="space-x-4">
-            <button className="bg-[#241F21] text-white py-3 px-8 rounded-lg hover:bg-gray-800 transition-colors font-semibold">
+          <div className="flex justify-center gap-3 items-center align-middle flex-col sm:flex-row">
+            <button className="bg-[#241F21] text-white py-3 px-8 rounded-lg hover:bg-gray-800 transition-colors font-semibold border-2 border-[#241F21]">
               Contact Support
             </button>
             <button className="border-2 border-[#241F21] text-[#241F21] py-3 px-8 rounded-lg hover:bg-[#241F21] hover:text-white transition-colors font-semibold">

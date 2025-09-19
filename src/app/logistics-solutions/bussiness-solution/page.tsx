@@ -266,7 +266,7 @@ function BussinessSolution() {
             needs. Get a customized solution tailored to your specific
             requirements.
           </p>
-          <div className="space-x-4">
+          <div className=" flex justify-center align-middle items-center gap-3 flex-col sm:flex-row">
             <Link href="/contact">
               <button className="bg-[#FEF400] text-[#241F21] py-3 px-8 rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
                 Request Consultation
