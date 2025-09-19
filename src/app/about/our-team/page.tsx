@@ -53,7 +53,7 @@ const ZypcoTeamMember = () => {
     },
     {
       id: 3,
-      name: "Imtesar Tanvin",
+      name: "Intesar Tanvin",
       position: "Marque Associate",
       image: "/imtesar-tanvine.jpg",
       bio: "Ensures seamless last-mile delivery and builds trust with clients.",

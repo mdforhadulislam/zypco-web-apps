@@ -1,6 +1,6 @@
 import PageHeader from "@/utilities/PageHeader";
 
-import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { Mail, MessageCircle, Phone } from "lucide-react";
 
 const Contact = () => {
   const contactData = {
@@ -79,7 +79,7 @@ const Contact = () => {
                   className="font-semibold hover:underline"
                   key={phone}
                 >
-                  {phone}  {" "}
+                  {phone}{" "}
                 </a>
               ))}
             </div>
