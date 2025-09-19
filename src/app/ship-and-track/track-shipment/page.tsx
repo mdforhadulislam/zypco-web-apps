@@ -13,8 +13,7 @@ import {
   Search,
   Truck,
 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface TrackingStep {
   status: string;
@@ -39,21 +38,10 @@ interface TrackingData {
 }
 
 const TrackShipment = () => {
-  const searchParams = useSearchParams();
   const [trackingNumber, setTrackingNumber] = useState("");
   const [trackingData, setTrackingData] = useState<TrackingData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // Pre-fill tracking number from URL params
-  useEffect(() => {
-    const trackId = searchParams.get("trackId");
-    if (trackId) {
-      setTrackingNumber(trackId);
-      // Auto-search if tracking number is provided
-      handleTrackPackage(trackId);
-    }
-  }, [searchParams]);
 
   const handleTrackPackage = async (trackId?: string) => {
     const trackingId = trackId || trackingNumber;

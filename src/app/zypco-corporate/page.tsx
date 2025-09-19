@@ -192,7 +192,7 @@ const ZypcoCorporate = () => {
                 </div>
                 <div className="mt-6">
                   <Link href="/contact">
-                    <button className="text-[#FEF400] font-semibold hover:text-yellow-600 transition-colors flex items-center">
+                    <button className="text-black font-semibold hover:text-black hover:underline transition-colors flex items-center">
                       Learn More <ArrowRight className="w-4 h-4 ml-2" strokeWidth={1.5} />
                     </button>
                   </Link>

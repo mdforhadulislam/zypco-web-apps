@@ -87,7 +87,7 @@ const ourCompany = [
   {
     id: 12342457,
     title: "Our Work Process",
-    link: "/about/oour-work-process",
+    link: "/about/our-work-process",
   },
   {
     id: 565343465,
@@ -184,7 +184,7 @@ const FooterBar = () => {
 
                     <Link
                       href={item.link}
-                      className=" text-base hover:text-[#241F21] duration-300 transition-all"
+                      className=" text-base hover:text-[#241F21] duration-300 transition-all hover:underline"
                     >
                       {item.title}
                     </Link>
@@ -206,7 +206,7 @@ const FooterBar = () => {
                     <IoIosArrowForward className="w-5 h-5 hover:text-[#241F21] duration-300 transition-all" />
                     <Link
                       href={item.link}
-                      className=" text-base hover:text-[#241F21] duration-300 transition-all"
+                      className=" text-base hover:text-[#241F21] duration-300 transition-all hover:underline"
                     >
                       {item.title}
                     </Link>
