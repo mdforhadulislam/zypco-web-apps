@@ -1,10 +1,19 @@
-'use client';
+"use client";
 
-import PageHeader from "@/utilities/PageHeader";
-import { Clock, MapPin, Package, Shield, Truck, User, CheckCircle, AlertCircle } from "lucide-react";
-import { useState } from "react";
 import { postRequestSend } from "@/components/ApiCall/methord";
 import { ROOT_API } from "@/components/ApiCall/url";
+import PageHeader from "@/utilities/PageHeader";
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  MapPin,
+  Package,
+  Shield,
+  Truck,
+  User,
+} from "lucide-react";
+import { useState } from "react";
 
 interface OrderFormData {
   parcel: {
@@ -32,8 +41,8 @@ interface OrderFormData {
     };
     weight: string;
     serviceType: string;
-    priority: 'normal' | 'express' | 'super-express';
-    orderType: 'document' | 'parcel' | 'e-commerce';
+    priority: "normal" | "express" | "super-express";
+    orderType: "document" | "parcel" | "e-commerce";
     item: Array<{
       name: string;
       quantity: number;
@@ -65,44 +74,46 @@ const CreateShipment = () => {
   const [formData, setFormData] = useState<OrderFormData>({
     parcel: {
       sender: {
-        name: '',
-        phone: '',
-        email: '',
+        name: "",
+        phone: "",
+        email: "",
         address: {
-          address: '',
-          city: '',
-          zipCode: '',
-          country: ''
-        }
+          address: "",
+          city: "",
+          zipCode: "",
+          country: "",
+        },
       },
       receiver: {
-        name: '',
-        phone: '',
-        email: '',
+        name: "",
+        phone: "",
+        email: "",
         address: {
-          address: '',
-          city: '',
-          zipCode: '',
-          country: ''
-        }
+          address: "",
+          city: "",
+          zipCode: "",
+          country: "",
+        },
       },
-      weight: '',
-      serviceType: 'standard',
-      priority: 'normal',
-      orderType: 'parcel',
-      item: [{
-        name: '',
-        quantity: 1,
-        unitPrice: 0,
-        totalPrice: 0
-      }],
-      customerNote: ''
-    }
+      weight: "",
+      serviceType: "standard",
+      priority: "normal",
+      orderType: "parcel",
+      item: [
+        {
+          name: "",
+          quantity: 1,
+          unitPrice: 0,
+          totalPrice: 0,
+        },
+      ],
+      customerNote: "",
+    },
   });
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<ApiResponse | null>(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const serviceTypes = [
     {
@@ -110,21 +121,21 @@ const CreateShipment = () => {
       label: "Express Delivery",
       time: "1-3 days",
       icon: "⚡",
-      priority: "super-express" as const
+      priority: "super-express" as const,
     },
     {
       value: "standard",
-      label: "Standard Delivery", 
+      label: "Standard Delivery",
       time: "3-5 days",
       icon: "📦",
-      priority: "express" as const
+      priority: "express" as const,
     },
     {
       value: "economy",
       label: "Economy Delivery",
       time: "5-7 days",
       icon: "🚛",
-      priority: "normal" as const
+      priority: "normal" as const,
     },
   ];
 
@@ -149,21 +160,29 @@ const CreateShipment = () => {
     },
   ];
 
-  const updateFormField = (section: 'sender' | 'receiver', field: string, value: string) => {
-    setFormData(prev => ({
+  const updateFormField = (
+    section: "sender" | "receiver",
+    field: string,
+    value: string
+  ) => {
+    setFormData((prev) => ({
       ...prev,
       parcel: {
         ...prev.parcel,
         [section]: {
           ...prev.parcel[section],
-          [field]: value
-        }
-      }
+          [field]: value,
+        },
+      },
     }));
   };
 
-  const updateAddressField = (section: 'sender' | 'receiver', field: string, value: string) => {
-    setFormData(prev => ({
+  const updateAddressField = (
+    section: "sender" | "receiver",
+    field: string,
+    value: string
+  ) => {
+    setFormData((prev) => ({
       ...prev,
       parcel: {
         ...prev.parcel,
@@ -171,95 +190,104 @@ const CreateShipment = () => {
           ...prev.parcel[section],
           address: {
             ...prev.parcel[section].address,
-            [field]: value
-          }
-        }
-      }
+            [field]: value,
+          },
+        },
+      },
     }));
   };
 
   const updateParcelField = (field: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       parcel: {
         ...prev.parcel,
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
   };
 
   const updateItem = (index: number, field: string, value: string | number) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const newItems = [...prev.parcel.item];
       newItems[index] = {
         ...newItems[index],
-        [field]: value
+        [field]: value,
       };
-      
+
       // Auto-calculate totalPrice
-      if (field === 'quantity' || field === 'unitPrice') {
-        newItems[index].totalPrice = newItems[index].quantity * newItems[index].unitPrice;
+      if (field === "quantity" || field === "unitPrice") {
+        newItems[index].totalPrice =
+          newItems[index].quantity * newItems[index].unitPrice;
       }
-      
+
       return {
         ...prev,
         parcel: {
           ...prev.parcel,
-          item: newItems
-        }
+          item: newItems,
+        },
       };
     });
   };
 
   const addItem = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       parcel: {
         ...prev.parcel,
-        item: [...prev.parcel.item, {
-          name: '',
-          quantity: 1,
-          unitPrice: 0,
-          totalPrice: 0
-        }]
-      }
+        item: [
+          ...prev.parcel.item,
+          {
+            name: "",
+            quantity: 1,
+            unitPrice: 0,
+            totalPrice: 0,
+          },
+        ],
+      },
     }));
   };
 
   const removeItem = (index: number) => {
     if (formData.parcel.item.length > 1) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         parcel: {
           ...prev.parcel,
-          item: prev.parcel.item.filter((_, i) => i !== index)
-        }
+          item: prev.parcel.item.filter((_, i) => i !== index),
+        },
       }));
     }
   };
 
   const validateForm = (): string | null => {
     const { parcel } = formData;
-    
-    if (!parcel.sender.name.trim()) return 'Sender name is required';
-    if (!parcel.sender.phone.trim()) return 'Sender phone is required';
-    if (!parcel.sender.email.trim()) return 'Sender email is required';
-    if (!parcel.sender.address.address.trim()) return 'Sender address is required';
-    
-    if (!parcel.receiver.name.trim()) return 'Receiver name is required';
-    if (!parcel.receiver.phone.trim()) return 'Receiver phone is required';
-    if (!parcel.receiver.address.address.trim()) return 'Receiver address is required';
-    if (!parcel.receiver.address.country.trim()) return 'Destination country is required';
-    
-    if (!parcel.weight.trim()) return 'Package weight is required';
-    
+
+    if (!parcel.sender.name.trim()) return "Sender name is required";
+    if (!parcel.sender.phone.trim()) return "Sender phone is required";
+    if (!parcel.sender.email.trim()) return "Sender email is required";
+    if (!parcel.sender.address.address.trim())
+      return "Sender address is required";
+
+    if (!parcel.receiver.name.trim()) return "Receiver name is required";
+    if (!parcel.receiver.phone.trim()) return "Receiver phone is required";
+    if (!parcel.receiver.address.address.trim())
+      return "Receiver address is required";
+    if (!parcel.receiver.address.country.trim())
+      return "Destination country is required";
+
+    if (!parcel.weight.trim()) return "Package weight is required";
+
     for (let i = 0; i < parcel.item.length; i++) {
       const item = parcel.item[i];
       if (!item.name.trim()) return `Item ${i + 1} name is required`;
-      if (item.quantity <= 0) return `Item ${i + 1} quantity must be greater than 0`;
-      if (item.unitPrice < 0) return `Item ${i + 1} unit price cannot be negative`;
+      if (item.quantity <= 0)
+        return `Item ${i + 1} quantity must be greater than 0`;
+      if (item.unitPrice < 0)
+        return `Item ${i + 1} unit price cannot be negative`;
     }
-    
+
     return null;
   };
 
@@ -271,46 +299,46 @@ const CreateShipment = () => {
     }
 
     setLoading(true);
-    setError('');
-    
+    setError("");
+
     try {
       const response = await postRequestSend<OrderFormData, ApiResponse>(
         `${ROOT_API}orders`,
         {},
         formData
       );
-      
+
       if (response.status === 201 && response.data) {
         setSuccess(response.data);
-        setError('');
+        setError("");
         // Reset form
         setFormData({
           parcel: {
             sender: {
-              name: '',
-              phone: '',
-              email: '',
-              address: { address: '', city: '', zipCode: '', country: '' }
+              name: "",
+              phone: "",
+              email: "",
+              address: { address: "", city: "", zipCode: "", country: "" },
             },
             receiver: {
-              name: '',
-              phone: '',
-              email: '',
-              address: { address: '', city: '', zipCode: '', country: '' }
+              name: "",
+              phone: "",
+              email: "",
+              address: { address: "", city: "", zipCode: "", country: "" },
             },
-            weight: '',
-            serviceType: 'standard',
-            priority: 'normal',
-            orderType: 'parcel',
-            item: [{ name: '', quantity: 1, unitPrice: 0, totalPrice: 0 }],
-            customerNote: ''
-          }
+            weight: "",
+            serviceType: "standard",
+            priority: "normal",
+            orderType: "parcel",
+            item: [{ name: "", quantity: 1, unitPrice: 0, totalPrice: 0 }],
+            customerNote: "",
+          },
         });
       } else {
-        setError(response.message || 'Failed to create shipment');
+        setError(response.message || "Failed to create shipment");
       }
     } catch (err) {
-      setError('Failed to create shipment. Please try again.');
+      setError("Failed to create shipment. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -356,21 +384,29 @@ const CreateShipment = () => {
           mainLink="/ship-and-track"
           subLink="/ship-and-track/create-shipment"
         />
-        
+
         <div className="w-full bg-white">
           <div className="container mx-auto px-4 py-16">
             <div className="max-w-2xl mx-auto text-center">
               <div className="bg-green-50 border border-green-200 rounded-lg p-8 mb-8">
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h2 className="text-3xl font-bold text-green-700 mb-4">Shipment Created Successfully!</h2>
-                <p className="text-green-600 mb-6">Your package has been registered and is ready for pickup.</p>
-                
+                <h2 className="text-3xl font-bold text-green-700 mb-4">
+                  Shipment Created Successfully!
+                </h2>
+                <p className="text-green-600 mb-6">
+                  Your package has been registered and is ready for pickup.
+                </p>
+
                 <div className="bg-white rounded-lg p-6 border border-green-200">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4">Shipment Details</h3>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    Shipment Details
+                  </h3>
                   <div className="space-y-2 text-left">
                     <div className="flex justify-between">
                       <span className="font-medium">Tracking ID:</span>
-                      <span className="font-bold text-[#241F21]">{success.trackId}</span>
+                      <span className="font-bold text-[#241F21]">
+                        {success.trackId}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Order ID:</span>
@@ -378,15 +414,19 @@ const CreateShipment = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Created:</span>
-                      <span>{new Date(success.createdAt).toLocaleDateString()}</span>
+                      <span>
+                        {new Date(success.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
-                  onClick={() => window.location.href = `/ship-and-track/track-shipment`}
+                  onClick={() =>
+                    (window.location.href = `/ship-and-track/track-shipment`)
+                  }
                   className="bg-[#FEF400] text-[#241F21] px-8 py-3 rounded-lg hover:bg-yellow-500 transition-colors font-bold"
                 >
                   Track Your Shipment
@@ -472,7 +512,9 @@ const CreateShipment = () => {
                       <input
                         type="text"
                         value={formData.parcel.sender.name}
-                        onChange={(e) => updateFormField('sender', 'name', e.target.value)}
+                        onChange={(e) =>
+                          updateFormField("sender", "name", e.target.value)
+                        }
                         placeholder="Enter sender's name"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -484,7 +526,9 @@ const CreateShipment = () => {
                       <input
                         type="tel"
                         value={formData.parcel.sender.phone}
-                        onChange={(e) => updateFormField('sender', 'phone', e.target.value)}
+                        onChange={(e) =>
+                          updateFormField("sender", "phone", e.target.value)
+                        }
                         placeholder="+880 1XXX XXXXXX"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -496,7 +540,9 @@ const CreateShipment = () => {
                       <input
                         type="email"
                         value={formData.parcel.sender.email}
-                        onChange={(e) => updateFormField('sender', 'email', e.target.value)}
+                        onChange={(e) =>
+                          updateFormField("sender", "email", e.target.value)
+                        }
                         placeholder="sender@example.com"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -508,7 +554,9 @@ const CreateShipment = () => {
                       <input
                         type="text"
                         value={formData.parcel.sender.address.city}
-                        onChange={(e) => updateAddressField('sender', 'city', e.target.value)}
+                        onChange={(e) =>
+                          updateAddressField("sender", "city", e.target.value)
+                        }
                         placeholder="City name"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -520,7 +568,13 @@ const CreateShipment = () => {
                       <textarea
                         rows={3}
                         value={formData.parcel.sender.address.address}
-                        onChange={(e) => updateAddressField('sender', 'address', e.target.value)}
+                        onChange={(e) =>
+                          updateAddressField(
+                            "sender",
+                            "address",
+                            e.target.value
+                          )
+                        }
                         placeholder="Enter complete pickup address with area, city, and postal code"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       ></textarea>
@@ -547,7 +601,9 @@ const CreateShipment = () => {
                       <input
                         type="text"
                         value={formData.parcel.receiver.name}
-                        onChange={(e) => updateFormField('receiver', 'name', e.target.value)}
+                        onChange={(e) =>
+                          updateFormField("receiver", "name", e.target.value)
+                        }
                         placeholder="Enter recipient's name"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -559,7 +615,9 @@ const CreateShipment = () => {
                       <input
                         type="tel"
                         value={formData.parcel.receiver.phone}
-                        onChange={(e) => updateFormField('receiver', 'phone', e.target.value)}
+                        onChange={(e) =>
+                          updateFormField("receiver", "phone", e.target.value)
+                        }
                         placeholder="Recipient's phone number"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -571,7 +629,9 @@ const CreateShipment = () => {
                       <input
                         type="email"
                         value={formData.parcel.receiver.email}
-                        onChange={(e) => updateFormField('receiver', 'email', e.target.value)}
+                        onChange={(e) =>
+                          updateFormField("receiver", "email", e.target.value)
+                        }
                         placeholder="recipient@example.com"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -583,7 +643,9 @@ const CreateShipment = () => {
                       <input
                         type="text"
                         value={formData.parcel.receiver.address.city}
-                        onChange={(e) => updateAddressField('receiver', 'city', e.target.value)}
+                        onChange={(e) =>
+                          updateAddressField("receiver", "city", e.target.value)
+                        }
                         placeholder="City name"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -592,9 +654,15 @@ const CreateShipment = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Country *
                       </label>
-                      <select 
+                      <select
                         value={formData.parcel.receiver.address.country}
-                        onChange={(e) => updateAddressField('receiver', 'country', e.target.value)}
+                        onChange={(e) =>
+                          updateAddressField(
+                            "receiver",
+                            "country",
+                            e.target.value
+                          )
+                        }
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       >
                         <option value="">Select destination country</option>
@@ -615,7 +683,13 @@ const CreateShipment = () => {
                       <input
                         type="text"
                         value={formData.parcel.receiver.address.zipCode}
-                        onChange={(e) => updateAddressField('receiver', 'zipCode', e.target.value)}
+                        onChange={(e) =>
+                          updateAddressField(
+                            "receiver",
+                            "zipCode",
+                            e.target.value
+                          )
+                        }
                         placeholder="Postal/ZIP code"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -627,7 +701,13 @@ const CreateShipment = () => {
                       <textarea
                         rows={3}
                         value={formData.parcel.receiver.address.address}
-                        onChange={(e) => updateAddressField('receiver', 'address', e.target.value)}
+                        onChange={(e) =>
+                          updateAddressField(
+                            "receiver",
+                            "address",
+                            e.target.value
+                          )
+                        }
                         placeholder="Enter complete delivery address"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       ></textarea>
@@ -652,11 +732,13 @@ const CreateShipment = () => {
                       <div
                         key={type.value}
                         className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                          formData.parcel.orderType === type.value 
-                            ? 'border-[#FEF400] bg-yellow-50' 
-                            : 'border-gray-300 hover:border-[#FEF400] hover:bg-yellow-50'
+                          formData.parcel.orderType === type.value
+                            ? "border-[#FEF400] bg-yellow-50"
+                            : "border-gray-300 hover:border-[#FEF400] hover:bg-yellow-50"
                         }`}
-                        onClick={() => updateParcelField('orderType', type.value)}
+                        onClick={() =>
+                          updateParcelField("orderType", type.value)
+                        }
                       >
                         <div className="flex items-center mb-2">
                           <input
@@ -664,7 +746,9 @@ const CreateShipment = () => {
                             name="packageType"
                             value={type.value}
                             checked={formData.parcel.orderType === type.value}
-                            onChange={() => updateParcelField('orderType', type.value)}
+                            onChange={() =>
+                              updateParcelField("orderType", type.value)
+                            }
                             className="mr-3"
                           />
                           <h5 className="font-semibold text-[#241F21]">
@@ -689,7 +773,9 @@ const CreateShipment = () => {
                       <input
                         type="text"
                         value={formData.parcel.weight}
-                        onChange={(e) => updateParcelField('weight', e.target.value)}
+                        onChange={(e) =>
+                          updateParcelField("weight", e.target.value)
+                        }
                         placeholder="0.0"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -701,7 +787,9 @@ const CreateShipment = () => {
                       <input
                         type="text"
                         value={formData.parcel.customerNote}
-                        onChange={(e) => updateParcelField('customerNote', e.target.value)}
+                        onChange={(e) =>
+                          updateParcelField("customerNote", e.target.value)
+                        }
                         placeholder="Any special instructions"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -710,9 +798,14 @@ const CreateShipment = () => {
 
                   {/* Items */}
                   <div>
-                    <h5 className="text-lg font-semibold text-[#241F21] mb-4">Package Contents</h5>
+                    <h5 className="text-lg font-semibold text-[#241F21] mb-4">
+                      Package Contents
+                    </h5>
                     {formData.parcel.item.map((item, index) => (
-                      <div key={index} className="grid md:grid-cols-5 gap-4 mb-4 p-4 border border-gray-200 rounded-lg">
+                      <div
+                        key={index}
+                        className="grid md:grid-cols-5 gap-4 mb-4 p-4 border border-gray-200 rounded-lg"
+                      >
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Item Name *
@@ -720,7 +813,9 @@ const CreateShipment = () => {
                           <input
                             type="text"
                             value={item.name}
-                            onChange={(e) => updateItem(index, 'name', e.target.value)}
+                            onChange={(e) =>
+                              updateItem(index, "name", e.target.value)
+                            }
                             placeholder="Item name"
                             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                           />
@@ -732,7 +827,13 @@ const CreateShipment = () => {
                           <input
                             type="number"
                             value={item.quantity}
-                            onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 0)}
+                            onChange={(e) =>
+                              updateItem(
+                                index,
+                                "quantity",
+                                parseInt(e.target.value) || 0
+                              )
+                            }
                             min="1"
                             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                           />
@@ -744,7 +845,13 @@ const CreateShipment = () => {
                           <input
                             type="number"
                             value={item.unitPrice}
-                            onChange={(e) => updateItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                            onChange={(e) =>
+                              updateItem(
+                                index,
+                                "unitPrice",
+                                parseFloat(e.target.value) || 0
+                              )
+                            }
                             min="0"
                             step="0.01"
                             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
@@ -801,13 +908,13 @@ const CreateShipment = () => {
                       <div
                         key={service.value}
                         className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                          formData.parcel.serviceType === service.value 
-                            ? 'border-[#FEF400] bg-yellow-50' 
-                            : 'border-gray-300 hover:border-[#FEF400] hover:bg-yellow-50'
+                          formData.parcel.serviceType === service.value
+                            ? "border-[#FEF400] bg-yellow-50"
+                            : "border-gray-300 hover:border-[#FEF400] hover:bg-yellow-50"
                         }`}
                         onClick={() => {
-                          updateParcelField('serviceType', service.value);
-                          updateParcelField('priority', service.priority);
+                          updateParcelField("serviceType", service.value);
+                          updateParcelField("priority", service.priority);
                         }}
                       >
                         <div className="flex items-center mb-2">
@@ -815,10 +922,12 @@ const CreateShipment = () => {
                             type="radio"
                             name="serviceType"
                             value={service.value}
-                            checked={formData.parcel.serviceType === service.value}
+                            checked={
+                              formData.parcel.serviceType === service.value
+                            }
                             onChange={() => {
-                              updateParcelField('serviceType', service.value);
-                              updateParcelField('priority', service.priority);
+                              updateParcelField("serviceType", service.value);
+                              updateParcelField("priority", service.priority);
                             }}
                             className="mr-3"
                           />
@@ -837,15 +946,16 @@ const CreateShipment = () => {
 
                 {/* Create Shipment Button */}
                 <div className="text-center">
-                  <button 
+                  <button
                     onClick={handleSubmit}
                     disabled={loading}
                     className="bg-[#FEF400] text-[#241F21] py-4 px-12 rounded-lg hover:bg-yellow-500 transition-colors font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? 'Creating Shipment...' : 'Create Shipment'}
+                    {loading ? "Creating Shipment..." : "Create Shipment"}
                   </button>
                   <p className="text-sm text-gray-500 mt-3">
-                    You{"'"}ll receive a tracking number after creating the shipment
+                    You{"'"}ll receive a tracking number after creating the
+                    shipment
                   </p>
                 </div>
               </div>
