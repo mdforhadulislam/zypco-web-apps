@@ -66,6 +66,7 @@ const TrackShipment = () => {
         setError(response.message || "Tracking number not found");
         setTrackingData(null);
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError("Failed to fetch tracking information. Please try again.");
       setTrackingData(null);

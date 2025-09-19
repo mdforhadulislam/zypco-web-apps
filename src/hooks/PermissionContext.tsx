@@ -25,16 +25,13 @@ export const PermissionProvider = ({ children }: { children: React.ReactNode }) 
       const res = await fetch(SINGLE_ACCOUNT_PERMISSION_API(user.phone));
       const data = await res.json();
 
-      console.log(data);
-      
-
       if (res.ok && data?.data) {
         setPermissions(data.data.permissions || []);
       } else {
         setPermissions([]);
       }
     } catch (err) {
-      console.error("Error fetching permissions:", err);
+      console.error("Error fetching permissions:", err);                     
       toast.error("Failed to load permissions");
       setPermissions([]);
     }
