@@ -14,7 +14,7 @@ const Contact = () => {
     officeAddress: "1 Eagle St, Brisbane, QLD, 4000",
     phoneLabel: "Phone",
     phoneDescription: "We're available Mon-Fri, 9am-5pm.",
-    phone: "+123 456 7890",
+    phone: ["+8801622541719", "+8801863468546"],
     chatLabel: "Live Chat",
     chatDescription: "Get instant help from our support team.",
     chatLink: "Start Chat",
@@ -29,10 +29,8 @@ const Contact = () => {
         subLink="/contact"
       />
 
-     <div className="w-full bg-white">
-       <section className="bg-background container m-auto py-32 px-4">
-       
-          
+      <div className="w-full bg-white">
+        <section className="bg-background container m-auto py-32 px-4">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <div className="bg-muted rounded-lg p-6">
               <span className="bg-accent mb-3 flex size-12 flex-col items-center justify-center rounded-full">
@@ -75,12 +73,15 @@ const Contact = () => {
               <p className="text-muted-foreground mb-3">
                 {contactData.phoneDescription}
               </p>
-              <a
-                href={`tel:${contactData.phone}`}
-                className="font-semibold hover:underline"
-              >
-                {contactData.phone}
-              </a>
+              {contactData.phone.map((phone) => (
+                <a
+                  href={`tel:${phone}`}
+                  className="font-semibold hover:underline"
+                  key={phone}
+                >
+                  {phone}  {" "}
+                </a>
+              ))}
             </div>
             <div className="bg-muted rounded-lg p-6">
               <span className="bg-accent mb-3 flex size-12 flex-col items-center justify-center rounded-full">
@@ -97,9 +98,8 @@ const Contact = () => {
               </a>
             </div>
           </div>
-       
-      </section>
-     </div>
+        </section>
+      </div>
     </div>
   );
 };

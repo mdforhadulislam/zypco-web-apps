@@ -8,246 +8,61 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import Logo from "@/utilities/Logo";
-import {
-  BadgeDollarSign,
-  Bot,
-  Boxes,
-  CirclePercent,
-  LayoutDashboard,
-  LifeBuoy,
-  Package,
-  Rss,
-  Send,
-  Settings2,
-  UserStar,
-} from "lucide-react";
-import * as React from "react";
+import { useAuth } from "@/hooks/AuthContext";
+import { useRefreshUser } from "@/hooks/ReFreshTokenContext";
+import Logo from "@/utilities/Logo"; 
+import { AdminData, ModaretorData, UserData } from "../ApiCall/data";
 import { NavUser } from "./NavIUser";
 import { NavMain } from "./NavMain";
 import { NavSecondary } from "./NavSecondary";
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "#",
-      icon: LayoutDashboard,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Pickups",
-      url: "#",
-      icon: Package,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Rate Charts",
-      url: "#",
-      icon: BadgeDollarSign,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Orders",
-      url: "#",
-      icon: Boxes,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Offers",
-      url: "#",
-      icon: CirclePercent,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Reviews",
-      url: "#",
-      icon: UserStar,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Blogs",
-      url: "#",
-      icon: Rss,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
-};
+import { useEffect } from "react";
+
 export function AppSideBar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const auth = useAuth();
+  const { user, refreshUserData } = useRefreshUser();
+
+  useEffect(()=>{
+
+    refreshUserData();
+  },[])
+
+  const data =
+    auth.user?.role == "user"
+      ? {
+          ...UserData,
+          user: {
+            name: auth.user?.name ?? "",
+            email: auth.user?.email ?? "",
+            avatar: "",
+          },
+        }
+      : auth.user?.role == "moderator"
+      ? {
+          ...ModaretorData,
+          user: {
+            name: auth.user?.name ?? "",
+            email: auth.user?.email ?? "",
+            avatar: "",
+          },
+        }
+      : auth.user?.role == "admin"
+      ? {
+          ...AdminData,
+          user: {
+            name: auth.user?.name ?? "",
+            email: auth.user?.email ?? "",
+            avatar: "",
+          },
+        }
+      : {
+          ...UserData,
+          user: {
+            name: auth.user?.name ?? "",
+            email: auth.user?.email ?? "",
+            avatar: "",
+          },
+        };
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>

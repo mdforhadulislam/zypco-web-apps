@@ -1,6 +1,5 @@
 import connectDB from "@/config/db";
 import { errorResponse, successResponse } from "@/server/common/response";
-import { Permission } from "@/server/models/Permission.model";
 import { User } from "@/server/models/User.model";
 import { emailService } from "@/services/emailService";
 import { NextRequest } from "next/server";
@@ -39,14 +38,7 @@ export async function POST(req: NextRequest) {
 
     // Generate verification code
     const code = newUser.generateVerificationCode();
-    const savedUser = await newUser.save();
-
-    const setPermission = new Permission({
-      user:savedUser._id,
-      permissions:["dashboard", "pickup", "order", "setting"]
-    })
-
-    await setPermission.save()
+    await newUser.save();
 
     // Send verification email
     const emailSent = await emailService.sendVerificationEmail({
@@ -54,9 +46,6 @@ export async function POST(req: NextRequest) {
       name: newUser.name,
       code,
     });
-
-    console.log("Verification email sent:", emailSent);
-
     
     return successResponse({
       status: 201,

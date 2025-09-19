@@ -1,5 +1,5 @@
 import { AuthProvider } from "@/hooks/AuthContext";
-import { PermissionProvider } from "@/hooks/PermissionContext";
+import { ReFreshTokenProvider } from "@/hooks/ReFreshTokenContext";
 import SiteLayout from "@/utilities/SiteLayout";
 import type { Metadata } from "next";
 import "./globals.css";
@@ -154,9 +154,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          <PermissionProvider>
+          <ReFreshTokenProvider>
             <SiteLayout>{children}</SiteLayout>
-          </PermissionProvider>
+          </ReFreshTokenProvider>
         </AuthProvider>
       </body>
     </html>

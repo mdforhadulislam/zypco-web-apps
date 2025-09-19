@@ -119,7 +119,7 @@ const FooterBar = () => {
           <div className="w-full h-auto grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-5">
             <div className="lg:border-r border-[#241F21] border-dashed">
               <div className={"flex gap-4 pb-4"}>
-                <Logo isFooter={true} width={300} height={180} />
+                <Logo isFooter={true} width={100} height={120} />
               </div>
 
               <div className="text-sm font-semibold pr-2 text-[#241F21] py-1">

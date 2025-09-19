@@ -13,18 +13,18 @@ const Logo: React.FC<LogoProps> = ({isFooter = false, width, height}) => {
     <Link href={"/"}>
         {isFooter ? 
             <Image
-            src="/logo.jpg"
+            src="/logo.png"
             alt="Zypco Logo"
             width={width}
             height={height}
             className="object-contain"
             priority 
         />:<Image
-        src="/logo.jpg"
+        src="/logo.png"
         alt="Zypco Logo"
-        width={140}
-        height={80}
-        className={`object-contain w-[${width ? width :"120"}px] h-[${height ? height :"70"}px]`}
+        width={65}
+        height={75}
+        className={`object-contain w-[${width ? width :"65"}px] h-[${height ? height :"75"}px]`}
         priority 
     />}
         

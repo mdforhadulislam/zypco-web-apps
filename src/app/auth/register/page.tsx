@@ -50,7 +50,7 @@ const ZypcoRegister = () => {
   return (
     <section className="w-full h-auto">
       <div className="container m-auto flex justify-center items-center">
-        <div className="w-100 h-auto px-2 pt-8 pb-30">
+        <div className="w-100 h-auto px-2 pt-6 pb-35">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -60,9 +60,9 @@ const ZypcoRegister = () => {
             <div className="flex flex-col gap-6">
               {/* Logo + Title */}
               <div className="flex flex-col items-center gap-2">
-                <a href="#" className="flex flex-col items-center gap-2 font-medium">
+            <a href="#" className="flex flex-col items-center gap-2 font-medium">
                   <div className="flex size-50 items-center justify-center rounded-md">
-                    <Logo width={200} height={80} />
+                    <Logo width={100} height={120} isFooter={true} />
                   </div>
                   <span className="sr-only">Zypco</span>
                 </a>

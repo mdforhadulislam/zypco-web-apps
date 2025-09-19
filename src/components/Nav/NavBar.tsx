@@ -177,7 +177,7 @@ const NavBar = () => {
   // className="shadow-sm  z-[40]"
   return (
     <header
-      className={`z-[40] w-full  bg-white ${
+      className={`z-[40] w-full  bg-white border-b ${
         navBarScrolled
           ? " fixed w-full h-auto animate-in duration-100 shadow-lg"
           : "animate-in duration-100 w-full lg:px-6 m-auto fixed "
@@ -185,8 +185,8 @@ const NavBar = () => {
     >
       <div className="flex items-center justify-between px-4 py-2  ">
         {/* Logo */}
-        <div className="flex items-center gap-4">
-          <Logo />
+        <div className="flex items-center gap-8">
+          <Logo  />
 
           {/* NavigationMenu */}
           <NavigationMenu className="hidden lg:flex">
@@ -354,12 +354,12 @@ const NavBar = () => {
                   <Button
                     variant="outline"
                     size="icon"
-                    className=" px-6 py-6  text-black hover:bg-black hover:text-[#FEF400] border border-black"
+                    className=" px-6 py-6  text-black hover:bg-black hover:text-[#FEF400] border border-black cursor-pointer"
                   >
                     <Menu className="size-6" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="overflow-y-auto ">
+                <SheetContent side="right" className="overflow-y-auto ">
                   <SheetHeader className="border-b py-2">
                     <SheetTitle>
                       <Link
