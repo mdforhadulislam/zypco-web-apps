@@ -211,9 +211,9 @@ const ShipAndTrack = () => {
             </div>
             <div className="bg-[#FEF400] rounded-lg p-8">
               <h3 className="text-2xl font-bold text-[#241F21] mb-6">Quick Actions</h3>
-              <div className="space-y-6">
-                <Link href="/ship-and-track/claculate-shipping-charge">
-                  <div className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+              <div className="flex justify-center align-middle items-center gap-3 flex-col">
+                <Link href="/ship-and-track/claculate-shipping-charge" className="w-full">
+                  <div className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer w-full">
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-semibold text-[#241F21]">Calculate Rates</h4>
@@ -224,8 +224,8 @@ const ShipAndTrack = () => {
                   </div>
                 </Link>
                 
-                <Link href="/ship-and-track/create-shipment">
-                  <div className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <Link href="/ship-and-track/create-shipment" className="w-full">
+                  <div className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer w-full">
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-semibold text-[#241F21]">Create Shipment</h4>
@@ -236,8 +236,8 @@ const ShipAndTrack = () => {
                   </div>
                 </Link>
                 
-                <Link href="/ship-and-track/track-shipment">
-                  <div className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                <Link href="/ship-and-track/track-shipment" className="w-full">
+                  <div className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer w-full">
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-semibold text-[#241F21]">Track Package</h4>

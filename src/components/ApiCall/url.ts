@@ -32,3 +32,11 @@ export const SINGLE_ACCOUNT_OFFER = (phone:string) => `${ROOT_API}accounts/${pho
 
 export const SINGLE_ACCOUNT_ORDER_API = (phone:string) => `${ROOT_API}accounts/${phone}/order`
 export const SINGLE_ACCOUNT_SINGLE_ORDER_API = (phone:string, orderId:string) => `${ROOT_API}accounts/${phone}/order/${orderId}`
+
+// New API endpoints for orders and tracking
+export const ORDERS_API = `${ROOT_API}orders`;
+export const SINGLE_ORDER_API = (orderId: string) => `${ROOT_API}orders/${orderId}`;
+export const ORDER_PAYMENT_API = (orderId: string) => `${ROOT_API}orders/${orderId}/payment`;
+
+export const TRACKS_API = `${ROOT_API}tracks`;
+export const SINGLE_TRACK_API = (trackId: string) => `${ROOT_API}tracks/${trackId}`;

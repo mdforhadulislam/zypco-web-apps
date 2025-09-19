@@ -1,54 +1,140 @@
+'use client';
+
 import PageHeader from '@/utilities/PageHeader';
-import { Search, Package, MapPin, Clock, CheckCircle, Truck, Plane, Home } from "lucide-react";
+import { Search, Package, MapPin, Clock, CheckCircle, Truck, Plane, Home, AlertCircle } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { getRequestSend } from '@/components/ApiCall/methord';
+import { ROOT_API } from '@/components/ApiCall/url';
+
+interface TrackingStep {
+  status: string;
+  location: {
+    city: string;
+    country: string;
+  };
+  description: string;
+  timestamp: string;
+  updatedBy?: string | null;
+}
+
+interface TrackingData {
+  _id: string;
+  order: string;
+  trackId: string;
+  currentStatus: string;
+  history: TrackingStep[];
+  estimatedDelivery?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const TrackShipment = () => {
-  const trackingSteps = [
-    {
-      status: "completed",
-      icon: <CheckCircle className="w-6 h-6 text-green-500" strokeWidth={1.5} />,
-      title: "Package Received",
-      description: "Your package has been received at our facility",
-      timestamp: "2024-01-15 09:30 AM",
-      location: "Dhaka Sorting Center"
-    },
-    {
-      status: "completed", 
-      icon: <Package className="w-6 h-6 text-green-500" strokeWidth={1.5} />,
-      title: "In Transit",
-      description: "Package is on the way to destination country",
-      timestamp: "2024-01-15 11:45 AM",
-      location: "International Hub"
-    },
-    {
-      status: "current",
-      icon: <Plane className="w-6 h-6 text-[#FEF400]" strokeWidth={1.5} />,
-      title: "International Transit",
-      description: "Package is currently in international transit",
-      timestamp: "2024-01-16 02:15 PM",
-      location: "In Flight to Destination"
-    },
-    {
-      status: "pending",
-      icon: <Truck className="w-6 h-6 text-gray-400" strokeWidth={1.5} />,
-      title: "Out for Delivery",
-      description: "Package will be out for final delivery",
-      timestamp: "Estimated: 2024-01-17 10:00 AM",
-      location: "Local Delivery Hub"
-    },
-    {
-      status: "pending",
-      icon: <Home className="w-6 h-6 text-gray-400" strokeWidth={1.5} />,
-      title: "Delivered",
-      description: "Package delivered to recipient",
-      timestamp: "Estimated: 2024-01-17 06:00 PM",
-      location: "Delivery Address"
+  const searchParams = useSearchParams();
+  const [trackingNumber, setTrackingNumber] = useState('');
+  const [trackingData, setTrackingData] = useState<TrackingData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Pre-fill tracking number from URL params
+  useEffect(() => {
+    const trackId = searchParams.get('trackId');
+    if (trackId) {
+      setTrackingNumber(trackId);
+      // Auto-search if tracking number is provided
+      handleTrackPackage(trackId);
     }
-  ];
+  }, [searchParams]);
+
+  const handleTrackPackage = async (trackId?: string) => {
+    const trackingId = trackId || trackingNumber;
+    
+    if (!trackingId.trim()) {
+      setError('Please enter a tracking number');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    
+    try {
+      const response = await getRequestSend<TrackingData>(`${ROOT_API}tracks/${trackingId.trim()}`);
+      
+      if (response.status === 200 && response.data) {
+        setTrackingData(response.data);
+        setError('');
+      } else {
+        setError(response.message || 'Tracking number not found');
+        setTrackingData(null);
+      }
+    } catch (err) {
+      setError('Failed to fetch tracking information. Please try again.');
+      setTrackingData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'created':
+      case 'pickup-pending':
+        return <Package className="w-6 h-6 text-blue-500" strokeWidth={1.5} />;
+      case 'picked-up':
+      case 'in-transit':
+        return <Truck className="w-6 h-6 text-yellow-500" strokeWidth={1.5} />;
+      case 'arrived-at-hub':
+      case 'customs-clearance':
+        return <Plane className="w-6 h-6 text-purple-500" strokeWidth={1.5} />;
+      case 'out-for-delivery':
+        return <Truck className="w-6 h-6 text-orange-500" strokeWidth={1.5} />;
+      case 'delivered':
+        return <CheckCircle className="w-6 h-6 text-green-500" strokeWidth={1.5} />;
+      case 'failed':
+      case 'cancelled':
+        return <AlertCircle className="w-6 h-6 text-red-500" strokeWidth={1.5} />;
+      default:
+        return <Package className="w-6 h-6 text-gray-400" strokeWidth={1.5} />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'delivered':
+        return 'text-green-600';
+      case 'failed':
+      case 'cancelled':
+        return 'text-red-600';
+      case 'out-for-delivery':
+        return 'text-orange-600';
+      case 'in-transit':
+      case 'arrived-at-hub':
+        return 'text-blue-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
+  const formatStatus = (status: string) => {
+    return status.split('-').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   const quickTrackOptions = [
-    { value: "ZYP123456789", label: "ZYP123456789", carrier: "Zypco" },
-    { value: "DHL987654321", label: "DHL987654321", carrier: "DHL" },
-    { value: "FDX456789123", label: "FDX456789123", carrier: "FedEx" }
+    { value: "ZYP00000001", label: "ZYP00000001", carrier: "Zypco" },
+    { value: "ZYP00000002", label: "ZYP00000002", carrier: "Zypco" },
+    { value: "ZYP00000003", label: "ZYP00000003", carrier: "Zypco" }
   ];
 
   const features = [
@@ -110,15 +196,22 @@ const TrackShipment = () => {
                   <div className="flex gap-4">
                     <input 
                       type="text" 
-                      placeholder="Enter tracking number (e.g., ZYP123456789)" 
+                      value={trackingNumber}
+                      onChange={(e) => setTrackingNumber(e.target.value)}
+                      placeholder="Enter tracking number (e.g., ZYP00000001)" 
                       className="flex-1 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent text-lg"
+                      onKeyPress={(e) => e.key === 'Enter' && handleTrackPackage()}
                     />
-                    <button className="bg-[#FEF400] text-[#241F21] px-8 py-4 rounded-lg hover:bg-yellow-500 transition-colors font-bold">
-                      Track
+                    <button 
+                      onClick={() => handleTrackPackage()}
+                      disabled={loading}
+                      className="bg-[#FEF400] text-[#241F21] px-8 py-4 rounded-lg hover:bg-yellow-500 transition-colors font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loading ? 'Tracking...' : 'Track'}
                     </button>
                   </div>
                   <p className="text-sm text-gray-500 mt-2">
-                    You can also track using reference number or phone number used for shipping
+                    You can track using tracking ID from your shipment receipt
                   </p>
                 </div>
 
@@ -129,6 +222,10 @@ const TrackShipment = () => {
                     {quickTrackOptions.map((option, index) => (
                       <button 
                         key={index}
+                        onClick={() => {
+                          setTrackingNumber(option.value);
+                          handleTrackPackage(option.value);
+                        }}
                         className="p-3 border border-gray-300 rounded-lg hover:border-[#FEF400] hover:bg-yellow-50 transition-colors text-left"
                       >
                         <div className="font-semibold text-[#241F21]">{option.label}</div>
@@ -137,119 +234,105 @@ const TrackShipment = () => {
                     ))}
                   </div>
                 </div>
+
+                {/* Error Message */}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center">
+                      <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
+                      <p className="text-red-700">{error}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Sample Tracking Result */}
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
-              <div className="bg-[#241F21] text-white p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-bold">Tracking Number: ZYP123456789</h3>
-                    <p className="text-gray-300">International Express Delivery</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-[#FEF400] font-bold text-lg">In Transit</div>
-                    <div className="text-sm text-gray-300">Expected: Jan 17, 2024</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-8">
-                {/* Package Info */}
-                <div className="grid md:grid-cols-3 gap-6 mb-8 p-6 bg-gray-50 rounded-lg">
-                  <div>
-                    <h4 className="font-semibold text-[#241F21] mb-2">From</h4>
-                    <p className="text-gray-600 text-sm">
-                      John Doe<br />
-                      Dhaka, Bangladesh<br />
-                      +880 1234567890
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-[#241F21] mb-2">To</h4>
-                    <p className="text-gray-600 text-sm">
-                      Jane Smith<br />
-                      New York, USA<br />
-                      +1 234-567-8900
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-[#241F21] mb-2">Package Details</h4>
-                    <p className="text-gray-600 text-sm">
-                      Weight: 2.5 kg<br />
-                      Service: Express<br />
-                      Value: ৳5,000
-                    </p>
-                  </div>
-                </div>
-
-                {/* Tracking Timeline */}
-                <div>
-                  <h4 className="text-xl font-semibold text-[#241F21] mb-6">Tracking History</h4>
-                  <div className="space-y-6">
-                    {trackingSteps.map((step, index) => (
-                      <div key={index} className="flex items-start">
-                        <div className="flex-shrink-0 mr-4">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                            step.status === 'completed' ? 'bg-green-100' :
-                            step.status === 'current' ? 'bg-yellow-100' : 'bg-gray-100'
-                          }`}>
-                            {step.icon}
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-2">
-                            <h5 className={`font-semibold ${
-                              step.status === 'completed' ? 'text-green-700' :
-                              step.status === 'current' ? 'text-[#241F21]' : 'text-gray-400'
-                            }`}>
-                              {step.title}
-                            </h5>
-                            <span className={`text-sm ${
-                              step.status === 'completed' ? 'text-green-600' :
-                              step.status === 'current' ? 'text-[#241F21]' : 'text-gray-400'
-                            }`}>
-                              {step.timestamp}
-                            </span>
-                          </div>
-                          <p className={`text-sm mb-1 ${
-                            step.status === 'completed' ? 'text-green-600' :
-                            step.status === 'current' ? 'text-gray-700' : 'text-gray-400'
-                          }`}>
-                            {step.description}
-                          </p>
-                          <p className={`text-xs ${
-                            step.status === 'completed' ? 'text-green-500' :
-                            step.status === 'current' ? 'text-gray-600' : 'text-gray-400'
-                          }`}>
-                            📍 {step.location}
-                          </p>
-                        </div>
+          {/* Tracking Results */}
+          {trackingData && (
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+                <div className="bg-[#241F21] text-white p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold">Tracking Number: {trackingData.trackId}</h3>
+                      <p className="text-gray-300">Order ID: {trackingData.order}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className={`font-bold text-lg ${getStatusColor(trackingData.currentStatus)}`}>
+                        {formatStatus(trackingData.currentStatus)}
                       </div>
-                    ))}
+                      {trackingData.estimatedDelivery && (
+                        <div className="text-sm text-gray-300">
+                          Expected: {formatDate(trackingData.estimatedDelivery)}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                  <div className="flex flex-wrap gap-4">
-                    <button className="bg-[#FEF400] text-[#241F21] py-2 px-6 rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
-                      Get SMS Updates
-                    </button>
-                    <button className="border-2 border-[#241F21] text-[#241F21] py-2 px-6 rounded-lg hover:bg-[#241F21] hover:text-white transition-colors font-semibold">
-                      Download Receipt
-                    </button>
-                    <button className="border-2 border-gray-300 text-gray-700 py-2 px-6 rounded-lg hover:bg-gray-50 transition-colors font-semibold">
-                      Contact Support
-                    </button>
+                <div className="p-8">
+                  {/* Tracking Timeline */}
+                  <div>
+                    <h4 className="text-xl font-semibold text-[#241F21] mb-6">Tracking History</h4>
+                    {trackingData.history.length > 0 ? (
+                      <div className="space-y-6">
+                        {trackingData.history.map((step, index) => (
+                          <div key={index} className="flex items-start">
+                            <div className="flex-shrink-0 mr-4">
+                              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gray-100">
+                                {getStatusIcon(step.status)}
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-2">
+                                <h5 className={`font-semibold ${getStatusColor(step.status)}`}>
+                                  {formatStatus(step.status)}
+                                </h5>
+                                <span className="text-sm text-gray-600">
+                                  {formatDate(step.timestamp)}
+                                </span>
+                              </div>
+                              {step.description && (
+                                <p className="text-sm text-gray-700 mb-1">
+                                  {step.description}
+                                </p>
+                              )}
+                              {(step.location.city || step.location.country) && (
+                                <p className="text-xs text-gray-600">
+                                  📍 {step.location.city} {step.location.country}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600">No tracking history available yet.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="mt-8 pt-6 border-t border-gray-200">
+                    <div className="flex flex-wrap gap-4">
+                      <button className="bg-[#FEF400] text-[#241F21] py-2 px-6 rounded-lg hover:bg-yellow-500 transition-colors font-semibold">
+                        Get SMS Updates
+                      </button>
+                      <button className="border-2 border-[#241F21] text-[#241F21] py-2 px-6 rounded-lg hover:bg-[#241F21] hover:text-white transition-colors font-semibold">
+                        Download Receipt
+                      </button>
+                      <button className="border-2 border-gray-300 text-gray-700 py-2 px-6 rounded-lg hover:bg-gray-50 transition-colors font-semibold">
+                        Contact Support
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -308,7 +391,7 @@ const TrackShipment = () => {
                 <p className="text-gray-600 text-sm">{'"In Transit"'} means your package is moving through our delivery network towards its destination.</p>
               </div>
               <div>
-                <h4 className="font-semibent text-[#241F21] mb-2">How do I get delivery notifications?</h4>
+                <h4 className="font-semibold text-[#241F21] mb-2">How do I get delivery notifications?</h4>
                 <p className="text-gray-600 text-sm">Enable SMS or email notifications during shipping, or click {'"Get SMS Updates"'} on the tracking page.</p>
               </div>
               <div>

@@ -1,25 +1,130 @@
+'use client';
+
 import PageHeader from "@/utilities/PageHeader";
-import { Clock, MapPin, Package, Shield, Truck, User } from "lucide-react";
+import { Clock, MapPin, Package, Shield, Truck, User, CheckCircle, AlertCircle } from "lucide-react";
+import { useState } from "react";
+import { postRequestSend } from "@/components/ApiCall/methord";
+import { ROOT_API } from "@/components/ApiCall/url";
+
+interface OrderFormData {
+  parcel: {
+    sender: {
+      name: string;
+      phone: string;
+      email: string;
+      address: {
+        address: string;
+        city: string;
+        zipCode: string;
+        country: string;
+      };
+    };
+    receiver: {
+      name: string;
+      phone: string;
+      email: string;
+      address: {
+        address: string;
+        city: string;
+        zipCode: string;
+        country: string;
+      };
+    };
+    weight: string;
+    serviceType: string;
+    priority: 'normal' | 'express' | 'super-express';
+    orderType: 'document' | 'parcel' | 'e-commerce';
+    item: Array<{
+      name: string;
+      quantity: number;
+      unitPrice: number;
+      totalPrice: number;
+    }>;
+    customerNote: string;
+  };
+  payment?: {
+    pType: string;
+    pAmount: number;
+    pOfferDiscount: number;
+    pExtraCharge: number;
+    pDiscount: number;
+    pReceived: number;
+    pRefunded: number;
+  };
+}
+
+interface ApiResponse {
+  _id: string;
+  trackId: string;
+  orderDate: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const CreateShipment = () => {
+  const [formData, setFormData] = useState<OrderFormData>({
+    parcel: {
+      sender: {
+        name: '',
+        phone: '',
+        email: '',
+        address: {
+          address: '',
+          city: '',
+          zipCode: '',
+          country: ''
+        }
+      },
+      receiver: {
+        name: '',
+        phone: '',
+        email: '',
+        address: {
+          address: '',
+          city: '',
+          zipCode: '',
+          country: ''
+        }
+      },
+      weight: '',
+      serviceType: 'standard',
+      priority: 'normal',
+      orderType: 'parcel',
+      item: [{
+        name: '',
+        quantity: 1,
+        unitPrice: 0,
+        totalPrice: 0
+      }],
+      customerNote: ''
+    }
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState<ApiResponse | null>(null);
+  const [error, setError] = useState('');
+
   const serviceTypes = [
     {
       value: "express",
       label: "Express Delivery",
       time: "1-3 days",
       icon: "⚡",
+      priority: "super-express" as const
     },
     {
       value: "standard",
-      label: "Standard Delivery",
+      label: "Standard Delivery", 
       time: "3-5 days",
       icon: "📦",
+      priority: "express" as const
     },
     {
       value: "economy",
       label: "Economy Delivery",
       time: "5-7 days",
       icon: "🚛",
+      priority: "normal" as const
     },
   ];
 
@@ -37,12 +142,179 @@ const CreateShipment = () => {
       maxWeight: "30 kg",
     },
     {
-      value: "freight",
-      label: "Freight",
-      description: "Heavy or bulk items",
+      value: "e-commerce",
+      label: "E-commerce",
+      description: "Online store items",
       maxWeight: "No limit",
     },
   ];
+
+  const updateFormField = (section: 'sender' | 'receiver', field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      parcel: {
+        ...prev.parcel,
+        [section]: {
+          ...prev.parcel[section],
+          [field]: value
+        }
+      }
+    }));
+  };
+
+  const updateAddressField = (section: 'sender' | 'receiver', field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      parcel: {
+        ...prev.parcel,
+        [section]: {
+          ...prev.parcel[section],
+          address: {
+            ...prev.parcel[section].address,
+            [field]: value
+          }
+        }
+      }
+    }));
+  };
+
+  const updateParcelField = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      parcel: {
+        ...prev.parcel,
+        [field]: value
+      }
+    }));
+  };
+
+  const updateItem = (index: number, field: string, value: string | number) => {
+    setFormData(prev => {
+      const newItems = [...prev.parcel.item];
+      newItems[index] = {
+        ...newItems[index],
+        [field]: value
+      };
+      
+      // Auto-calculate totalPrice
+      if (field === 'quantity' || field === 'unitPrice') {
+        newItems[index].totalPrice = newItems[index].quantity * newItems[index].unitPrice;
+      }
+      
+      return {
+        ...prev,
+        parcel: {
+          ...prev.parcel,
+          item: newItems
+        }
+      };
+    });
+  };
+
+  const addItem = () => {
+    setFormData(prev => ({
+      ...prev,
+      parcel: {
+        ...prev.parcel,
+        item: [...prev.parcel.item, {
+          name: '',
+          quantity: 1,
+          unitPrice: 0,
+          totalPrice: 0
+        }]
+      }
+    }));
+  };
+
+  const removeItem = (index: number) => {
+    if (formData.parcel.item.length > 1) {
+      setFormData(prev => ({
+        ...prev,
+        parcel: {
+          ...prev.parcel,
+          item: prev.parcel.item.filter((_, i) => i !== index)
+        }
+      }));
+    }
+  };
+
+  const validateForm = (): string | null => {
+    const { parcel } = formData;
+    
+    if (!parcel.sender.name.trim()) return 'Sender name is required';
+    if (!parcel.sender.phone.trim()) return 'Sender phone is required';
+    if (!parcel.sender.email.trim()) return 'Sender email is required';
+    if (!parcel.sender.address.address.trim()) return 'Sender address is required';
+    
+    if (!parcel.receiver.name.trim()) return 'Receiver name is required';
+    if (!parcel.receiver.phone.trim()) return 'Receiver phone is required';
+    if (!parcel.receiver.address.address.trim()) return 'Receiver address is required';
+    if (!parcel.receiver.address.country.trim()) return 'Destination country is required';
+    
+    if (!parcel.weight.trim()) return 'Package weight is required';
+    
+    for (let i = 0; i < parcel.item.length; i++) {
+      const item = parcel.item[i];
+      if (!item.name.trim()) return `Item ${i + 1} name is required`;
+      if (item.quantity <= 0) return `Item ${i + 1} quantity must be greater than 0`;
+      if (item.unitPrice < 0) return `Item ${i + 1} unit price cannot be negative`;
+    }
+    
+    return null;
+  };
+
+  const handleSubmit = async () => {
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    
+    try {
+      const response = await postRequestSend<OrderFormData, ApiResponse>(
+        `${ROOT_API}orders`,
+        {},
+        formData
+      );
+      
+      if (response.status === 201 && response.data) {
+        setSuccess(response.data);
+        setError('');
+        // Reset form
+        setFormData({
+          parcel: {
+            sender: {
+              name: '',
+              phone: '',
+              email: '',
+              address: { address: '', city: '', zipCode: '', country: '' }
+            },
+            receiver: {
+              name: '',
+              phone: '',
+              email: '',
+              address: { address: '', city: '', zipCode: '', country: '' }
+            },
+            weight: '',
+            serviceType: 'standard',
+            priority: 'normal',
+            orderType: 'parcel',
+            item: [{ name: '', quantity: 1, unitPrice: 0, totalPrice: 0 }],
+            customerNote: ''
+          }
+        });
+      } else {
+        setError(response.message || 'Failed to create shipment');
+      }
+    } catch (err) {
+      setError('Failed to create shipment. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const features = [
     {
@@ -74,6 +346,64 @@ const CreateShipment = () => {
     "Make payment",
     "Track your shipment",
   ];
+
+  if (success) {
+    return (
+      <div className="w-full h-auto bg-[#241F21]">
+        <PageHeader
+          title="SHIP AND TRACK"
+          subtitle="CREATE SHIPMENT"
+          mainLink="/ship-and-track"
+          subLink="/ship-and-track/create-shipment"
+        />
+        
+        <div className="w-full bg-white">
+          <div className="container mx-auto px-4 py-16">
+            <div className="max-w-2xl mx-auto text-center">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-8 mb-8">
+                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                <h2 className="text-3xl font-bold text-green-700 mb-4">Shipment Created Successfully!</h2>
+                <p className="text-green-600 mb-6">Your package has been registered and is ready for pickup.</p>
+                
+                <div className="bg-white rounded-lg p-6 border border-green-200">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4">Shipment Details</h3>
+                  <div className="space-y-2 text-left">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Tracking ID:</span>
+                      <span className="font-bold text-[#241F21]">{success.trackId}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Order ID:</span>
+                      <span>{success._id}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Created:</span>
+                      <span>{new Date(success.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={() => window.location.href = `/ship-and-track/track-shipment`}
+                  className="bg-[#FEF400] text-[#241F21] px-8 py-3 rounded-lg hover:bg-yellow-500 transition-colors font-bold"
+                >
+                  Track Your Shipment
+                </button>
+                <button
+                  onClick={() => setSuccess(null)}
+                  className="border-2 border-[#241F21] text-[#241F21] px-8 py-3 rounded-lg hover:bg-[#241F21] hover:text-white transition-colors font-bold"
+                >
+                  Create Another Shipment
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-auto bg-[#241F21]">
@@ -113,6 +443,16 @@ const CreateShipment = () => {
               </div>
 
               <div className="p-8">
+                {/* Error Message */}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
+                    <div className="flex items-center">
+                      <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
+                      <p className="text-red-700">{error}</p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Sender Information */}
                 <div className="mb-8">
                   <div className="flex items-center mb-4">
@@ -131,6 +471,8 @@ const CreateShipment = () => {
                       </label>
                       <input
                         type="text"
+                        value={formData.parcel.sender.name}
+                        onChange={(e) => updateFormField('sender', 'name', e.target.value)}
                         placeholder="Enter sender's name"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -141,6 +483,8 @@ const CreateShipment = () => {
                       </label>
                       <input
                         type="tel"
+                        value={formData.parcel.sender.phone}
+                        onChange={(e) => updateFormField('sender', 'phone', e.target.value)}
                         placeholder="+880 1XXX XXXXXX"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -151,17 +495,21 @@ const CreateShipment = () => {
                       </label>
                       <input
                         type="email"
+                        value={formData.parcel.sender.email}
+                        onChange={(e) => updateFormField('sender', 'email', e.target.value)}
                         placeholder="sender@example.com"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Company (Optional)
+                        City
                       </label>
                       <input
                         type="text"
-                        placeholder="Company name"
+                        value={formData.parcel.sender.address.city}
+                        onChange={(e) => updateAddressField('sender', 'city', e.target.value)}
+                        placeholder="City name"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
                     </div>
@@ -171,6 +519,8 @@ const CreateShipment = () => {
                       </label>
                       <textarea
                         rows={3}
+                        value={formData.parcel.sender.address.address}
+                        onChange={(e) => updateAddressField('sender', 'address', e.target.value)}
                         placeholder="Enter complete pickup address with area, city, and postal code"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       ></textarea>
@@ -196,6 +546,8 @@ const CreateShipment = () => {
                       </label>
                       <input
                         type="text"
+                        value={formData.parcel.receiver.name}
+                        onChange={(e) => updateFormField('receiver', 'name', e.target.value)}
                         placeholder="Enter recipient's name"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -206,6 +558,8 @@ const CreateShipment = () => {
                       </label>
                       <input
                         type="tel"
+                        value={formData.parcel.receiver.phone}
+                        onChange={(e) => updateFormField('receiver', 'phone', e.target.value)}
                         placeholder="Recipient's phone number"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -216,17 +570,21 @@ const CreateShipment = () => {
                       </label>
                       <input
                         type="email"
+                        value={formData.parcel.receiver.email}
+                        onChange={(e) => updateFormField('receiver', 'email', e.target.value)}
                         placeholder="recipient@example.com"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Company (Optional)
+                        City
                       </label>
                       <input
                         type="text"
-                        placeholder="Company name"
+                        value={formData.parcel.receiver.address.city}
+                        onChange={(e) => updateAddressField('receiver', 'city', e.target.value)}
+                        placeholder="City name"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
                     </div>
@@ -234,24 +592,30 @@ const CreateShipment = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Country *
                       </label>
-                      <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent">
-                        <option>Select destination country</option>
-                        <option>United States</option>
-                        <option>United Kingdom</option>
-                        <option>Canada</option>
-                        <option>Australia</option>
-                        <option>Germany</option>
-                        <option>France</option>
-                        <option>India</option>
-                        <option>Singapore</option>
+                      <select 
+                        value={formData.parcel.receiver.address.country}
+                        onChange={(e) => updateAddressField('receiver', 'country', e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
+                      >
+                        <option value="">Select destination country</option>
+                        <option value="United States">United States</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="Canada">Canada</option>
+                        <option value="Australia">Australia</option>
+                        <option value="Germany">Germany</option>
+                        <option value="France">France</option>
+                        <option value="India">India</option>
+                        <option value="Singapore">Singapore</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Postal Code *
+                        Postal Code
                       </label>
                       <input
                         type="text"
+                        value={formData.parcel.receiver.address.zipCode}
+                        onChange={(e) => updateAddressField('receiver', 'zipCode', e.target.value)}
                         placeholder="Postal/ZIP code"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
@@ -262,6 +626,8 @@ const CreateShipment = () => {
                       </label>
                       <textarea
                         rows={3}
+                        value={formData.parcel.receiver.address.address}
+                        onChange={(e) => updateAddressField('receiver', 'address', e.target.value)}
                         placeholder="Enter complete delivery address"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       ></textarea>
@@ -285,13 +651,20 @@ const CreateShipment = () => {
                     {packageTypes.map((type) => (
                       <div
                         key={type.value}
-                        className="border border-gray-300 rounded-lg p-4 hover:border-[#FEF400] hover:bg-yellow-50 cursor-pointer transition-colors"
+                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                          formData.parcel.orderType === type.value 
+                            ? 'border-[#FEF400] bg-yellow-50' 
+                            : 'border-gray-300 hover:border-[#FEF400] hover:bg-yellow-50'
+                        }`}
+                        onClick={() => updateParcelField('orderType', type.value)}
                       >
                         <div className="flex items-center mb-2">
                           <input
                             type="radio"
                             name="packageType"
                             value={type.value}
+                            checked={formData.parcel.orderType === type.value}
+                            onChange={() => updateParcelField('orderType', type.value)}
                             className="mr-3"
                           />
                           <h5 className="font-semibold text-[#241F21]">
@@ -308,74 +681,106 @@ const CreateShipment = () => {
                     ))}
                   </div>
 
-                  <div className="grid md:grid-cols-4 gap-6">
+                  <div className="grid md:grid-cols-2 gap-6 mb-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Weight (kg) *
                       </label>
                       <input
-                        type="number"
-                        step="0.1"
+                        type="text"
+                        value={formData.parcel.weight}
+                        onChange={(e) => updateParcelField('weight', e.target.value)}
                         placeholder="0.0"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Length (cm)
+                        Special Instructions
                       </label>
                       <input
-                        type="number"
-                        placeholder="0"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Width (cm)
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="0"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Height (cm)
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="0"
+                        type="text"
+                        value={formData.parcel.customerNote}
+                        onChange={(e) => updateParcelField('customerNote', e.target.value)}
+                        placeholder="Any special instructions"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
                       />
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-6 mt-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Package Contents *
-                      </label>
-                      <textarea
-                        rows={3}
-                        placeholder="Describe the contents of your package"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                      ></textarea>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Declared Value (৳) *
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="0"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        For insurance and customs purposes
-                      </p>
-                    </div>
+                  {/* Items */}
+                  <div>
+                    <h5 className="text-lg font-semibold text-[#241F21] mb-4">Package Contents</h5>
+                    {formData.parcel.item.map((item, index) => (
+                      <div key={index} className="grid md:grid-cols-5 gap-4 mb-4 p-4 border border-gray-200 rounded-lg">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Item Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={item.name}
+                            onChange={(e) => updateItem(index, 'name', e.target.value)}
+                            placeholder="Item name"
+                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Quantity *
+                          </label>
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 0)}
+                            min="1"
+                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Unit Price (৳)
+                          </label>
+                          <input
+                            type="number"
+                            value={item.unitPrice}
+                            onChange={(e) => updateItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                            min="0"
+                            step="0.01"
+                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Total Price (৳)
+                          </label>
+                          <input
+                            type="number"
+                            value={item.totalPrice}
+                            readOnly
+                            className="w-full p-2 border border-gray-300 rounded-lg bg-gray-50"
+                          />
+                        </div>
+                        <div className="flex items-end">
+                          {formData.parcel.item.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeItem(index)}
+                              className="text-red-600 hover:text-red-800 p-2"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addItem}
+                      className="text-[#FEF400] hover:text-yellow-600 font-medium"
+                    >
+                      + Add Another Item
+                    </button>
                   </div>
                 </div>
 
@@ -395,13 +800,26 @@ const CreateShipment = () => {
                     {serviceTypes.map((service) => (
                       <div
                         key={service.value}
-                        className="border border-gray-300 rounded-lg p-4 hover:border-[#FEF400] hover:bg-yellow-50 cursor-pointer transition-colors"
+                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                          formData.parcel.serviceType === service.value 
+                            ? 'border-[#FEF400] bg-yellow-50' 
+                            : 'border-gray-300 hover:border-[#FEF400] hover:bg-yellow-50'
+                        }`}
+                        onClick={() => {
+                          updateParcelField('serviceType', service.value);
+                          updateParcelField('priority', service.priority);
+                        }}
                       >
                         <div className="flex items-center mb-2">
                           <input
                             type="radio"
                             name="serviceType"
                             value={service.value}
+                            checked={formData.parcel.serviceType === service.value}
+                            onChange={() => {
+                              updateParcelField('serviceType', service.value);
+                              updateParcelField('priority', service.priority);
+                            }}
                             className="mr-3"
                           />
                           <span className="text-2xl mr-2">{service.icon}</span>
@@ -417,85 +835,17 @@ const CreateShipment = () => {
                   </div>
                 </div>
 
-                {/* Pickup Schedule */}
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold text-[#241F21] mb-4">
-                    Pickup Schedule
-                  </h4>
-                  <div className="grid md:grid-cols-3 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Pickup Date *
-                      </label>
-                      <input
-                        type="date"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Pickup Time *
-                      </label>
-                      <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent">
-                        <option>9:00 AM - 12:00 PM</option>
-                        <option>12:00 PM - 3:00 PM</option>
-                        <option>3:00 PM - 6:00 PM</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Special Instructions
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Any special pickup instructions"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Additional Options */}
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold text-[#241F21] mb-4">
-                    Additional Options
-                  </h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center">
-                      <input type="checkbox" className="mr-3" />
-                      <label className="text-gray-700">
-                        SMS notifications for delivery updates
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input type="checkbox" className="mr-3" />
-                      <label className="text-gray-700">
-                        Email notifications for delivery updates
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input type="checkbox" className="mr-3" />
-                      <label className="text-gray-700">
-                        Signature required upon delivery
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input type="checkbox" className="mr-3" />
-                      <label className="text-gray-700">
-                        COD (Cash on Delivery) - Collect payment from recipient
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Create Shipment Button */}
                 <div className="text-center">
-                  <button className="bg-[#FEF400] text-[#241F21] py-4 px-12 rounded-lg hover:bg-yellow-500 transition-colors font-bold text-lg">
-                    Create Shipment & Calculate Cost
+                  <button 
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="bg-[#FEF400] text-[#241F21] py-4 px-12 rounded-lg hover:bg-yellow-500 transition-colors font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Creating Shipment...' : 'Create Shipment'}
                   </button>
                   <p className="text-sm text-gray-500 mt-3">
-                    You{"'"}ll see the total cost and can make payment on the
-                    next step
+                    You{"'"}ll receive a tracking number after creating the shipment
                   </p>
                 </div>
               </div>
