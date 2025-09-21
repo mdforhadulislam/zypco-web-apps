@@ -96,7 +96,7 @@ export default function SiteLayout({
     return (
       <>
         <NavBar />
-        <div className="w-full h-[85px]"></div>
+        <div className="w-full h-[99px]"></div>
         {children}
         <FooterBar />
         <Toaster expand={false} position="top-center" closeButton  />

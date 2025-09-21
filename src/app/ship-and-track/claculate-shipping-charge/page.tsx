@@ -21,7 +21,7 @@ const CalculateShippingCharge = () => {
     { name: "UPS", logo: "/ups-logo.png", deliveryTime: "1-3 business days" },
     {
       name: "Local Partner",
-      logo: "/logo.jpg",
+      logo: "/logo.png",
       deliveryTime: "1-3 business days",
     },
   ];

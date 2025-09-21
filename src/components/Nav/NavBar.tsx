@@ -8,11 +8,16 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { useAuth } from "@/hooks/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import Logo from "@/utilities/Logo";
 import {
+  BadgeCheck,
   Building2,
   Calculator,
+  ChevronsUpDown,
   Factory,
+  LogOut,
   Menu,
   PackagePlus,
   PackageSearch,
@@ -26,7 +31,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -139,6 +154,11 @@ const NavData = [
   //   ],
   // },
   {
+    title: "API Integration",
+    href: "/contact",
+    items: [],
+  },
+  {
     title: "Contact",
     href: "/contact",
     items: [],
@@ -159,6 +179,8 @@ const NavData = [
 const NavBar = () => {
   const [navBarScrolled, setNavBarScrolled] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+  const { user } = useAuth();
+  const isMobile = useIsMobile();
 
   const handleScroll = () => {
     const offset = window.scrollY;
@@ -186,7 +208,7 @@ const NavBar = () => {
       <div className="flex items-center justify-between px-4 py-2  ">
         {/* Logo */}
         <div className="flex items-center gap-8">
-          <Logo  />
+          <Logo />
 
           {/* NavigationMenu */}
           <NavigationMenu className="hidden lg:flex">
@@ -311,6 +333,20 @@ const NavBar = () => {
                     href="/contact"
                     className="hover:text-black font-semibold text-black "
                   >
+                    API Integration
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  asChild
+                  className={navigationMenuTriggerStyle()}
+                >
+                  <Link
+                    href="/contact"
+                    className="hover:text-black font-semibold text-black "
+                  >
                     Contact
                   </Link>
                 </NavigationMenuLink>
@@ -339,12 +375,23 @@ const NavBar = () => {
               </Link>
             </li>
           </ul>
-          <Link
-            href={"/auth/login"}
-            className="bg-2 font-semibold  text-[#FEF400] bg-black  hover:bg-black/90 px-6 py-3 rounded-4xl"
-          >
-            Login
-          </Link>
+          {user?.token && (
+            <Avatar className="h-12 w-12  rounded-full cursor-pointer">
+              <AvatarImage src={""} alt={user.name} />
+              <AvatarFallback className="rounded-full bg-black text-white">
+                {user.name.split("")[0]}
+              </AvatarFallback>
+            </Avatar>
+          )}
+
+          {!user?.token && (
+            <Link
+              href={"/auth/login"}
+              className="bg-2 font-semibold  text-[#FEF400] bg-black  hover:bg-black/90 px-6 py-3 rounded-4xl"
+            >
+              Login
+            </Link>
+          )}
 
           {/* Mobile Menu */}
           <div className="block lg:hidden">
@@ -362,13 +409,12 @@ const NavBar = () => {
                 <SheetContent side="right" className="overflow-y-auto ">
                   <SheetHeader className="border-b py-2">
                     <SheetTitle>
-                      <Link
-                        href={"/"}
+                      <div
                         className="flex items-center gap-2"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         <Logo />
-                      </Link>
+                      </div>
                     </SheetTitle>
                   </SheetHeader>
                   <div className="flex flex-col gap-6 p-4 py-1">
@@ -384,21 +430,91 @@ const NavBar = () => {
 
                     <div className="flex flex-col gap-3"></div>
                   </div>
+                  <div className=" relative w-full h-full">
+                    <div className="px-4 w-full absolute bottom-3">
+                      {user?.token && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild className="h-13 w-full">
+                            <Button
+                              size="lg"
+                              className="bg-white text-black hover:bg-white p-2 shadow-4xl"
+                            >
+                              <Avatar className="h-8 w-8 rounded-lg">
+                                <AvatarImage src={""} alt={user.name} />
+                                <AvatarFallback className="rounded-lg">
+                                  {user.name.split("")[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="grid flex-1 text-left text-sm leading-tight">
+                                <span className="truncate font-medium">
+                                  {user.name}
+                                </span>
+                                <span className="truncate text-xs">
+                                  {user.email}
+                                </span>
+                              </div>
+                              <ChevronsUpDown className="ml-auto size-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                            side={isMobile ? "bottom" : "right"}
+                            align="end"
+                            sideOffset={4}
+                          >
+                            <DropdownMenuLabel className="p-0 font-normal">
+                              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                                <Avatar className="h-8 w-8 rounded-lg">
+                                  <AvatarImage src={""} alt={user.name} />
+                                  <AvatarFallback className="rounded-lg">
+                                    CN
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="grid flex-1 text-left text-sm leading-tight">
+                                  <span className="truncate font-medium">
+                                    {user.name}
+                                  </span>
+                                  <span className="truncate text-xs">
+                                    {user.email}
+                                  </span>
+                                </div>
+                              </div>
+                            </DropdownMenuLabel>
 
-                  <div className="w-full h-auto flex gap-3 justify-center align-middle items-center">
-                    <Link
-                      href={"/auth/login"}
-                      className="px-3 py-4 flex justify-center align-middle items-center w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 cursor-pointer font-bold text-white rounded-lg"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      href={"/auth/register"}
-                      className="px-3 py-4 text-white w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 rounded-lg cursor-pointer font-bold flex justify-center align-middle items-center"
-                    >
-                      SingUp
-                    </Link>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuGroup>
+                              <DropdownMenuItem className="cursor-pointer">
+                                <BadgeCheck />
+                                Account
+                              </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="cursor-pointer">
+                              <LogOut />
+                              Log out
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
                   </div>
+
+                  {!user?.token && (
+                    <div className="w-full h-auto flex gap-3 justify-center align-middle items-center">
+                      <Link
+                        href={"/auth/login"}
+                        className="px-3 py-4 flex justify-center align-middle items-center w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 cursor-pointer font-bold text-white rounded-lg"
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        href={"/auth/register"}
+                        className="px-3 py-4 text-white w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 rounded-lg cursor-pointer font-bold flex justify-center align-middle items-center"
+                      >
+                        SingUp
+                      </Link>
+                    </div>
+                  )}
                 </SheetContent>
               </Sheet>
             </div>
