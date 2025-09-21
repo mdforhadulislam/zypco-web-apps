@@ -82,12 +82,18 @@ const ourCompany = [
   {
     id: 12342457,
     title: "Our Services",
-    link: "/about/oour-services",
+    link: "/about/our-services",
   },
   {
     id: 12342457,
     title: "Our Work Process",
     link: "/about/our-work-process",
+  },
+  
+  {
+    id: 12342457,
+    title: "Our Blog",
+    link: "/about/our-blog",
   },
   {
     id: 565343465,

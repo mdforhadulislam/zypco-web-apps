@@ -84,7 +84,7 @@ export default function SiteLayout({
             <div>
               {children}
 
-              <Toaster expand={false} position="top-center" />
+              <Toaster expand={false} position="top-center" closeButton  />
             </div>
           </SidebarInset>
         </SidebarProvider>
@@ -99,7 +99,7 @@ export default function SiteLayout({
         <div className="w-full h-[85px]"></div>
         {children}
         <FooterBar />
-        <Toaster expand={false} position="top-center" />
+        <Toaster expand={false} position="top-center" closeButton  />
       </>
     );
   }

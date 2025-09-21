@@ -72,12 +72,12 @@ const ZypcoLogin = () => {
             <div className="flex flex-col gap-6">
               {/* Logo + Title */}
               <div className="flex flex-col items-center gap-2">
-                <a href="#" className="flex flex-col items-center gap-2 font-medium">
+                <Link href={"/"} className="flex flex-col items-center gap-2 font-medium">
                   <div className="flex size-50 items-center justify-center rounded-md">
                     <Logo width={100} height={120} isFooter={true} />
                   </div>
                   <span className="sr-only">Zypco</span>
-                </a>
+                </Link>
                 <h1 className="text-xl font-bold">Welcome to Zypco</h1>
                 <div className="text-center text-sm">
                   Don&apos;t have an account?{" "}

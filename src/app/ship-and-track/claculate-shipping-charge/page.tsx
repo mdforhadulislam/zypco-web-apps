@@ -26,12 +26,6 @@ const CalculateShippingCharge = () => {
     },
   ];
 
-  const packageTypes = [
-    { value: "document", label: "Document", icon: "📄" },
-    { value: "parcel", label: "Parcel", icon: "📦" },
-    { value: "freight", label: "Freight", icon: "🚛" },
-  ];
-
   const features = [
     {
       icon: <Calculator className="w-6 h-6 text-[#FEF400]" strokeWidth={1.5} />,
@@ -72,14 +66,13 @@ const CalculateShippingCharge = () => {
               Calculate Shipping Charges
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Get instant shipping quotes from multiple carriers. Compare
-              prices, delivery times, and choose the best option for your
-              package delivery anywhere in the world.
+              Select destination country and shipment type (B2B or B2C) to get
+              instant shipping quotes.
             </p>
           </div>
 
           {/* Calculator Form */}
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-3xl mx-auto">
             <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-8">
               <div className="flex items-center mb-6">
                 <Calculator
@@ -92,161 +85,44 @@ const CalculateShippingCharge = () => {
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
-                {/* From Section */}
-                <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-[#241F21] mb-4">
-                    From (Origin)
-                  </h4>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Country
-                    </label>
-                    <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent">
-                      <option>Bangladesh</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      City
-                    </label>
-                    <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent">
-                      <option>Select City</option>
-                      <option>Dhaka</option>
-                      <option>Chittagong</option>
-                      <option>Sylhet</option>
-                      <option>Rajshahi</option>
-                      <option>Khulna</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Postal Code
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter postal code"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                    />
-                  </div>
+                {/* From Country */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    From Country
+                  </label>
+                  <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent">
+                    <option>Bangladesh</option>
+                  </select>
                 </div>
 
-                {/* To Section */}
-                <div className="space-y-4">
-                  <h4 className="text-lg font-semibold text-[#241F21] mb-4">
-                    To (Destination)
-                  </h4>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Country
-                    </label>
-                    <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent">
-                      <option>Select Country</option>
-                      <option>United States</option>
-                      <option>United Kingdom</option>
-                      <option>Canada</option>
-                      <option>Australia</option>
-                      <option>Germany</option>
-                      <option>France</option>
-                      <option>India</option>
-                      <option>Singapore</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter destination city"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Postal Code
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter postal code"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                    />
-                  </div>
+                {/* To Country */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    To Country
+                  </label>
+                  <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent">
+                    <option>Select Country</option>
+                    <option>United States</option>
+                    <option>United Kingdom</option>
+                    <option>Canada</option>
+                    <option>Australia</option>
+                    <option>Germany</option>
+                    <option>France</option>
+                    <option>India</option>
+                    <option>Singapore</option>
+                  </select>
                 </div>
               </div>
 
-              {/* Package Details */}
-              <div className="mt-8 pt-8 border-t border-gray-200">
-                <h4 className="text-lg font-semibold text-[#241F21] mb-4">
-                  Package Details
-                </h4>
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Package Type
-                    </label>
-                    <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent">
-                      {packageTypes.map((type) => (
-                        <option key={type.value} value={type.value}>
-                          {type.icon} {type.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Weight (kg)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      placeholder="0.0"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Declared Value (৳)
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="0"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-6 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Length (cm)
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="0"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Width (cm)
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="0"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Height (cm)
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="0"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent"
-                    />
-                  </div>
-                </div>
+              {/* Shipment Type */}
+              <div className="mt-8">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Shipment Type
+                </label>
+                <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent">
+                  <option value="b2b">B2B (Business to Business)</option>
+                  <option value="b2c">B2C (Business to Customer)</option>
+                </select>
               </div>
 
               {/* Calculate Button */}

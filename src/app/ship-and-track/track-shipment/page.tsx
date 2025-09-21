@@ -205,12 +205,12 @@ const TrackShipment = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Tracking Number
                   </label>
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 flex-col sm:flex-row">
                     <input
                       type="text"
                       value={trackingNumber}
                       onChange={(e) => setTrackingNumber(e.target.value)}
-                      placeholder="Enter tracking number (e.g., ZYP00000001)"
+                      placeholder="Enter tracking number(e.g.,ZYP00000001)"
                       className="flex-1 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FEF400] focus:border-transparent text-lg"
                       onKeyPress={(e) =>
                         e.key === "Enter" && handleTrackPackage()
