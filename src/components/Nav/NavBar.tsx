@@ -496,25 +496,26 @@ const NavBar = () => {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       )}
-                    </div>
-                  </div>
-
-                  {!user?.token && (
+                       {!user?.token && (
                     <div className="w-full h-auto flex gap-3 justify-center align-middle items-center">
                       <Link
                         href={"/auth/login"}
-                        className="px-3 py-4 flex justify-center align-middle items-center w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 cursor-pointer font-bold text-white rounded-lg"
+                        className="px-3 py-4 flex justify-center align-middle items-center w-[48%] bg-[#241F21] hover:bg-[#241F21]/80 cursor-pointer font-bold text-white rounded-lg"
                       >
                         Login
                       </Link>
                       <Link
                         href={"/auth/register"}
-                        className="px-3 py-4 text-white w-[45%] bg-[#241F21] hover:bg-[#241F21]/80 rounded-lg cursor-pointer font-bold flex justify-center align-middle items-center"
+                        className="px-3 py-4 text-white w-[48%] bg-[#241F21] hover:bg-[#241F21]/80 rounded-lg cursor-pointer font-bold flex justify-center align-middle items-center"
                       >
                         SingUp
                       </Link>
                     </div>
                   )}
+                    </div>
+                  </div>
+
+                 
                 </SheetContent>
               </Sheet>
             </div>

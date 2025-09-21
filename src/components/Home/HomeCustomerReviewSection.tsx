@@ -77,7 +77,7 @@ const HomeCustomerReviewSection = () => {
   }, [api1, api2]);
 
   return (
-    <section className="py-32 w-full h-auto bg-[#241F21] px-4">
+    <section className="py-26 w-full h-auto bg-[#241F21] px-4">
       <div className="container m-auto">
         {/* <div className="container flex flex-col items-center gap-6">
           <h2 className="mb-2 text-center text-3xl font-semibold lg:text-5xl text-balance">
@@ -106,8 +106,8 @@ const HomeCustomerReviewSection = () => {
                     key={`row1-${index}`}
                     className="pl-4 basis-auto "
                   >
-                    <Card className="max-w-96 p-6 select-none bg-[#FEF400]">
-                      <div className="mb-4 flex gap-4 items-center align-middle">
+                    <Card className="max-w-68 p-3 select-none bg-[#FEF400]">
+                      <div className="mb-2 flex gap-4 items-center align-middle">
                         <Avatar className="size-9 ring-1 ring-input">
                           <AvatarImage
                             src={testimonial.avatar || "/placeholder.svg"}
@@ -120,14 +120,14 @@ const HomeCustomerReviewSection = () => {
                               .join("")}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="text-base">
+                       
                           <p className="font-medium text-lg">
                             {testimonial.name}
                           </p>
                           {/* <p className="text-muted-foreground">{testimonial.role}</p> */}
-                        </div>
+                       
                       </div>
-                      <blockquote className="text-base">
+                      <blockquote className="text-sm">
                         &ldquo;{testimonial.quote}&ldquo;
                       </blockquote>
                     </Card>
@@ -151,8 +151,8 @@ const HomeCustomerReviewSection = () => {
                     key={`row2-${index}`}
                     className="pl-4 basis-auto"
                   >
-                    <Card className="max-w-96 p-6 select-none bg-[#FEF400]">
-                      <div className="mb-4 flex gap-4 items-center align-middle">
+                    <Card className="max-w-68 p-3 select-none bg-[#FEF400]">
+                      <div className="mb-2 flex gap-4 items-center align-middle">
                         <Avatar className="size-9 ring-1 ring-input">
                           <AvatarImage
                             src={testimonial.avatar || "/placeholder.svg"}
@@ -165,12 +165,12 @@ const HomeCustomerReviewSection = () => {
                               .join("")}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="text-base">
-                          <p className="text-lg">{testimonial.name}</p>
-                          {/* <p className="text-muted-foreground">{testimonial.role}</p> */}
-                        </div>
+                     
+                          <p className="text-lg font-medium">{testimonial.name}</p>
+                          
+                    
                       </div>
-                      <blockquote className="text-base">
+                      <blockquote className="text-sm">
                         &quot;{testimonial.quote}&quot;
                       </blockquote>
                     </Card>
