@@ -45,4 +45,37 @@ export const SINGLE_TRACK_API = (trackId: string) =>`${ROOT_API}tracks/${trackId
 export const BLOG_API = `${ROOT_API}blogs/`
 export const SINGLE_BLOG_API =(bloogId:string)=> `${ROOT_API}blogs/${bloogId}`
 
-export const CONTACT_API = `${ROOT_API}`
+export const CONTACT_API = `${ROOT_API}contacts/`
+export const SINGLE_CONTACT_API=(contactId:string) => `${ROOT_API}contacts/${contactId}`
+
+
+export const NOTIFICATION_API = `${ROOT_API}notifications/`
+export const SINGLE_NOTIFICATION_API=(notificationId:string) => `${ROOT_API}notifications/${notificationId}`
+
+export const OFFER_API = `${ROOT_API}offer/`
+export const SINGLE_OFFER_API=(offerId:string) => `${ROOT_API}offers/${offerId}`
+
+export const PICKUP_API = `${ROOT_API}pickups/`
+export const SINGLE_PICKUP_API=(pickupId:string) => `${ROOT_API}pickups/${pickupId}`
+
+export const PRICE_API = `${ROOT_API}prices/`
+export const SINGLE_PRICE_API=(priceId:string) => `${ROOT_API}prices/${priceId}`
+
+export const REVIEW_API = `${ROOT_API}reviews/`
+export const SINGLE_REVIEW_API=(reviewId:string) => `${ROOT_API}reviews/${reviewId}`
+
+ 
+export const ROOT_ANALAYTICS_API = `${ROOT_API}analaytics/`
+export const ADDRESS_ANALAYTICS_API = `${ROOT_API}analaytics/addresses-analytics`
+export const API_KEY_ANALAYTICS_API = `${ROOT_API}analaytics/api-keys-analytics`
+export const CONTACT_ANALAYTICS_API = `${ROOT_API}analaytics/contacts-analytics`
+export const CONTENT_ANALAYTICS_API = `${ROOT_API}analaytics/content-analytics`
+export const COUNTRIES_ANALAYTICS_API = `${ROOT_API}analaytics/countries-analytics`
+export const LOGIN_ANALAYTICS_API = `${ROOT_API}analaytics/login-analytics`
+export const NOTIFICATION_ANALAYTICS_API = `${ROOT_API}analaytics/notifications-analytics`
+export const OFFER_ANALAYTICS_API = `${ROOT_API}analaytics/offers-analytics`
+export const OPERATIONAL_ANALAYTICS_API = `${ROOT_API}analaytics/operational-analytics`
+export const ORDER_ANALAYTICS_API = `${ROOT_API}analaytics/order-analytics`
+export const REVENUE_ANALAYTICS_API = `${ROOT_API}analaytics/revenue-analytics`
+export const REVIEW_ANALAYTICS_API = `${ROOT_API}analaytics/reviews-analytics`
+export const USER_ANALAYTICS_API = `${ROOT_API}analaytics/user-analytics`

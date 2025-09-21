@@ -1,4 +1,3 @@
-
 import {
   BadgeDollarSign,
   Bot,
@@ -14,7 +13,6 @@ import {
 } from "lucide-react";
 
 export const AdminData = {
- 
   navMain: [
     {
       title: "Dashboard",
@@ -98,24 +96,24 @@ export const AdminData = {
     },
     {
       title: "Pickups",
-      url: "#",
+      url: "/dashboard/pickups",
       icon: Package,
       items: [
         {
           title: "All Pickup",
-          url: "#",
+          url: "/dashboard/pickups",
         },
         {
           title: "Pending Pickup",
-          url: "#",
+          url: "/dashboard/pickups",
         },
         {
           title: "Cancel Pickup",
-          url: "#",
+          url: "/dashboard/pickups",
         },
         {
           title: "Done Pickup",
-          url: "#",
+          url: "/dashboard/pickups",
         },
       ],
     },
@@ -232,10 +230,7 @@ export const AdminData = {
   ],
 };
 
-
-
 export const ModaretorData = {
- 
   navMain: [
     {
       title: "Dashboard",
@@ -257,7 +252,7 @@ export const ModaretorData = {
         },
       ],
     },
-  
+
     {
       title: "Pickups",
       url: "#",
@@ -336,7 +331,7 @@ export const ModaretorData = {
       icon: Rss,
       items: [],
     },
- 
+
     {
       title: "Settings",
       url: "#",
@@ -371,10 +366,7 @@ export const ModaretorData = {
   ],
 };
 
-
-
 export const UserData = {
- 
   navMain: [
     {
       title: "Dashboard",
@@ -396,7 +388,7 @@ export const UserData = {
         },
       ],
     },
-  
+
     {
       title: "Pickups",
       url: "#",
@@ -468,8 +460,8 @@ export const UserData = {
       url: "#",
       icon: UserStar,
       items: [],
-    }, 
- 
+    },
+
     {
       title: "Settings",
       url: "#",

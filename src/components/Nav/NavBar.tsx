@@ -24,6 +24,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   Accordion,
@@ -179,8 +180,9 @@ const NavData = [
 const NavBar = () => {
   const [navBarScrolled, setNavBarScrolled] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const isMobile = useIsMobile();
+  const router = useRouter();
 
   const handleScroll = () => {
     const offset = window.scrollY;
@@ -376,12 +378,60 @@ const NavBar = () => {
             </li>
           </ul>
           {user?.token && (
-            <Avatar className="h-12 w-12  rounded-full cursor-pointer">
-              <AvatarImage src={""} alt={user.name} />
-              <AvatarFallback className="rounded-full bg-black text-white">
-                {user.name.split("")[0]}
-              </AvatarFallback>
-            </Avatar>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild className="h-13 w-full">
+                <Avatar className="h-12 w-12  rounded-full cursor-pointer">
+                  <AvatarImage src={""} alt={user.name} />
+                  <AvatarFallback className="rounded-full bg-black text-white">
+                    {user.name.split("")[0]}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                side={isMobile ? "bottom" : "bottom"}
+                align="end"
+                sideOffset={4}
+              >
+                <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarImage src={""} alt={user.name} />
+                      <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-medium">{user.name}</span>
+                      <span className="truncate text-xs">{user.email}</span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => {
+                      router.push("/dashboard");
+                    }}
+                  >
+                    <BadgeCheck />
+                    Account
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => {
+                    logout();
+
+                    router.push("/");
+                  }}
+                >
+                  <LogOut />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
 
           {!user?.token && (
@@ -483,39 +533,48 @@ const NavBar = () => {
 
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
-                              <DropdownMenuItem className="cursor-pointer">
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => {
+                                  router.push("/dashboard");
+                                }}
+                              >
                                 <BadgeCheck />
                                 Account
                               </DropdownMenuItem>
                             </DropdownMenuGroup>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="cursor-pointer">
+                            <DropdownMenuItem
+                              className="cursor-pointer"
+                              onClick={() => {
+                                logout();
+                                router.push("/");
+                              }}
+                            >
                               <LogOut />
                               Log out
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       )}
-                       {!user?.token && (
-                    <div className="w-full h-auto flex gap-3 justify-center align-middle items-center">
-                      <Link
-                        href={"/auth/login"}
-                        className="px-3 py-4 flex justify-center align-middle items-center w-[48%] bg-[#241F21] hover:bg-[#241F21]/80 cursor-pointer font-bold text-white rounded-lg"
-                      >
-                        Login
-                      </Link>
-                      <Link
-                        href={"/auth/register"}
-                        className="px-3 py-4 text-white w-[48%] bg-[#241F21] hover:bg-[#241F21]/80 rounded-lg cursor-pointer font-bold flex justify-center align-middle items-center"
-                      >
-                        SingUp
-                      </Link>
-                    </div>
-                  )}
+                      {!user?.token && (
+                        <div className="w-full h-auto flex gap-3 justify-center align-middle items-center">
+                          <Link
+                            href={"/auth/login"}
+                            className="px-3 py-4 flex justify-center align-middle items-center w-[48%] bg-[#241F21] hover:bg-[#241F21]/80 cursor-pointer font-bold text-white rounded-lg"
+                          >
+                            Login
+                          </Link>
+                          <Link
+                            href={"/auth/register"}
+                            className="px-3 py-4 text-white w-[48%] bg-[#241F21] hover:bg-[#241F21]/80 rounded-lg cursor-pointer font-bold flex justify-center align-middle items-center"
+                          >
+                            SingUp
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   </div>
-
-                 
                 </SheetContent>
               </Sheet>
             </div>

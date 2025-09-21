@@ -10,21 +10,20 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/AuthContext";
 import { useRefreshUser } from "@/hooks/ReFreshTokenContext";
-import Logo from "@/utilities/Logo"; 
+import Logo from "@/utilities/Logo";
+import { useEffect } from "react";
 import { AdminData, ModaretorData, UserData } from "../ApiCall/data";
 import { NavUser } from "./NavIUser";
 import { NavMain } from "./NavMain";
 import { NavSecondary } from "./NavSecondary";
-import { useEffect } from "react";
 
 export function AppSideBar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const auth = useAuth();
-  const { user, refreshUserData } = useRefreshUser();
+  const { refreshUserData } = useRefreshUser();
 
-  useEffect(()=>{
-
+  useEffect(() => {
     refreshUserData();
-  },[])
+  }, []);
 
   const data =
     auth.user?.role == "user"
@@ -69,17 +68,15 @@ export function AppSideBar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Logo />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-bold">ZYPCO COURIER</span>
-                  <span className="truncate text-xs font-semibold">
-                    INTERNATIONAL COURIER
-                  </span>
-                </div>
-              </a>
+              <><div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+                <Logo />
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-bold">ZYPCO COURIER</span>
+                <span className="truncate text-xs font-semibold">
+                  INTERNATIONAL COURIER
+                </span>
+              </div></>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -82,7 +82,7 @@ export default function SiteLayout({
               </div>
             </header>
             <div>
-              {children}
+              <div className="w-full h-auto p-2">{children}</div>
 
               <Toaster expand={false} position="top-center" closeButton  />
             </div>
