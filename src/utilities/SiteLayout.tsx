@@ -42,8 +42,8 @@ export default function SiteLayout({
         <SidebarProvider>
           <AppSideBar />
           <SidebarInset>
-            <div className="w-full h-auto relative">
-              <header className="flex h-16 shrink-0 items-center gap-2 border-b fixed w-full bg-white">
+           
+              <header className="flex h-16 shrink-0 items-center gap-2 border-b">
               <div className="flex items-center gap-2 px-4 relative w-full">
                 <SidebarTrigger className="-ml-1" />
                 <Separator
@@ -94,8 +94,7 @@ export default function SiteLayout({
 
               </div>
             </header>
-            <div className="w-fukk h-17"></div>
-            </div>
+         
             <div>
               <div className="w-full h-auto p-2">{children}</div>
 

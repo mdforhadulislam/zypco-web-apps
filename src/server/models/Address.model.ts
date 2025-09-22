@@ -1,7 +1,7 @@
 import { Document, Schema, Types, model, models } from "mongoose";
 
 export interface IAddress extends Document {
-  user: Types.ObjectId; // Linked User
+  user: Types.ObjectId ; // Linked User
   name: string; // Person Name
   label?: string; // e.g., "Home", "Office"
   addressLine: string; // Street Address
