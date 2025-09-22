@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
-import { models } from "mongoose";
-import { Document, Schema, model } from "mongoose";
+import crypto from "crypto"; 
+import { Document, Schema, model ,models} from "mongoose";
 
 
 

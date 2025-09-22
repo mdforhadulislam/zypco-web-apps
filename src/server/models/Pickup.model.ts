@@ -1,6 +1,5 @@
 import { models } from "mongoose";
 import { Document, Schema, Types, model } from "mongoose";
-
 // Pickup Interface
 export interface IPickup extends Document {
   user: Types.ObjectId; // User reference

@@ -53,6 +53,8 @@ export async function GET(
       req,
     });
   } catch (error: unknown) {
+    console.log(error);
+    
     const msg = error instanceof Error ? error.message : "Failed to fetch pickups";
     return errorResponse({ status: 500, message: msg, error, req });
   }
