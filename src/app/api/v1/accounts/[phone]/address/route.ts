@@ -38,7 +38,6 @@ export async function GET(
 
     const addresses = await Address.find({
       user: user._id,
-      isDeleted: false,
     }).sort({ isDefault: -1, createdAt: -1 });
     return successResponse({
       status: 200,

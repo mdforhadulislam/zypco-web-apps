@@ -1,4 +1,5 @@
 type RequestResponse<T> = {
+  meta: any;
   data: T | null;
   message: string;
   status: number;

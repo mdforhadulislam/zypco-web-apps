@@ -101,8 +101,7 @@ export async function POST(req: NextRequest) {
     }
 
     const pickup = new Pickup({
-      user: body.user,
-      moderator: body.moderator,
+      user: body.user, 
       pickupAddress: body.pickupAddress,
       preferredDate: new Date(body.preferredDate),
       preferredTimeSlot: body.preferredTimeSlot || "",
