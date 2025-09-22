@@ -3,15 +3,6 @@ import { getRequestSend } from "@/components/ApiCall/methord";
 import { PICKUP_API } from "@/components/ApiCall/url";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -20,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Ellipsis } from "lucide-react";
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 
@@ -47,7 +37,7 @@ const DashboardPickups = () => {
 
   const fetchPickups = async () => {
     const res = await getRequestSend(`${PICKUP_API}?page=${page}&limit=10`);
-    const data = res.data;
+    const data = res.data as Pickup[];
     console.log(data);
     setPickups((prev) => [...prev, ...data]);
     if (page >= res.meta.totalPages) {
@@ -108,9 +98,9 @@ const DashboardPickups = () => {
                     <TableCell className="text-center">
                       {pickup?.user.phone}
                     </TableCell>
-                    
+
                     <TableCell className="text-center">
-                      {pickup.notes} 
+                      {pickup.notes}
                     </TableCell>
 
                     <TableCell className="text-center">
@@ -200,11 +190,13 @@ const DashboardPickups = () => {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu> */}
-                     <div className="flex gap-2 flex-row items-center align-middle justify-center"><Badge className=" cursor-pointer">View</Badge>
-                     <Badge  className=" cursor-pointer">Edit</Badge>
-                     <Badge  className=" cursor-pointer">Confirm</Badge>
-                     <Badge  className=" cursor-pointer">Cancelled</Badge>
-                     <Badge  className=" cursor-pointer">Delete</Badge></div>
+                      <div className="flex gap-2 flex-row items-center align-middle justify-center">
+                        <Badge className=" cursor-pointer">View</Badge>
+                        <Badge className=" cursor-pointer">Edit</Badge>
+                        <Badge className=" cursor-pointer">Confirm</Badge>
+                        <Badge className=" cursor-pointer">Cancelled</Badge>
+                        <Badge className=" cursor-pointer">Delete</Badge>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
