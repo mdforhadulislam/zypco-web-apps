@@ -2,7 +2,14 @@ import React from 'react'
 
 const DashboardPickups = () => {
   return (
-    <div>DashboardPickups</div>
+    <div>
+      
+
+
+
+
+      
+    </div>
   )
 }
 

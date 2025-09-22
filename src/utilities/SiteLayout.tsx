@@ -52,8 +52,8 @@ export default function SiteLayout({
                 <Breadcrumb>
                   <BreadcrumbList>
                     {pathNameArray.map((item) => (
-                      <div key={item}>
-                        <BreadcrumbItem className="hidden md:block">
+                      <div key={item} className="hidden items-center align-middle gap-2 md:flex ">
+                        <BreadcrumbItem>
                           <BreadcrumbLink
                             href={`/${pathName}`}
                             className=" capitalize"
@@ -62,12 +62,24 @@ export default function SiteLayout({
                           </BreadcrumbLink>
                         </BreadcrumbItem>
                         {pathNameArray.length >= 3 ? (
-                          <BreadcrumbSeparator className="hidden md:block" />
+                          <BreadcrumbSeparator />
                         ) : (
                           ""
                         )}
                       </div>
                     ))}
+                    {
+                      pathNameArray.length>0 && <BreadcrumbItem>
+                          <BreadcrumbLink
+                            href={`/${pathName}`}
+                            className=" capitalize md:hidden block"
+                          >
+                          
+                            {pathNameArray[2]}
+                          </BreadcrumbLink>
+                        </BreadcrumbItem>
+                    }
+
                   </BreadcrumbList>
                 </Breadcrumb>
 

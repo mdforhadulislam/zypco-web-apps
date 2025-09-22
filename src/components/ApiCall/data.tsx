@@ -119,16 +119,16 @@ export const AdminData = {
     },
     {
       title: "Rate Charts",
-      url: "#",
+      url: "/dashboard/rate-charts/",
       icon: BadgeDollarSign,
       items: [
         {
           title: "Countries",
-          url: "#",
+          url: "/dashboard/rate-charts/",
         },
         {
           title: "Rate Charts",
-          url: "#",
+          url: "/dashboard/rate-charts/",
         },
       ],
     },
