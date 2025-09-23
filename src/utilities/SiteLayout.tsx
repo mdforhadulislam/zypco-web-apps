@@ -36,72 +36,12 @@ export default function SiteLayout({
     router.push("/dashboard");
   }
 
-  if (pathName == "dashboard" && auth.user?.token) {
+  // Dashboard has its own layout, so don't handle it here
+  if (pathName == "dashboard") {
     return (
       <>
-        <SidebarProvider>
-          <AppSideBar />
-          <SidebarInset>
-           
-              <header className="flex h-16 shrink-0 items-center gap-2 border-b">
-              <div className="flex items-center gap-2 px-4 relative w-full">
-                <SidebarTrigger className="-ml-1" />
-                <Separator
-                  orientation="vertical"
-                  className="mr-2 data-[orientation=vertical]:h-4"
-                />
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    {pathNameArray.map((item) => (
-                      <div key={item} className="hidden items-center align-middle gap-2 md:flex ">
-                        <BreadcrumbItem>
-                          <BreadcrumbLink
-                            href={`/${pathName}`}
-                            className=" capitalize"
-                          >
-                            {item}
-                          </BreadcrumbLink>
-                        </BreadcrumbItem>
-                        {pathNameArray.length >= 3 ? (
-                          <BreadcrumbSeparator />
-                        ) : (
-                          ""
-                        )}
-                      </div>
-                    ))}
-                    {
-                      pathNameArray.length>0 && <BreadcrumbItem>
-                          <BreadcrumbLink
-                            href={`/${pathName}`}
-                            className=" capitalize md:hidden block"
-                          >
-                          
-                            {pathNameArray[2]}
-                          </BreadcrumbLink>
-                        </BreadcrumbItem>
-                    }
-
-                  </BreadcrumbList>
-                </Breadcrumb>
-
-                <div className=" absolute right-5 top-[8%] flex justify-center align-middle items-center gap-5">
-                  <BellRing size={24} />
-                  <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={"/"} alt={"USER PROFILE"} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                </Avatar>
-                </div>
-
-              </div>
-            </header>
-         
-            <div>
-              <div className="w-full h-auto p-2">{children}</div>
-
-              <Toaster expand={false} position="top-center" closeButton  />
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
+        {children}
+        <Toaster expand={false} position="top-center" closeButton />
       </>
     );
   }

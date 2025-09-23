@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   BadgeDollarSign,
   Bot,
   Boxes,
@@ -16,81 +17,80 @@ export const AdminData = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: LayoutDashboard,
       isActive: true,
       items: [
         {
-          title: "Analaylics",
-          url: "/#analaylics",
+          title: "Analytics",
+          url: "/dashboard/analytics",
         },
         {
           title: "All Pickup",
-          url: "/#order",
+          url: "/dashboard/pickups",
         },
         {
           title: "All Order",
-          url: "/#order",
+          url: "/dashboard/orders",
         },
       ],
     },
     {
       title: "Analytics",
-      url: "#",
-      icon: Bot,
+      url: "/dashboard/analytics",
+      icon: BarChart3,
       items: [
         {
           title: "User Analytics",
-          url: "#",
+          url: "/dashboard/analytics/users",
         },
         {
           title: "Login Analytics",
-          url: "#",
+          url: "/dashboard/analytics/login",
         },
-
         {
           title: "Revenue Analytics",
-          url: "#",
+          url: "/dashboard/analytics/revenue",
         },
         {
           title: "API Key Analytics",
-          url: "#",
+          url: "/dashboard/analytics/api-keys",
         },
         {
           title: "Addresses Analytics",
-          url: "#",
+          url: "/dashboard/analytics/addresses",
         },
         {
           title: "Order Analytics",
-          url: "#",
+          url: "/dashboard/analytics/orders",
         },
         {
-          title: "Oprational Analytics",
-          url: "#",
+          title: "Operational Analytics",
+          url: "/dashboard/analytics/operational",
         },
         {
           title: "Offers Analytics",
-          url: "#",
+          url: "/dashboard/analytics/offers",
         },
         {
           title: "Countries Analytics",
-          url: "#",
+          url: "/dashboard/analytics/countries",
         },
         {
           title: "Notifications Analytics",
-          url: "#",
+          url: "/dashboard/analytics/notifications",
         },
         {
           title: "Contacts Analytics",
-          url: "#",
+          url: "/dashboard/analytics/contacts",
         },
         {
           title: "Content Analytics",
-          url: "#",
+          url: "/dashboard/analytics/content",
         },
         {
           title: "Reviews Analytics",
-          url: "#",
+          url: "/dashboard/analytics/reviews",
         },
       ],
     },
@@ -105,113 +105,137 @@ export const AdminData = {
         },
         {
           title: "Pending Pickup",
-          url: "/dashboard/pickups",
+          url: "/dashboard/pickups?status=pending",
         },
         {
           title: "Cancel Pickup",
-          url: "/dashboard/pickups",
+          url: "/dashboard/pickups?status=cancelled",
         },
         {
           title: "Done Pickup",
-          url: "/dashboard/pickups",
+          url: "/dashboard/pickups?status=completed",
         },
       ],
     },
     {
       title: "Rate Charts",
-      url: "/dashboard/rate-charts/",
+      url: "/dashboard/rate-charts",
       icon: BadgeDollarSign,
       items: [
         {
           title: "Countries",
-          url: "/dashboard/rate-charts/",
+          url: "/dashboard/rate-charts/countries",
         },
         {
           title: "Rate Charts",
-          url: "/dashboard/rate-charts/",
+          url: "/dashboard/rate-charts",
         },
       ],
     },
     {
       title: "Orders",
-      url: "#",
+      url: "/dashboard/orders",
       icon: Boxes,
       items: [
         {
           title: "All Orders",
-          url: "#",
+          url: "/dashboard/orders",
         },
         {
           title: "Normal Order",
-          url: "#",
+          url: "/dashboard/orders?type=normal",
         },
         {
           title: "Express Order",
-          url: "#",
+          url: "/dashboard/orders?type=express",
         },
         {
           title: "Super Express",
-          url: "#",
+          url: "/dashboard/orders?type=super-express",
         },
         {
           title: "Tax Paid",
-          url: "#",
+          url: "/dashboard/orders?status=tax-paid",
         },
       ],
     },
-
     {
       title: "Reviews",
-      url: "#",
+      url: "/dashboard/reviews",
       icon: UserStar,
-      items: [],
+      items: [
+        {
+          title: "All Reviews",
+          url: "/dashboard/reviews",
+        },
+        {
+          title: "Pending Reviews",
+          url: "/dashboard/reviews?status=pending",
+        },
+        {
+          title: "Approved Reviews",
+          url: "/dashboard/reviews?status=approved",
+        },
+      ],
     },
     {
       title: "Content",
-      url: "#",
+      url: "/dashboard/contents",
       icon: Rss,
-      items: [],
+      items: [
+        {
+          title: "All Content",
+          url: "/dashboard/contents",
+        },
+        {
+          title: "Blog Posts",
+          url: "/dashboard/contents/blogs",
+        },
+        {
+          title: "Notifications",
+          url: "/dashboard/contents/notifications",
+        },
+      ],
     },
-
     {
       title: "Users",
-      url: "#",
+      url: "/dashboard/users",
       icon: CircleUserRound,
       items: [
         {
-          title: "Normal User",
-          url: "#",
+          title: "All Users",
+          url: "/dashboard/users",
         },
         {
-          title: "All Users",
-          url: "#",
+          title: "Normal User",
+          url: "/dashboard/users?role=user",
         },
         {
           title: "Admin Users",
-          url: "#",
+          url: "/dashboard/users?role=admin",
         },
         {
           title: "Moderator User",
-          url: "#",
+          url: "/dashboard/users?role=moderator",
         },
       ],
     },
     {
       title: "Settings",
-      url: "#",
+      url: "/dashboard/settings",
       icon: Settings2,
       items: [
         {
           title: "General",
-          url: "#",
+          url: "/dashboard/settings",
         },
         {
           title: "Offers",
-          url: "#",
+          url: "/dashboard/settings/offers",
         },
         {
           title: "Api Key",
-          url: "#",
+          url: "/dashboard/settings/api-keys",
         },
       ],
     },
@@ -219,12 +243,12 @@ export const AdminData = {
   navSecondary: [
     {
       title: "Support",
-      url: "#",
+      url: "/dashboard/support",
       icon: LifeBuoy,
     },
     {
       title: "Feedback",
-      url: "#",
+      url: "/dashboard/feedback",
       icon: Send,
     },
   ],
@@ -234,120 +258,135 @@ export const ModaretorData = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: LayoutDashboard,
       isActive: true,
       items: [
         {
-          title: "Analaylics",
-          url: "/#analaylics",
+          title: "Analytics",
+          url: "/dashboard/analytics",
         },
         {
           title: "All Pickup",
-          url: "/#order",
+          url: "/dashboard/pickups",
         },
         {
           title: "All Order",
-          url: "/#order",
+          url: "/dashboard/orders",
         },
       ],
     },
-
     {
       title: "Pickups",
-      url: "#",
+      url: "/dashboard/pickups",
       icon: Package,
       items: [
         {
           title: "All Pickup",
-          url: "#",
+          url: "/dashboard/pickups",
         },
         {
           title: "Pending Pickup",
-          url: "#",
+          url: "/dashboard/pickups?status=pending",
         },
         {
           title: "Cancel Pickup",
-          url: "#",
+          url: "/dashboard/pickups?status=cancelled",
         },
         {
           title: "Done Pickup",
-          url: "#",
+          url: "/dashboard/pickups?status=completed",
         },
       ],
     },
     {
       title: "Rate Charts",
-      url: "#",
+      url: "/dashboard/rate-charts",
       icon: BadgeDollarSign,
       items: [
         {
           title: "Countries",
-          url: "#",
+          url: "/dashboard/rate-charts/countries",
         },
         {
           title: "Rate Charts",
-          url: "#",
+          url: "/dashboard/rate-charts",
         },
       ],
     },
     {
       title: "Orders",
-      url: "#",
+      url: "/dashboard/orders",
       icon: Boxes,
       items: [
         {
           title: "All Orders",
-          url: "#",
+          url: "/dashboard/orders",
         },
         {
           title: "Normal Order",
-          url: "#",
+          url: "/dashboard/orders?type=normal",
         },
         {
           title: "Express Order",
-          url: "#",
+          url: "/dashboard/orders?type=express",
         },
         {
           title: "Super Express",
-          url: "#",
+          url: "/dashboard/orders?type=super-express",
         },
         {
           title: "Tax Paid",
-          url: "#",
+          url: "/dashboard/orders?status=tax-paid",
         },
       ],
     },
-
     {
       title: "Reviews",
-      url: "#",
+      url: "/dashboard/reviews",
       icon: UserStar,
-      items: [],
+      items: [
+        {
+          title: "All Reviews",
+          url: "/dashboard/reviews",
+        },
+        {
+          title: "Pending Reviews",
+          url: "/dashboard/reviews?status=pending",
+        },
+        {
+          title: "Approved Reviews",
+          url: "/dashboard/reviews?status=approved",
+        },
+      ],
     },
     {
       title: "Content",
-      url: "#",
+      url: "/dashboard/contents",
       icon: Rss,
-      items: [],
+      items: [
+        {
+          title: "All Content",
+          url: "/dashboard/contents",
+        },
+        {
+          title: "Blog Posts",
+          url: "/dashboard/contents/blogs",
+        },
+      ],
     },
-
     {
       title: "Settings",
-      url: "#",
+      url: "/dashboard/settings",
       icon: Settings2,
       items: [
         {
           title: "General",
-          url: "#",
+          url: "/dashboard/settings",
         },
         {
           title: "Offers",
-          url: "#",
-        },
-        {
-          title: "Api Key",
-          url: "#",
+          url: "/dashboard/settings/offers",
         },
       ],
     },
@@ -355,12 +394,12 @@ export const ModaretorData = {
   navSecondary: [
     {
       title: "Support",
-      url: "#",
+      url: "/dashboard/support",
       icon: LifeBuoy,
     },
     {
       title: "Feedback",
-      url: "#",
+      url: "/dashboard/feedback",
       icon: Send,
     },
   ],
@@ -370,114 +409,100 @@ export const UserData = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: LayoutDashboard,
       isActive: true,
       items: [
         {
-          title: "Analaylics",
-          url: "/#analaylics",
+          title: "My Orders",
+          url: "/dashboard/orders",
         },
         {
-          title: "All Pickup",
-          url: "/#order",
-        },
-        {
-          title: "All Order",
-          url: "/#order",
+          title: "My Pickups",
+          url: "/dashboard/pickups",
         },
       ],
     },
-
     {
       title: "Pickups",
-      url: "#",
+      url: "/dashboard/pickups",
       icon: Package,
       items: [
         {
           title: "All Pickup",
-          url: "#",
+          url: "/dashboard/pickups",
         },
         {
           title: "Pending Pickup",
-          url: "#",
-        },
-        {
-          title: "Cancel Pickup",
-          url: "#",
+          url: "/dashboard/pickups?status=pending",
         },
         {
           title: "Done Pickup",
-          url: "#",
+          url: "/dashboard/pickups?status=completed",
         },
       ],
     },
     {
       title: "Rate Charts",
-      url: "#",
+      url: "/dashboard/rate-charts",
       icon: BadgeDollarSign,
       items: [
         {
           title: "Countries",
-          url: "#",
+          url: "/dashboard/rate-charts/countries",
         },
         {
           title: "Rate Charts",
-          url: "#",
+          url: "/dashboard/rate-charts",
         },
       ],
     },
     {
       title: "Orders",
-      url: "#",
+      url: "/dashboard/orders",
       icon: Boxes,
       items: [
         {
-          title: "All Orders",
-          url: "#",
+          title: "My Orders",
+          url: "/dashboard/orders",
         },
         {
-          title: "Normal Order",
-          url: "#",
-        },
-        {
-          title: "Express Order",
-          url: "#",
-        },
-        {
-          title: "Super Express",
-          url: "#",
-        },
-        {
-          title: "Tax Paid",
-          url: "#",
+          title: "Track Orders",
+          url: "/dashboard/orders/track",
         },
       ],
     },
-
     {
       title: "Reviews",
-      url: "#",
+      url: "/dashboard/reviews",
       icon: UserStar,
-      items: [],
+      items: [
+        {
+          title: "My Reviews",
+          url: "/dashboard/reviews",
+        },
+        {
+          title: "Write Review",
+          url: "/dashboard/reviews/new",
+        },
+      ],
     },
-
     {
       title: "Settings",
-      url: "#",
+      url: "/dashboard/settings",
       icon: Settings2,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "Profile",
+          url: "/dashboard/settings",
         },
         {
-          title: "Offers",
-          url: "#",
+          title: "Addresses",
+          url: "/dashboard/settings/addresses",
         },
         {
-          title: "Api Key",
-          url: "#",
+          title: "API Keys",
+          url: "/dashboard/settings/api-keys",
         },
       ],
     },
@@ -485,12 +510,12 @@ export const UserData = {
   navSecondary: [
     {
       title: "Support",
-      url: "#",
+      url: "/dashboard/support",
       icon: LifeBuoy,
     },
     {
       title: "Feedback",
-      url: "#",
+      url: "/dashboard/feedback",
       icon: Send,
     },
   ],
