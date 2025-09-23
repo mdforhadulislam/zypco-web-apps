@@ -51,14 +51,7 @@ export async function GET(req: NextRequest) {
     }
 
     const total = await Pickup.countDocuments(query);
-    const pickups = await Pickup.find(query)
-      .sort({ preferredDate: 1, createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate("user")
-      .populate("moderator")
-      .populate("pickupAddress")
-      .lean();
+    const pickups = await Pickup.find(query).sort({ preferredDate: 1, createdAt: -1 }).skip(skip).limit(limit).populate("user").populate("moderator").populate("address").lean();
 
     return successResponse({
       status: 200,
@@ -92,8 +85,8 @@ export async function POST(req: NextRequest) {
       return errorResponse({ status: 400, message: "user is required and must be a valid ObjectId", req });
     }
 
-    if (!body.pickupAddress || !Types.ObjectId.isValid(body.pickupAddress)) {
-      return errorResponse({ status: 400, message: "pickupAddress is required and must be a valid ObjectId", req });
+    if (!body.address || !Types.ObjectId.isValid(body.address)) {
+      return errorResponse({ status: 400, message: "address is required and must be a valid ObjectId", req });
     }
 
     if (!body.preferredDate) {
@@ -102,7 +95,7 @@ export async function POST(req: NextRequest) {
 
     const pickup = new Pickup({
       user: body.user, 
-      pickupAddress: body.pickupAddress,
+      address: body.address,
       preferredDate: new Date(body.preferredDate),
       preferredTimeSlot: body.preferredTimeSlot || "",
       status: body.status || "pending",

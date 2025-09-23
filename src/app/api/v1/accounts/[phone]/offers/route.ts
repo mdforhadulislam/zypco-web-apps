@@ -18,7 +18,7 @@ export async function GET(
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
 
-    const offers = await Offer.find({ isActive: true }).sort({ validFrom: -1 });
+    const offers = await Offer.find({ isActive: true }).populate("user").sort({ validFrom: -1 }).lean();
 
     return successResponse({ status: 200, message: "Offers fetched", data: offers, req });
   } catch (error: unknown) {

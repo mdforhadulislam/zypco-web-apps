@@ -19,7 +19,7 @@ export async function GET(
     
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
 
-    const notifications = await Notification.find({ userId: user._id }).sort({ createdAt: -1 });
+    const notifications = await Notification.find({ userId: user._id }).populate("user").sort({ createdAt: -1 }).lean();
 
     return successResponse({
       status: 200,

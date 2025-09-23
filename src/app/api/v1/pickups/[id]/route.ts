@@ -24,7 +24,7 @@ export async function GET(
     const pickup = await Pickup.findById(id)
       .populate("user")
       .populate("moderator")
-      .populate("pickupAddress")
+      .populate("address")
       .lean();
 
     if (!pickup) {
@@ -70,7 +70,7 @@ export async function PUT(
     const pickup = await Pickup.findByIdAndUpdate(id, updatedData, { new: true })
       .populate("user")
       .populate("moderator")
-      .populate("pickupAddress")
+      .populate("address")
       .lean();
 
     if (!pickup) {

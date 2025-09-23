@@ -1,6 +1,6 @@
 import connectDB from "@/config/db";
 import { errorResponse, successResponse } from "@/server/common/response";
-import { Review, IReview } from "@/server/models/Review.model";
+import { IReview, Review } from "@/server/models/Review.model";
 import { User } from "@/server/models/User.model";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,7 +17,9 @@ export async function GET(
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
 
-    const reviews: IReview[] = await Review.find({ user: user._id }).sort({ createdAt: -1 });
+    
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const reviews: any[] = await Review.find({ user: user._id }).sort({ createdAt: -1 }).populate("user").lean();
 
     return successResponse({
       status: 200,

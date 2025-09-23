@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/config/db";
-import { User } from "@/server/models/User.model";
+import { errorResponse, successResponse } from "@/server/common/response";
 import { ApiAccessLog } from "@/server/models/ApiAccessLog.model";
+import { User } from "@/server/models/User.model";
 import { Types } from "mongoose";
-import { successResponse, errorResponse } from "@/server/common/response";
+import { NextRequest, NextResponse } from "next/server";
 
 // GET - fetch a single access log by id
 export async function GET(
@@ -20,7 +20,7 @@ export async function GET(
 
     if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid log ID", req });
 
-    const log = await ApiAccessLog.findOne({ _id: id, user: user._id });
+    const log = await ApiAccessLog.findOne({ _id: id, user: user._id }).populate("ApiConfig").populate("user").lean();
     if (!log) return errorResponse({ status: 404, message: "Access log not found", req });
 
     return successResponse({ status: 200, message: "Access log fetched", data: log, req });

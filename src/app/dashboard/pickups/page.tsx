@@ -20,7 +20,7 @@ type Pickup = {
   preferredTimeSlot: string;
   status: string;
   notes: string;
-  pickupAddress: {
+  address: {
     addressLine: string;
     area: string;
     city: string;
@@ -57,8 +57,18 @@ const DashboardPickups = () => {
           dataLength={pickups.length}
           next={fetchPickups}
           hasMore={hasMore}
-          loader={<h4>Loading...</h4>}
-          endMessage={<p>No more pickups</p>}
+          loader={
+           
+            <div>lodding....</div>
+      
+          }
+          endMessage={
+         
+              <div>
+                No results.
+              </div>
+       
+          }
         >
           <Table className="w-full h-auto">
             <TableHeader>
@@ -74,60 +84,55 @@ const DashboardPickups = () => {
             </TableHeader>
 
             <TableBody className={`h-auto p-2 border-b`}>
-              {!pickups.length ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-[500px] text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                pickups?.map((pickup, index) => (
-                  <TableRow key={index} className="p-2 border">
-                    <TableCell className="text-center flex justify-around align-middle items-center h-full py-4">
-                      <div>{index + 1}.</div>
-                      <Avatar className="h-12 w-12 rounded-full">
-                        <AvatarImage src={""} alt={pickup.user.name} />
-                        <AvatarFallback className="rounded-full">
-                          {pickup.user.name.split("")[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {pickup?.user.name}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {pickup?.user.phone}
-                    </TableCell>
+              {!pickups.length
+                ? ""
+                : pickups?.map((pickup, index) => (
+                    <TableRow key={index} className="p-2 border">
+                      <TableCell className="text-center flex justify-around align-middle items-center h-full py-4">
+                        <div>{index + 1}.</div>
+                        <Avatar className="h-12 w-12 rounded-full">
+                          <AvatarImage src={""} alt={pickup.user.name} />
+                          <AvatarFallback className="rounded-full">
+                            {pickup.user.name.split("")[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {pickup?.user.name}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {pickup?.user.phone}
+                      </TableCell>
 
-                    <TableCell className="text-center">
-                      {pickup.notes}
-                    </TableCell>
+                      <TableCell className="text-center">
+                        {pickup.notes}
+                      </TableCell>
 
-                    <TableCell className="text-center">
-                      {pickup.pickupAddress.addressLine},{" "}
-                      {pickup.pickupAddress.area}, {pickup.pickupAddress.city}
-                    </TableCell>
+                      <TableCell className="text-center">
+                        {pickup.address.addressLine},{" "}
+                        {pickup.address.area}, {pickup.address.city}
+                      </TableCell>
 
-                    <TableCell className="text-center">
-                      <Badge
-                        className={`${
-                          pickup?.status == "picked"
-                            ? "bg-green-600 hover:bg-green-600/85"
-                            : pickup?.status == "scheduled"
-                            ? "bg-yellow-500 hover:bg-yellow-500/85"
-                            : pickup?.status == "cancelled"
-                            ? "bg-red-600 hover:bg-red-600/85"
-                            : pickup?.status == "pending"
-                            ? "bg-[#241F21] hover:bg-[#241F21]-600/85 text-white"
-                            : "bg-white shadow-[0]"
-                        } transition-all duration-300`}
-                      >
-                        {pickup?.status}
-                      </Badge>
-                    </TableCell>
+                      <TableCell className="text-center">
+                        <Badge
+                          className={`${
+                            pickup?.status == "picked"
+                              ? "bg-green-600 hover:bg-green-600/85"
+                              : pickup?.status == "scheduled"
+                              ? "bg-yellow-500 hover:bg-yellow-500/85"
+                              : pickup?.status == "cancelled"
+                              ? "bg-red-600 hover:bg-red-600/85"
+                              : pickup?.status == "pending"
+                              ? "bg-[#241F21] hover:bg-[#241F21]-600/85 text-white"
+                              : "bg-white shadow-[0]"
+                          } transition-all duration-300`}
+                        >
+                          {pickup?.status}
+                        </Badge>
+                      </TableCell>
 
-                    <TableCell className="text-center">
-                      {/* <DropdownMenu>
+                      <TableCell className="text-center">
+                        {/* <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
@@ -190,17 +195,16 @@ const DashboardPickups = () => {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu> */}
-                      <div className="flex gap-2 flex-row items-center align-middle justify-center">
-                        <Badge className=" cursor-pointer">View</Badge>
-                        <Badge className=" cursor-pointer">Edit</Badge>
-                        <Badge className=" cursor-pointer">Confirm</Badge>
-                        <Badge className=" cursor-pointer">Cancelled</Badge>
-                        <Badge className=" cursor-pointer">Delete</Badge>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
+                        <div className="flex gap-2 flex-row items-center align-middle justify-center">
+                          <Badge className=" cursor-pointer">View</Badge>
+                          <Badge className=" cursor-pointer">Edit</Badge>
+                          <Badge className=" cursor-pointer">Confirm</Badge>
+                          <Badge className=" cursor-pointer">Cancelled</Badge>
+                          <Badge className=" cursor-pointer">Delete</Badge>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
             </TableBody>
           </Table>
         </InfiniteScroll>

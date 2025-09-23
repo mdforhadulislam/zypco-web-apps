@@ -66,7 +66,7 @@ export async function GET(
 
     if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid address id", req });
 
-    const address = await Address.findOne({ _id: id, user: user._id, isDeleted: false });
+    const address = await Address.findOne({ _id: id, user: user._id, isDeleted: false }).populate("user").populate("country").lean();
     if (!address) return errorResponse({ status: 404, message: "Address not found", req });
 
     return successResponse({ status: 200, message: "Address fetched", data: address, req });

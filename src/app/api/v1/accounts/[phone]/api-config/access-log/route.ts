@@ -37,8 +37,7 @@ export async function GET(
     if (apiKey) filter.apiKey = apiKey;
 
     const logs = await ApiAccessLog.find(filter)
-      .sort({ timestamp: -1 })
-      .limit(100); // limit to last 100 logs
+      .sort({ timestamp: -1 }).populate("ApiConfig").populate("user").lean(); // limit to last 100 logs
 
     return successResponse({
       status: 200,

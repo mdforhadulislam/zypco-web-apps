@@ -38,7 +38,7 @@ export async function GET(
 
     const addresses = await Address.find({
       user: user._id,
-    }).sort({ isDefault: -1, createdAt: -1 });
+    }).sort({ isDefault: -1, createdAt: -1 }).populate("user").populate("country").lean();
     return successResponse({
       status: 200,
       message: "Addresses fetched",

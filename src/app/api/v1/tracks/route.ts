@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
     const sortOrder = (q.sortOrder || "desc").toLowerCase() === "asc" ? 1 : -1;
 
     const total = await Track.countDocuments(query);
-    const tracks = await Track.find(query)
+    const tracks = await Track.find(query).populate('order')
       .sort({ [sortBy as string]: sortOrder })
       .skip(skip)
       .limit(limit)

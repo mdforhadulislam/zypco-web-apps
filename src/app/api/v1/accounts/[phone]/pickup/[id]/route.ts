@@ -20,7 +20,7 @@ export async function GET(
 
     if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid pickup ID", req });
 
-    const pickup = await Pickup.findOne({ _id: id, user: user._id });
+    const pickup = await Pickup.findOne({ _id: id, user: user._id }).populate("user").populate("moderator").populate("address").lean();
     if (!pickup) return errorResponse({ status: 404, message: "Pickup not found", req });
 
     return successResponse({ status: 200, message: "Pickup fetched", data: pickup, req });

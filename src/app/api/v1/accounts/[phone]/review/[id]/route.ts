@@ -17,7 +17,7 @@ export async function GET(
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
 
-    const review = await Review.findOne({ _id: id, user: user._id });
+    const review = await Review.findOne({ _id: id, user: user._id }).populate("user").lean();
     if (!review) return errorResponse({ status: 404, message: "Review not found", req });
 
     return successResponse({ status: 200, message: "Review fetched", data: review, req });

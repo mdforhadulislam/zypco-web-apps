@@ -18,7 +18,7 @@ export async function GET(
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
 
-    const notification = await Notification.findOne({ _id: id, user: user._id });
+    const notification = await Notification.findOne({ _id: id, user: user._id }).populate("user").lean();
     if (!notification) return errorResponse({ status: 404, message: "Notification not found", req });
 
     return successResponse({ status: 200, message: "Notification fetched", data: notification, req });

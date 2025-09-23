@@ -35,7 +35,7 @@ export async function GET(
 
     const total = await Pickup.countDocuments(query);
 
-    const pickups: IPickup[] = await Pickup.find(query)
+    const pickups: IPickup[] = await Pickup.find(query).populate("user").populate("moderator").populate("address")
       .sort({ preferredDate: -1 })
       .skip(skip)
       .limit(limit);

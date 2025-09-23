@@ -15,7 +15,7 @@ export async function GET(
 
     if (!Types.ObjectId.isValid(trackID)) return errorResponse({ status: 400, message: "Invalid trackID", req });
 
-    const track = await Track.findById(trackID).lean();
+    const track = await Track.findById(trackID).populate("order").lean();
     if (!track) return errorResponse({ status: 404, message: "Track not found", req });
 
     return successResponse({ status: 200, message: "Track fetched successfully", data: track, req });

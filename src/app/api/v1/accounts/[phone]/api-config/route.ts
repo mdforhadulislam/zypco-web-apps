@@ -32,7 +32,7 @@ export async function GET(
 
     const configs = await ApiConfig.find({ user: user._id }).sort({
       createdAt: -1,
-    });
+    }).populate("user").lean();
 
     return successResponse({
       status: 200,

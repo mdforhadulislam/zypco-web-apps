@@ -1,10 +1,9 @@
-import { models } from "mongoose";
-import { Document, Schema, Types, model } from "mongoose";
+import { Document, Schema, Types, model, models } from "mongoose";
 // Pickup Interface
 export interface IPickup extends Document {
   user: Types.ObjectId; // User reference
   moderator?: Types.ObjectId; // Moderator/User who handled the pickup
-  pickupAddress: Types.ObjectId; // Reference to Address model
+  address: Types.ObjectId; // Reference to Address model
   preferredDate: Date; // Preferred pickup date
   preferredTimeSlot?: string; // Optional time slot e.g., "09:00-12:00"
   status: string; // 'pending', 'scheduled', 'picked', 'cancelled'
@@ -19,11 +18,7 @@ const pickupSchema = new Schema<IPickup>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     moderator: { type: Schema.Types.ObjectId, ref: "User", default: null }, // optional
-    pickupAddress: {
-      type: Schema.Types.ObjectId,
-      ref: "Address",
-      required: true,
-    },
+    address: { type: Schema.Types.ObjectId, ref: "Address", required: true },
     preferredDate: { type: Date, required: true },
     preferredTimeSlot: { type: String, default: "" },
     status: {

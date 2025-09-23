@@ -15,7 +15,7 @@ export async function GET(
 
     if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid ID", req });
 
-    const review = await Review.findById(id).lean();
+    const review = await Review.findById(id).populate("user").lean();
     if (!review) return errorResponse({ status: 404, message: "Review not found", req });
 
     return successResponse({ status: 200, message: "Review fetched successfully", data: review, req });

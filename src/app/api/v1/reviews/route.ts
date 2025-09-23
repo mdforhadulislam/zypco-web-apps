@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     const sortOrder = (q.sortOrder || "desc").toLowerCase() === "asc" ? 1 : -1;
 
     const total = await Review.countDocuments(query);
-    const reviews = await Review.find(query)
+    const reviews = await Review.find(query).populate("user")
   .sort({ [sortBy as string]: sortOrder })
   .skip(skip)
   .limit(limit)
