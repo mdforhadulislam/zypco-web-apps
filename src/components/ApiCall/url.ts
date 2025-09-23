@@ -1,5 +1,5 @@
-export const ROOT = `https://zypco.vercel.app/`;
-// export const ROOT = `http://localhost:3000/`;
+// export const ROOT = `https://zypco.vercel.app/`;
+export const ROOT = `http://localhost:3000/`;
 export const ROOT_API = `${ROOT}api/v1/`;
 
 export const SIGNIN_API = `${ROOT_API}auth/signin`;
@@ -47,7 +47,6 @@ export const SINGLE_BLOG_API =(bloogId:string)=> `${ROOT_API}blogs/${bloogId}`
 
 export const CONTACT_API = `${ROOT_API}contacts/`
 export const SINGLE_CONTACT_API=(contactId:string) => `${ROOT_API}contacts/${contactId}`
-
 
 export const NOTIFICATION_API = `${ROOT_API}notifications/`
 export const SINGLE_NOTIFICATION_API=(notificationId:string) => `${ROOT_API}notifications/${notificationId}`

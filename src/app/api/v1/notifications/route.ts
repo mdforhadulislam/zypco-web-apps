@@ -70,12 +70,12 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const body = await req.json();
 
-    if (!body.user) return errorResponse({ status: 400, message: "user is required", req });
+    if (!body.userId) return errorResponse({ status: 400, message: "user is required", req });
     if (!body.title) return errorResponse({ status: 400, message: "title is required", req });
     if (!body.message) return errorResponse({ status: 400, message: "message is required", req });
 
     const notification = new Notification({
-      user: body.user,
+      userId: body.userId,
       title: body.title,
       message: body.message,
       type: body.type || "info",

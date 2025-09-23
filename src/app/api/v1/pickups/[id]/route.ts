@@ -99,7 +99,7 @@ export async function DELETE(
       return errorResponse({ status: 400, message: "Invalid pickup id", req });
     }
 
-    const pickup = await Pickup.findByIdAndDelete(id).lean();
+    const pickup = await Pickup.findByIdAndDelete(id);
 
     if (!pickup) {
       return errorResponse({ status: 404, message: "Pickup not found", req });

@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
     const sortOrder = (q.sortOrder || "desc").toLowerCase() === "asc" ? 1 : -1;
 
     const total = await Price.countDocuments(query);
-    const prices = await Price.find(query)
+    const prices = await Price.find(query).populate("from").populate("to")
   .sort({ [sortBy as string]: sortOrder })
   .skip(skip)
   .limit(limit)
