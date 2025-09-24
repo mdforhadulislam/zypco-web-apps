@@ -25,7 +25,9 @@ export function useApi<T>(url: string, autoFetch = true) {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       const response = await getRequestSend<T>(url, getHeaders());
-      if (response.status == 200 && response.data) {
+      
+      if ( response.data) {
+        console.log(response);
         setState({ data: response.data, loading: false, error: null });
       } else {
         setState({ data: null, loading: false, error: response.message || 'Failed to fetch data' });
@@ -43,7 +45,7 @@ export function useApi<T>(url: string, autoFetch = true) {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       const response = await postRequestSend<Req, T>(url, getHeaders(), data);
-      if (response.status == 200 || response.status === 201) {
+      if (response.status == 200 || response.status == 201) {
         setState(prev => ({ ...prev, loading: false, error: null }));
         return response.data;
       } else {
@@ -79,7 +81,7 @@ export function useApi<T>(url: string, autoFetch = true) {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       const response = await deleteRequestSend<T>(url, getHeaders());
-      if (response.status == 200 || response.status === 204) {
+      if (response.status == 200 || response.status == 204) {
         setState(prev => ({ ...prev, loading: false, error: null }));
         return true;
       } else {

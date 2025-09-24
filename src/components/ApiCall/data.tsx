@@ -1,6 +1,7 @@
 import {
   BarChart3,
   BadgeDollarSign,
+  Bell,
   Bot,
   Boxes,
   CircleUserRound,
@@ -193,7 +194,26 @@ export const AdminData = {
         },
         {
           title: "Notifications",
-          url: "/dashboard/contents/notifications",
+          url: "/dashboard/notifications",
+        },
+      ],
+    },
+    {
+      title: "Notifications",
+      url: "/dashboard/notifications",
+      icon: Bell,
+      items: [
+        {
+          title: "All Notifications",
+          url: "/dashboard/notifications",
+        },
+        {
+          title: "Unread Notifications",
+          url: "/dashboard/notifications?read=false",
+        },
+        {
+          title: "System Notifications",
+          url: "/dashboard/notifications?type=info",
         },
       ],
     },
@@ -376,6 +396,21 @@ export const ModaretorData = {
       ],
     },
     {
+      title: "Notifications",
+      url: "/dashboard/notifications",
+      icon: Bell,
+      items: [
+        {
+          title: "All Notifications",
+          url: "/dashboard/notifications",
+        },
+        {
+          title: "Unread Notifications", 
+          url: "/dashboard/notifications?read=false",
+        },
+      ],
+    },
+    {
       title: "Settings",
       url: "/dashboard/settings",
       icon: Settings2,
@@ -420,6 +455,10 @@ export const UserData = {
         {
           title: "My Pickups",
           url: "/dashboard/pickups",
+        },
+        {
+          title: "My Notifications", 
+          url: "/dashboard/notifications",
         },
       ],
     },

@@ -32,7 +32,7 @@ interface UserAccount {
   email: string;
   phone: string;
   role: "user" | "moderator" | "admin";
-  status: "active" | "inactive" | "suspended";
+  isActive: boolean
   createdAt: string;
   lastLogin?: string;
 }
@@ -50,6 +50,9 @@ const DashboardUsers = () => {
     updateData,
     deleteData,
   } = useApi<UserAccount[]>(ACCOUNT_API);
+
+  console.log(users);
+  
 
   // Only admin can access user management
   if (user?.role !== "admin") {
@@ -79,8 +82,7 @@ const DashboardUsers = () => {
     admins: usersData.filter((u) => u.role === "admin").length,
     moderators: usersData.filter((u) => u.role === "moderator").length,
     regularUsers: usersData.filter((u) => u.role === "user").length,
-    active: usersData.filter((u) => u.status === "active").length,
-    inactive: usersData.filter((u) => u.status === "inactive").length,
+    isActive: usersData.filter((u) => u.isActive ).length,
   };
 
   const roleColors: Record<string, string> = {
@@ -120,20 +122,12 @@ const DashboardUsers = () => {
         </Badge>
       ),
     },
-    {
-      key: "status",
-      label: "Status",
-      render: (value: string) => (
-        <Badge className={statusColors[value] || "bg-gray-100 text-gray-800"}>
-          {value.toUpperCase()}
-        </Badge>
-      ),
-    },
+    
     {
       key: "createdAt",
       label: "Joined",
       sortable: true,
-      render: (value: string) => new Date(value).toLocaleDateString(),
+      render: (value: string) => new Date(value).toLocaleDateString("en-BD"),
     },
     {
       key: "lastLogin",
@@ -150,8 +144,6 @@ const DashboardUsers = () => {
         email: formData.get("email"),
         phone: formData.get("phone"),
         role: formData.get("role"),
-        status: "active",
-        createdAt: new Date().toISOString(),
       };
 
       await postData(userData);
@@ -173,7 +165,7 @@ const DashboardUsers = () => {
         email: formData.get("email"),
         phone: formData.get("phone"),
         role: formData.get("role"),
-        status: formData.get("status"),
+        isActive: formData.get("isActive"),
       };
 
       await updateData(updatedData);
@@ -222,24 +214,6 @@ const DashboardUsers = () => {
     }
   };
 
-  const handleChangeStatus = async (
-    userToUpdate: UserAccount,
-    newStatus: string
-  ) => {
-    if (userToUpdate.id === user?.id && newStatus !== "active") {
-      toast.error("You cannot suspend your own account");
-      return;
-    }
-
-    try {
-      const updatedUser = { ...userToUpdate, status: newStatus };
-      await updateData(updatedUser);
-      toast.success(`User status updated to ${newStatus}`);
-      refetch();
-    } catch (error) {
-      toast.error("Failed to update user status");
-    }
-  };
 
   return (
     <div className="space-y-6" data-testid="users-page">
@@ -341,16 +315,11 @@ const DashboardUsers = () => {
         />
         <StatsCard
           title="Active Users"
-          value={stats.active}
+          value={stats.isActive}
           icon={UserCheck}
           trend="up"
         />
-        <StatsCard
-          title="Inactive"
-          value={stats.inactive}
-          icon={Users}
-          trend="down"
-        />
+       
       </div>
 
       {/* Users Table */}
@@ -377,15 +346,8 @@ const DashboardUsers = () => {
             label: "Make User",
             onClick: (user) => handleChangeRole(user, "user"),
           },
-          {
-            label: "Activate",
-            onClick: (user) => handleChangeStatus(user, "active"),
-          },
-          {
-            label: "Suspend",
-            onClick: (user) => handleChangeStatus(user, "suspended"),
-            variant: "destructive" as const,
-          },
+          
+          
         ]}
       />
 
@@ -440,20 +402,7 @@ const DashboardUsers = () => {
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-                <div>
-                  <Label htmlFor="edit-status">Status</Label>
-                  <Select name="status" defaultValue={selectedUser.status}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                      <SelectItem value="suspended">Suspended</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                </div> 
               </div>
               <div className="flex justify-end space-x-2">
                 <Button

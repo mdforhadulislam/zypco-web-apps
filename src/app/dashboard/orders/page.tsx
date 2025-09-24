@@ -152,7 +152,7 @@ const DashboardOrders = () => {
         Authorization: `Bearer ${user?.token}`,
       });
 
-      if (response.status === 200 && response.data) {
+      if (response.status == 200 && response.data) {
         const newOrders = Array.isArray(response.data) ? response.data : [];
 
         if (reset || pageNum === 1) {
@@ -281,7 +281,7 @@ const DashboardOrders = () => {
         orderData
       );
 
-      if (response.status === 201) {
+      if (response.status == 201) {
         toast.success("Order created successfully");
         setIsCreateModalOpen(false);
         // Reset and fetch fresh data
@@ -314,7 +314,7 @@ const DashboardOrders = () => {
           { Authorization: `Bearer ${user?.token}` }
         );
 
-        if (response.status === 200) {
+        if (response.status == 200) {
           toast.success("Order deleted successfully");
           setOrders((prev) => prev.filter((o) => o._id !== order._id));
           
@@ -344,19 +344,18 @@ const DashboardOrders = () => {
       toast.error("You do not have permission to update order status");
       return;
     }
-
     try {
       const response = await putRequestSend(
         SINGLE_ORDER_API(order._id),
         { Authorization: `Bearer ${user?.token}` },
-        { 
+        {
           ...order,
           status: newStatus,
           moderator: user?.id 
         }
       );
 
-      if (response.status === 200) {
+      if (response.status == 200) {
         toast.success(`Order status updated to ${newStatus}`);
         setOrders((prev) =>
           prev.map((o) =>
