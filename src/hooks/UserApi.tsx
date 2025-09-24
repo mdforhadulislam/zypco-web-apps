@@ -17,15 +17,15 @@ export function useApi<T>(url: string, autoFetch = true) {
   });
   const { user } = useAuth();
 
-  const getHeaders = () => {
-    return user?.token ? { Authorization: `Bearer ${user.token}` } : {};
-  };
+ const getHeaders = (): Record<string, string> => {
+  return user?.token ? { Authorization: `Bearer ${user.token}` } : {};
+};
 
   const fetchData = async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       const response = await getRequestSend<T>(url, getHeaders());
-      if (response.status === 200 && response.data) {
+      if (response.status == 200 && response.data) {
         setState({ data: response.data, loading: false, error: null });
       } else {
         setState({ data: null, loading: false, error: response.message || 'Failed to fetch data' });
@@ -43,7 +43,7 @@ export function useApi<T>(url: string, autoFetch = true) {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       const response = await postRequestSend<Req, T>(url, getHeaders(), data);
-      if (response.status === 200 || response.status === 201) {
+      if (response.status == 200 || response.status === 201) {
         setState(prev => ({ ...prev, loading: false, error: null }));
         return response.data;
       } else {
@@ -61,7 +61,7 @@ export function useApi<T>(url: string, autoFetch = true) {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       const response = await putRequestSend<Req, T>(url, getHeaders(), data);
-      if (response.status === 200) {
+      if (response.status == 200) {
         setState(prev => ({ ...prev, loading: false, error: null }));
         return response.data;
       } else {
@@ -79,7 +79,7 @@ export function useApi<T>(url: string, autoFetch = true) {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       const response = await deleteRequestSend<T>(url, getHeaders());
-      if (response.status === 200 || response.status === 204) {
+      if (response.status == 200 || response.status === 204) {
         setState(prev => ({ ...prev, loading: false, error: null }));
         return true;
       } else {
