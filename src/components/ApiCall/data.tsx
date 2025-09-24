@@ -22,7 +22,7 @@ export const AdminData = {
       isActive: true,
       items: [
         {
-          title: "Analytics",
+          title: "Analaytics",
           url: "/dashboard/analytics",
         },
         {
@@ -36,61 +36,61 @@ export const AdminData = {
       ],
     },
     {
-      title: "Analytics",
-      url: "/dashboard/analytics",
+      title: "Analaytics",
+      url: "/dashboard/analaytics",
       icon: BarChart3,
       items: [
         {
-          title: "User Analytics",
-          url: "/dashboard/analytics/users",
+          title: "User Analaytics",
+          url: "/dashboard/analaytics/users",
         },
         {
-          title: "Login Analytics",
-          url: "/dashboard/analytics/login",
+          title: "Login Analaytics",
+          url: "/dashboard/analaytics/login",
         },
         {
-          title: "Revenue Analytics",
-          url: "/dashboard/analytics/revenue",
+          title: "Revenue Analaytics",
+          url: "/dashboard/analaytics/revenue",
         },
         {
-          title: "API Key Analytics",
-          url: "/dashboard/analytics/api-keys",
+          title: "API Key Analaytics",
+          url: "/dashboard/analaytics/api-keys",
         },
         {
-          title: "Addresses Analytics",
-          url: "/dashboard/analytics/addresses",
+          title: "Addresses Analaytics",
+          url: "/dashboard/analaytics/addresses",
         },
         {
-          title: "Order Analytics",
-          url: "/dashboard/analytics/orders",
+          title: "Order Analaytics",
+          url: "/dashboard/analaytics/orders",
         },
         {
-          title: "Operational Analytics",
-          url: "/dashboard/analytics/operational",
+          title: "Operational Analaytics",
+          url: "/dashboard/analaytics/operational",
         },
         {
-          title: "Offers Analytics",
-          url: "/dashboard/analytics/offers",
+          title: "Offers Analaytics",
+          url: "/dashboard/analaytics/offers",
         },
         {
-          title: "Countries Analytics",
-          url: "/dashboard/analytics/countries",
+          title: "Countries Analaytics",
+          url: "/dashboard/analaytics/countries",
         },
         {
-          title: "Notifications Analytics",
-          url: "/dashboard/analytics/notifications",
+          title: "Notifications Analaytics",
+          url: "/dashboard/analaytics/notifications",
         },
         {
-          title: "Contacts Analytics",
-          url: "/dashboard/analytics/contacts",
+          title: "Contacts Analaytics",
+          url: "/dashboard/analaytics/contacts",
         },
         {
-          title: "Content Analytics",
-          url: "/dashboard/analytics/content",
+          title: "Content Analaytics",
+          url: "/dashboard/analaytics/content",
         },
         {
-          title: "Reviews Analytics",
-          url: "/dashboard/analytics/reviews",
+          title: "Reviews Analaytics",
+          url: "/dashboard/analaytics/reviews",
         },
       ],
     },
