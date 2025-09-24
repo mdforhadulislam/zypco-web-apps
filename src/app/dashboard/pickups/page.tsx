@@ -426,19 +426,19 @@ const DashboardPickups = () => {
 
   // Pickup Card Component
   const PickupCard = ({ pickup }: { pickup: Pickup }) => (
-    <Card className="mb-4 py-2" data-testid={`pickup-card-${pickup._id}`}>
-      <CardContent className="py-2 px-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-3">
+    <Card className="mb-3 py-2" data-testid={`pickup-card-${pickup._id}`}>
+      <CardContent className="py-2 px-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-1">
             <Package className="h-5 w-5 text-gray-500" />
             <div>
-              <p className="font-semibold text-sm">#{pickup._id}</p>
+              <p className="font-light text-xs">#{pickup._id}</p>
               {canViewAll && (
                 <p className="text-sm text-gray-600">{pickup.user.name}</p>
               )}
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
             <Badge
               className={
                 statusColors[pickup.status] || "bg-gray-100 text-gray-800"
@@ -449,7 +449,7 @@ const DashboardPickups = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
-                  <MoreHorizontal className="h-4 w-4" />
+                  <MoreHorizontal className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">

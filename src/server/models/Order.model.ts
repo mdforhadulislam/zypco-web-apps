@@ -1,12 +1,11 @@
-import { models } from "mongoose";
-import { Document, Schema, model } from "mongoose";
+import { Document, Schema, model, models } from "mongoose";
 
 const counterSchema = new Schema({
   name: { type: String, required: true, unique: true },
   seq: { type: Number, default: 0 },
 });
 
-const Counter = model("Counter", counterSchema);
+const Counter =   models.Counter || model("Counter", counterSchema);;
 
 // Address Sub-schema
 const addressSchema = new Schema({
