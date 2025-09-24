@@ -24,22 +24,39 @@ interface Column {
   key: string;
   label: string;
   sortable?: boolean;
+  
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   render?: (value: any, row: any) => React.ReactNode;
 }
 
 interface DataTableProps {
   title: string;
+  
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[];
   columns: Column[];
   searchKeys?: string[];
+  
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onEdit?: (item: any) => void;
+  
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onDelete?: (item: any) => void;
+  
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onView?: (item: any) => void;
   itemsPerPage?: number;
+  loading?: boolean;
   actions?: Array<{
     label: string;
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onClick: (item: any) => void;
     variant?: "default" | "destructive";
+
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    condition?: (item: any) => boolean;
   }>;
 }
 
@@ -52,6 +69,7 @@ export function DataTable({
   onDelete,
   onView,
   itemsPerPage = 10,
+  loading = false,
   actions = [],
 }: DataTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -66,9 +84,11 @@ export function DataTable({
 
     if (searchTerm && searchKeys.length > 0) {
       filtered = data.filter((item) =>
-        searchKeys.some((key) =>
-          String(item[key]).toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        searchKeys.some((key) => {
+          // Handle nested object paths like 'user.name'
+          const value = key.split('.').reduce((obj, k) => obj?.[k], item);
+          return String(value || '').toLowerCase().includes(searchTerm.toLowerCase());
+        })
       );
     }
 
@@ -156,7 +176,19 @@ export function DataTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedData.length === 0 ? (
+              {loading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length + (hasActions ? 1 : 0)}
+                    className="text-center py-8"
+                  >
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+                      <span className="ml-2">Loading...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={columns.length + (hasActions ? 1 : 0)}
@@ -199,7 +231,9 @@ export function DataTable({
                                 Edit
                               </DropdownMenuItem>
                             )}
-                            {actions.map((action, actionIndex) => (
+                            {actions
+                              .filter(action => !action.condition || action.condition(item))
+                              .map((action, actionIndex) => (
                               <DropdownMenuItem
                                 key={actionIndex}
                                 onClick={() => action.onClick(item)}

@@ -77,7 +77,7 @@ export default function DashboardLayout({
     <SidebarProvider>
       <AppSideBar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b">
+           <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 rounded-t-xl">
           <div className="flex items-center gap-2 px-4 relative w-full">
             <SidebarTrigger className="-ml-1" />
             <Separator
@@ -112,7 +112,7 @@ export default function DashboardLayout({
               </BreadcrumbList>
             </Breadcrumb>
 
-            <div className="absolute right-5 top-[8%] flex justify-center align-middle items-center gap-5">
+            <div className="absolute right-5 top-[8%] flex justify-center align-middle items-center gap-5 ">
               <BellRing size={24} />
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src="/" alt="USER PROFILE" />
@@ -124,8 +124,8 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        <div>
-          <div className="w-full h-auto p-4">{children}</div>
+        <div className="flex flex-1 flex-col gap-4 p-4">
+          {children}
           <Toaster expand={false} position="top-center" closeButton />
         </div>
       </SidebarInset>
