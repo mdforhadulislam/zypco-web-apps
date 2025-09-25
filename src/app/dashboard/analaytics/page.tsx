@@ -54,29 +54,13 @@ const DashboardAnalytics = () => {
 
   // Mock analytics data for demonstration
   const mockStats = {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
     totalUsers: userAnalytics?.totalUsers || 1250,
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
     newUsers: userAnalytics?.newUsers || 85,
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
     totalOrders: orderAnalytics?.totalOrders || 856,
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
     pendingOrders: orderAnalytics?.pendingOrders || 23,
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
     totalRevenue: revenueAnalytics?.totalRevenue || 45672,
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
     monthlyGrowth: revenueAnalytics?.monthlyGrowth || 15.2,
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
     avgOrderValue: revenueAnalytics?.avgOrderValue || 53.4,
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
     deliveryRate: operationalAnalytics?.deliveryRate || 96.8,
   };
 

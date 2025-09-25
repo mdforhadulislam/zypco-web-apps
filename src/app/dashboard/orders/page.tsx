@@ -1,27 +1,5 @@
 "use client";
-import {
-  deleteRequestSend,
-  getRequestSend,
-  postRequestSend,
-  putRequestSend,
-} from "@/components/ApiCall/methord";
-import {
-  ORDERS_API,
-  SINGLE_ORDER_API,
-  NOTIFICATION_API,
-} from "@/components/ApiCall/url";
-import { StatsCard } from "@/components/Dashboard/StatsCard";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,952 +11,874 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAuth } from "@/hooks/AuthContext";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/hooks/AuthContext";
+import { useOrders, useApiMutation } from "@/hooks/UserApi";
+import { ORDERS_API, ORDER_BY_ID_API } from "@/components/ApiCall/url";
+import {
+  Eye,
+  Filter,
   Package,
   Plus,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Truck,
   Search,
-  LoaderCircle,
-  MoreHorizontal,
+  Truck,
   Edit,
   Trash2,
-  User,
   MapPin,
+  Calendar,
+  DollarSign,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
+import { useState } from "react";
 import { toast } from "sonner";
 
-type Order = {
+interface Order {
   _id: string;
   trackId: string;
   orderDate: string;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
   parcel: {
+    from: string;
+    to: string;
+    weight: number;
+    priority: string;
+    orderType: string;
     sender: {
       name: string;
       phone: string;
-      email: string;
+      address: string;
     };
     receiver: {
       name: string;
       phone: string;
-      email: string;
+      address: string;
     };
-    from: {
-      addressLine: string;
-      area: string;
-      city: string;
-      country: {
-        name: string;
-      };
-    };
-    to: {
-      addressLine: string;
-      area: string;
-      city: string;
-      country: {
-        name: string;
-      };
-    };
-    priority: "normal" | "express" | "super-express";
-    orderType: "document" | "parcel" | "box";
-    weight: number;
-    item?: {
+    item?: Array<{
       name: string;
       quantity: number;
       unitPrice: number;
       totalPrice: number;
-    }[];
+    }>;
+    description?: string;
   };
   payment: {
     pType: string;
     pAmount: number;
+    pReceived: number;
+    pDiscount: number;
     pOfferDiscount: number;
     pExtraCharge: number;
-    pDiscount: number;
-    pReceived: number;
     pRefunded: number;
   };
-  moderator?: {
-    _id: string;
-    name: string;
-    phone: string;
-  };
+  status?: string;
   createdAt: string;
   updatedAt: string;
-};
+}
 
-const DashboardOrders = () => {
+export default function OrdersPage() {
   const { user } = useAuth();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // InfiniteScroll states
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [orderTypeFilter, setOrderTypeFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showOrderDialog, setShowOrderDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  // Role-based permissions
-  const canViewAll = user?.role === "admin" || user?.role === "moderator";
-  const canManage = user?.role === "admin" || user?.role === "moderator";
-  const canDelete = user?.role === "admin";
-  const canAssignModerator = user?.role === "admin";
+  // Build filter params
+  const filterParams = {
+    page,
+    limit: 20,
+    ...(search && { search }),
+    ...(orderTypeFilter !== "all" && { orderType: orderTypeFilter }),
+    ...(priorityFilter !== "all" && { priority: priorityFilter }),
+  };
 
-  // Fetch orders with pagination
-  const fetchOrders = async (pageNum = 1, reset = false) => {
-    try {
-      const queryParams = new URLSearchParams();
+  const {
+    data: orders,
+    meta,
+    isLoading,
+    error,
+    mutate: refreshOrders,
+  } = useOrders(filterParams);
 
-      queryParams.set("page", pageNum.toString());
-      queryParams.set("limit", "10");
+  const { mutateApi } = useApiMutation();
 
-      if (searchTerm) {
-        queryParams.set("search", searchTerm);
-      }
-
-      const url = `${ORDERS_API}?${queryParams.toString()}`;
-      const response = await getRequestSend<Order[]>(url, {
-        Authorization: `Bearer ${user?.token}`,
-      });
-
-      if (response.status == 200 && response.data) {
-        const newOrders = Array.isArray(response.data) ? response.data : [];
-
-        if (reset || pageNum === 1) {
-          setOrders(newOrders);
-        } else {
-          setOrders((prev) => [...prev, ...newOrders]);
-        }
-
-        // Check if there are more pages
-        const totalPages = response.meta?.totalPages || 1;
-        setHasMore(pageNum < totalPages);
-
-        if (pageNum === 1) {
-          toast.success("Orders loaded successfully");
-        }
-      } else {
-        toast.error(response.message || "Failed to fetch orders");
-        setHasMore(false);
-      }
-    } catch (error) {
-      toast.error("Failed to fetch orders");
-      console.error("Fetch orders error:", error);
-      setHasMore(false);
-    } finally {
-      setInitialLoading(false);
+  const getOrderStatusBadge = (order: Order) => {
+    // You can derive status from payment and other fields
+    if (order.payment.pReceived >= order.payment.pAmount) {
+      return <Badge variant="default">Paid</Badge>;
+    } else if (order.payment.pReceived > 0) {
+      return <Badge variant="secondary">Partially Paid</Badge>;
+    } else {
+      return <Badge variant="destructive">Unpaid</Badge>;
     }
   };
 
-  // Fetch more orders for infinite scroll
-  const fetchMoreOrders = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchOrders(nextPage, false);
-  };
-
-  // Load initial data
-  useEffect(() => {
-    if (user?.token) {
-      fetchOrders(1, true);
-      setPage(1);
-    }
-  }, [user, searchTerm]);
-
-  // Filter orders based on search term
-  const filteredOrders = orders.filter(
-    (order) =>
-      order.trackId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.parcel.sender.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.parcel.receiver.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.parcel.from.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.parcel.to.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.status.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Calculate stats
-  const stats = {
-    total: filteredOrders.length,
-    pending: filteredOrders.filter((order) => order.status === "pending").length,
-    processing: filteredOrders.filter((order) => order.status === "processing").length,
-    shipped: filteredOrders.filter((order) => order.status === "shipped").length,
-    delivered: filteredOrders.filter((order) => order.status === "delivered").length,
-    cancelled: filteredOrders.filter((order) => order.status === "cancelled").length,
-  };
-
-  const statusColors: Record<string, string> = {
-    pending: "bg-yellow-100 text-yellow-800",
-    processing: "bg-blue-100 text-blue-800",
-    shipped: "bg-purple-100 text-purple-800",
-    delivered: "bg-green-100 text-green-800",
-    cancelled: "bg-red-100 text-red-800",
-  };
-
-  const priorityColors: Record<string, string> = {
-    normal: "bg-gray-100 text-gray-800",
-    express: "bg-orange-100 text-orange-800",
-    "super-express": "bg-red-100 text-red-800",
-  };
-
-  // Handle create order
-  const handleCreateOrder = async (formData: FormData) => {
-    try {
-      setLoading(true);
-
-      const orderData = {
-        parcel: {
-          sender: {
-            name: formData.get("senderName") as string,
-            phone: formData.get("senderPhone") as string,
-            email: formData.get("senderEmail") as string,
-          },
-          receiver: {
-            name: formData.get("receiverName") as string,
-            phone: formData.get("receiverPhone") as string,
-            email: formData.get("receiverEmail") as string,
-          },
-          from: {
-            addressLine: formData.get("fromAddress") as string,
-            area: formData.get("fromArea") as string,
-            city: formData.get("fromCity") as string,
-            country: { name: formData.get("fromCountry") as string },
-          },
-          to: {
-            addressLine: formData.get("toAddress") as string,
-            area: formData.get("toArea") as string,
-            city: formData.get("toCity") as string,
-            country: { name: formData.get("toCountry") as string },
-          },
-          priority: formData.get("priority") as string,
-          orderType: formData.get("orderType") as string,
-          weight: Number(formData.get("weight")) || 0,
-        },
-        payment: {
-          pType: "cash",
-          pAmount: Number(formData.get("amount")) || 0,
-          pOfferDiscount: 0,
-          pExtraCharge: 0,
-          pDiscount: 0,
-          pReceived: 0,
-          pRefunded: 0,
-        },
-      };
-
-      const response = await postRequestSend(
-        ORDERS_API,
-        { Authorization: `Bearer ${user?.token}` },
-        orderData
-      );
-
-      if (response.status == 201) {
-        toast.success("Order created successfully");
-        setIsCreateModalOpen(false);
-        // Reset and fetch fresh data
-        setOrders([]);
-        setPage(1);
-        setHasMore(true);
-        fetchOrders(1, true);
-      } else {
-        toast.error(response.message || "Failed to create order");
-      }
-    } catch (error) {
-      toast.error("Failed to create order");
-      console.error("Create order error:", error);
-    } finally {
-      setLoading(false);
+  const getPriorityBadge = (priority: string) => {
+    switch (priority) {
+      case "express":
+        return <Badge variant="destructive">Express</Badge>;
+      case "super-express":
+        return <Badge variant="destructive">Super Express</Badge>;
+      case "normal":
+      default:
+        return <Badge variant="secondary">Normal</Badge>;
     }
   };
 
-  // Handle delete order
-  const handleDeleteOrder = async (order: Order) => {
-    if (!canDelete) {
-      toast.error("You do not have permission to delete orders");
-      return;
-    }
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm("Are you sure you want to delete this order?")) return;
 
-    if (confirm(`Are you sure you want to delete order ${order.trackId}?`)) {
-      try {
-        const response = await deleteRequestSend(
-          SINGLE_ORDER_API(order._id),
-          { Authorization: `Bearer ${user?.token}` }
-        );
-
-        if (response.status == 200) {
-          toast.success("Order deleted successfully");
-          setOrders((prev) => prev.filter((o) => o._id !== order._id));
-          
-          // Send notification
-          postRequestSend(
-            NOTIFICATION_API,
-            { Authorization: `Bearer ${user?.token}` },
-            {
-              title: `Order Deleted by ${user?.name}`,
-              userId: order.parcel.sender.phone,
-              message: `Your order ${order.trackId} has been deleted by admin.`,
-            }
-          );
-        } else {
-          toast.error(response.message || "Failed to delete order");
-        }
-      } catch (error) {
-        toast.error("Failed to delete order");
-        console.error("Delete order error:", error);
-      }
-    }
+    await mutateApi(ORDER_BY_ID_API(orderId), {
+      method: "DELETE",
+      successMessage: "Order deleted successfully",
+      onSuccess: () => {
+        refreshOrders();
+        setShowOrderDialog(false);
+      },
+    });
   };
 
-  // Handle status update
-  const handleUpdateStatus = async (order: Order, newStatus: string) => {
-    if (!canManage) {
-      toast.error("You do not have permission to update order status");
-      return;
-    }
-    try {
-      const response = await putRequestSend(
-        SINGLE_ORDER_API(order._id),
-        { Authorization: `Bearer ${user?.token}` },
-        {
-          ...order,
-          status: newStatus,
-          moderator: user?.id 
-        }
-      );
-
-      if (response.status == 200) {
-        toast.success(`Order status updated to ${newStatus}`);
-        setOrders((prev) =>
-          prev.map((o) =>
-            o._id === order._id
-              ? { 
-                  ...o, 
-                  status: newStatus as Order["status"],
-                  moderator: {
-                    _id: user.id,
-                    name: user.name,
-                    phone: user.phone,
-                  }
-                }
-              : o
-          )
-        );
-
-        // Send notification
-        postRequestSend(
-          NOTIFICATION_API,
-          { Authorization: `Bearer ${user?.token}` },
-          {
-            title: `Order Status Updated to ${newStatus}`,
-            userId: order.parcel.sender.phone,
-            message: `Your order ${order.trackId} status has been updated to ${newStatus} by ${user?.name}.`,
-          }
-        );
-      } else {
-        toast.error(response.message || "Failed to update status");
-      }
-    } catch (error) {
-      toast.error("Failed to update order status");
-      console.error("Update status error:", error);
-    }
+  const handleCreateOrder = async (orderData: any) => {
+    await mutateApi(ORDERS_API, {
+      method: "POST",
+      data: orderData,
+      successMessage: "Order created successfully",
+      onSuccess: () => {
+        refreshOrders();
+        setShowCreateDialog(false);
+      },
+    });
   };
 
-  // Handle moderator assignment
-  const handleAssignModerator = async (order: Order) => {
-    if (!canAssignModerator) {
-      toast.error("You do not have permission to assign moderators");
-      return;
-    }
-
-    try {
-      const response = await putRequestSend(
-        SINGLE_ORDER_API(order._id),
-        { Authorization: `Bearer ${user?.token}` },
-        {
-          ...order,
-          moderator: user.id,
-          status: "processing",
-        }
-      );
-
-      if (response.status === 200) {
-        toast.success("Order assigned successfully");
-        setOrders((prev) =>
-          prev.map((o) =>
-            o._id === order._id
-              ? {
-                  ...o,
-                  moderator: {
-                    _id: user.id,
-                    name: user.name,
-                    phone: user.phone,
-                  },
-                  status: "processing" as const,
-                }
-              : o
-          )
-        );
-      } else {
-        toast.error(response.message || "Failed to assign order");
-      }
-    } catch (error) {
-      toast.error("Failed to assign order");
-      console.error("Assign moderator error:", error);
-    }
-  };
-
-  // Order Card Component (similar to PickupCard pattern)
-  const OrderCard = ({ order }: { order: Order }) => (
-    <Card className="mb-4 py-2" data-testid={`order-card-${order._id}`}>
-      <CardContent className="py-2 px-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-3">
-            <Package className="h-5 w-5 text-gray-500" />
-            <div>
-              <p className="font-semibold text-sm font-mono">#{order.trackId}</p>
-              <p className="text-sm text-gray-600">{order.parcel.sender.name}</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge
-              className={
-                statusColors[order.status] || "bg-gray-100 text-gray-800"
-              }
-            >
-              {order.status.toUpperCase()}
-            </Badge>
-            <Badge
-              className={
-                priorityColors[order.parcel.priority] || "bg-gray-100 text-gray-800"
-              }
-            >
-              {order.parcel.priority.replace('-', ' ').toUpperCase()}
-            </Badge>
-            
-            <div className="flex gap-2">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => {
-                  setSelectedOrder(order);
-                  setIsViewModalOpen(true);
-                }}
-              >
-                View
-              </Button>
-
-              {canManage && (
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => {
-                    setSelectedOrder(order);
-                    setIsEditModalOpen(true);
-                  }}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              )}
-
-              {canManage && !order.moderator && canAssignModerator && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleAssignModerator(order)}
-                >
-                  <User className="h-4 w-4" />
-                </Button>
-              )}
-
-              {canDelete && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeleteOrder(order)}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-          <div>
-            <p className="text-gray-600">From:</p>
-            <p className="font-medium capitalize">
-              {order.parcel.from.city}, {order.parcel.from.country.name}
-            </p>
-            <p className="text-gray-500 capitalize">
-              {order.parcel.from.addressLine}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-gray-600">To:</p>
-            <p className="font-medium capitalize">
-              {order.parcel.to.city}, {order.parcel.to.country.name}
-            </p>
-            <p className="text-gray-500 capitalize">
-              {order.parcel.to.addressLine}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-gray-600">Payment Amount:</p>
-            <p className="font-medium">৳{order.payment.pAmount}</p>
-            <p className="text-gray-500">Weight: {order.parcel.weight}kg</p>
-          </div>
-
-          {canManage && order.moderator && (
-            <div>
-              <p className="text-gray-600">Assigned To:</p>
-              <div className="flex items-center gap-1">
-                <User size={16} />
-                <p className="font-medium">{order.moderator.name}</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Status Action Buttons */}
-        {canManage && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {order.status === "pending" && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleUpdateStatus(order, "processing")}
-              >
-                Mark Processing
-              </Button>
-            )}
-            
-            {order.status === "processing" && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleUpdateStatus(order, "shipped")}
-              >
-                Mark Shipped
-              </Button>
-            )}
-            
-            {order.status === "shipped" && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleUpdateStatus(order, "delivered")}
-              >
-                Mark Delivered
-              </Button>
-            )}
-            
-            {order.status !== "delivered" && order.status !== "cancelled" && (
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={() => handleUpdateStatus(order, "cancelled")}
-              >
-                Cancel Order
-              </Button>
-            )}
-          </div>
-        )}
-
-        <div className="mt-3 text-xs text-gray-500">
-          Created: {new Date(order.createdAt).toLocaleDateString()}
-        </div>
-      </CardContent>
-    </Card>
-  );
+  // Check permissions
+  const canCreateOrders = user?.role === "admin" || user?.role === "moderator";
+  const canDeleteOrders = user?.role === "admin";
 
   return (
     <div className="space-y-6" data-testid="orders-page">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1
-            className="text-3xl font-bold tracking-tight"
-            data-testid="orders-title"
-          >
-            {user?.role === "user" ? "My Orders" : "Orders Management"}
-          </h1>
-          <p className="text-muted-foreground">
-            {user?.role === "user"
-              ? "Track and manage your courier orders"
-              : user?.role === "moderator"
-              ? "Manage assigned orders and update status"
-              : "Manage all courier orders and shipments"}
-          </p>
+        <div className="flex items-center space-x-2">
+          <Package className="h-6 w-6" />
+          <h1 className="text-2xl font-bold">Order Management</h1>
         </div>
-        
-        {canManage && (
-          <AlertDialog
-            open={isCreateModalOpen}
-            onOpenChange={setIsCreateModalOpen}
+        {canCreateOrders && (
+          <Button 
+            onClick={() => setShowCreateDialog(true)}
+            data-testid="create-order-button"
           >
-            <AlertDialogTrigger asChild>
-              <Button data-testid="create-order-btn" disabled={loading}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Order
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent
-              data-testid="create-order-modal"
-              className="max-w-4xl max-h-[90vh] overflow-y-auto"
-            >
-              <AlertDialogHeader>
-                <AlertDialogTitle>Create New Order</AlertDialogTitle>
-              </AlertDialogHeader>
-              <form action={handleCreateOrder} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Sender Information */}
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-lg">Sender Information</h3>
-                    <div>
-                      <Label htmlFor="senderName">Full Name</Label>
-                      <Input id="senderName" name="senderName" required />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label htmlFor="senderPhone">Phone</Label>
-                        <Input id="senderPhone" name="senderPhone" required />
-                      </div>
-                      <div>
-                        <Label htmlFor="senderEmail">Email</Label>
-                        <Input id="senderEmail" name="senderEmail" type="email" required />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="fromAddress">Address</Label>
-                      <Input id="fromAddress" name="fromAddress" required />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <Label htmlFor="fromArea">Area</Label>
-                        <Input id="fromArea" name="fromArea" required />
-                      </div>
-                      <div>
-                        <Label htmlFor="fromCity">City</Label>
-                        <Input id="fromCity" name="fromCity" required />
-                      </div>
-                      <div>
-                        <Label htmlFor="fromCountry">Country</Label>
-                        <Input id="fromCountry" name="fromCountry" required />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Receiver Information */}
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-lg">Receiver Information</h3>
-                    <div>
-                      <Label htmlFor="receiverName">Full Name</Label>
-                      <Input id="receiverName" name="receiverName" required />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label htmlFor="receiverPhone">Phone</Label>
-                        <Input id="receiverPhone" name="receiverPhone" required />
-                      </div>
-                      <div>
-                        <Label htmlFor="receiverEmail">Email</Label>
-                        <Input id="receiverEmail" name="receiverEmail" type="email" required />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="toAddress">Address</Label>
-                      <Input id="toAddress" name="toAddress" required />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <Label htmlFor="toArea">Area</Label>
-                        <Input id="toArea" name="toArea" required />
-                      </div>
-                      <div>
-                        <Label htmlFor="toCity">City</Label>
-                        <Input id="toCity" name="toCity" required />
-                      </div>
-                      <div>
-                        <Label htmlFor="toCountry">Country</Label>
-                        <Input id="toCountry" name="toCountry" required />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Parcel Details */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div>
-                    <Label htmlFor="priority">Priority</Label>
-                    <Select name="priority" required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select priority" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="normal">Normal</SelectItem>
-                        <SelectItem value="express">Express</SelectItem>
-                        <SelectItem value="super-express">Super Express</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="orderType">Order Type</Label>
-                    <Select name="orderType" required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="document">Document</SelectItem>
-                        <SelectItem value="parcel">Parcel</SelectItem>
-                        <SelectItem value="box">Box</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="weight">Weight (kg)</Label>
-                    <Input
-                      id="weight"
-                      name="weight"
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="amount">Amount (৳)</Label>
-                    <Input
-                      id="amount"
-                      name="amount"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <AlertDialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsCreateModalOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <AlertDialogAction asChild>
-                    <Button
-                      type="submit"
-                      data-testid="create-order-submit"
-                      disabled={loading}
-                    >
-                      {loading && (
-                        <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                      )}
-                      Create Order
-                    </Button>
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </form>
-            </AlertDialogContent>
-          </AlertDialog>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Order
+          </Button>
         )}
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-        <StatsCard
-          title="Total Orders"
-          value={stats.total}
-          icon={Package}
-          trend="neutral"
-        />
-        <StatsCard
-          title="Pending"
-          value={stats.pending}
-          icon={Clock}
-          trend="neutral"
-        />
-        <StatsCard
-          title="Processing"
-          value={stats.processing}
-          icon={AlertCircle}
-          trend="neutral"
-        />
-        <StatsCard
-          title="Shipped"
-          value={stats.shipped}
-          icon={Truck}
-          trend="up"
-        />
-        <StatsCard
-          title="Delivered"
-          value={stats.delivered}
-          icon={CheckCircle}
-          trend="up"
-        />
-        <StatsCard
-          title="Cancelled"
-          value={stats.cancelled}
-          icon={XCircle}
-          trend="down"
-        />
-      </div>
-
-      {/* Search Bar */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search orders..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-8"
-          data-testid="order-search-input"
-        />
-      </div>
-
-      {/* Orders List with InfiniteScroll */}
-      <div data-testid="orders-list">
-        {initialLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <LoaderCircle className="h-8 w-8 animate-spin" />
-            <span className="ml-2">Loading orders...</span>
-          </div>
-        ) : (
-          <InfiniteScroll
-            dataLength={filteredOrders.length}
-            next={fetchMoreOrders}
-            hasMore={hasMore}
-            loader={
-              <div className="flex items-center justify-center py-4">
-                <LoaderCircle className="h-6 w-6 animate-spin" />
-                <span className="ml-2">Loading more orders...</span>
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Filter className="h-5 w-5" />
+            <span>Filters</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <Label htmlFor="search">Search</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="search"
+                  placeholder="Track ID, sender, receiver..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10"
+                  data-testid="search-input"
+                />
               </div>
-            }
-            endMessage={
-              <p className="text-center py-4 text-gray-500">
-                {filteredOrders.length === 0
-                  ? "No orders found"
-                  : "No more orders to load"}
-              </p>
-            }
-            scrollableTarget="scrollableDiv"
-          >
-            {filteredOrders.map((order) => (
-              <OrderCard key={order._id} order={order} />
-            ))}
-          </InfiniteScroll>
-        )}
-      </div>
+            </div>
+            <div>
+              <Label htmlFor="order-type-filter">Order Type</Label>
+              <Select value={orderTypeFilter} onValueChange={setOrderTypeFilter}>
+                <SelectTrigger data-testid="order-type-filter">
+                  <SelectValue placeholder="All types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All types</SelectItem>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="express">Express</SelectItem>
+                  <SelectItem value="super-express">Super Express</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="priority-filter">Priority</Label>
+              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                <SelectTrigger data-testid="priority-filter">
+                  <SelectValue placeholder="All priorities" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All priorities</SelectItem>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="express">Express</SelectItem>
+                  <SelectItem value="super-express">Super Express</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearch("");
+                  setOrderTypeFilter("all");
+                  setPriorityFilter("all");
+                  setPage(1);
+                }}
+                data-testid="clear-filters"
+              >
+                Clear Filters
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* View Order Modal */}
-      <AlertDialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <AlertDialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Order Details - {selectedOrder?.trackId}</AlertDialogTitle>
-          </AlertDialogHeader>
+      {/* Orders Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Orders ({meta?.total || 0})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-600">Failed to load orders</p>
+              <Button onClick={() => refreshOrders()} className="mt-2">
+                Retry
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Table data-testid="orders-table">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Track ID</TableHead>
+                    <TableHead>Route</TableHead>
+                    <TableHead>Priority</TableHead>
+                    <TableHead>Weight</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {orders?.map((order: Order) => (
+                    <TableRow key={order._id} data-testid={`order-row-${order._id}`}>
+                      <TableCell>
+                        <div className="font-mono text-sm">
+                          {order.trackId}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center space-x-1 text-sm">
+                            <MapPin className="h-3 w-3 text-green-600" />
+                            <span className="truncate max-w-[120px]">{order.parcel.from}</span>
+                          </div>
+                          <div className="flex items-center space-x-1 text-sm text-gray-600">
+                            <MapPin className="h-3 w-3 text-red-600" />
+                            <span className="truncate max-w-[120px]">{order.parcel.to}</span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {getPriorityBadge(order.parcel.priority)}
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{order.parcel.weight} kg</span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="text-sm font-medium">
+                            ${order.payment.pAmount}
+                          </div>
+                          <div className="text-xs text-gray-600">
+                            Paid: ${order.payment.pReceived}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {getOrderStatusBadge(order)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="text-sm">
+                            {new Date(order.orderDate).toLocaleDateString()}
+                          </div>
+                          <div className="text-xs text-gray-600">
+                            {new Date(order.orderDate).toLocaleTimeString()}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowOrderDialog(true);
+                            }}
+                            data-testid={`view-order-${order._id}`}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          {canDeleteOrders && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteOrder(order._id)}
+                              className="text-red-600 hover:text-red-700"
+                              data-testid={`delete-order-${order._id}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
 
+              {/* Pagination */}
+              {meta && meta.totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <div className="text-sm text-gray-700">
+                    Showing {((meta.page - 1) * 20) + 1} to {Math.min(meta.page * 20, meta.total)} of {meta.total} orders
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      disabled={page <= 1}
+                      onClick={() => setPage(page - 1)}
+                      data-testid="prev-page"
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      disabled={page >= meta.totalPages}
+                      onClick={() => setPage(page + 1)}
+                      data-testid="next-page"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Order Details Dialog */}
+      <Dialog open={showOrderDialog} onOpenChange={setShowOrderDialog}>
+        <DialogContent className="sm:max-w-2xl" data-testid="order-details-dialog">
+          <DialogHeader>
+            <DialogTitle>Order Details</DialogTitle>
+            <DialogDescription>
+              Complete order information and tracking details
+            </DialogDescription>
+          </DialogHeader>
           {selectedOrder && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Sender Details */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Sender Information</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <p><strong>Name:</strong> {selectedOrder.parcel.sender.name}</p>
-                    <p><strong>Phone:</strong> {selectedOrder.parcel.sender.phone}</p>
-                    <p><strong>Email:</strong> {selectedOrder.parcel.sender.email}</p>
-                    <p><strong>Address:</strong> {selectedOrder.parcel.from.addressLine}</p>
-                    <p><strong>City:</strong> {selectedOrder.parcel.from.city}</p>
-                    <p><strong>Country:</strong> {selectedOrder.parcel.from.country.name}</p>
-                  </CardContent>
-                </Card>
-
-                {/* Receiver Details */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Receiver Information</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <p><strong>Name:</strong> {selectedOrder.parcel.receiver.name}</p>
-                    <p><strong>Phone:</strong> {selectedOrder.parcel.receiver.phone}</p>
-                    <p><strong>Email:</strong> {selectedOrder.parcel.receiver.email}</p>
-                    <p><strong>Address:</strong> {selectedOrder.parcel.to.addressLine}</p>
-                    <p><strong>City:</strong> {selectedOrder.parcel.to.city}</p>
-                    <p><strong>Country:</strong> {selectedOrder.parcel.to.country.name}</p>
-                  </CardContent>
-                </Card>
+              {/* Basic Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Track ID</Label>
+                  <p className="font-mono text-sm">{selectedOrder.trackId}</p>
+                </div>
+                <div>
+                  <Label>Order Date</Label>
+                  <p className="text-sm">{new Date(selectedOrder.orderDate).toLocaleString()}</p>
+                </div>
+                <div>
+                  <Label>Priority</Label>
+                  {getPriorityBadge(selectedOrder.parcel.priority)}
+                </div>
+                <div>
+                  <Label>Weight</Label>
+                  <p className="text-sm">{selectedOrder.parcel.weight} kg</p>
+                </div>
               </div>
 
-              {/* Order & Payment Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Order Details</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <p><strong>Track ID:</strong> {selectedOrder.trackId}</p>
-                    <p><strong>Status:</strong> <Badge className={statusColors[selectedOrder.status]}>{selectedOrder.status.toUpperCase()}</Badge></p>
-                    <p><strong>Priority:</strong> <Badge className={priorityColors[selectedOrder.parcel.priority]}>{selectedOrder.parcel.priority.replace('-', ' ').toUpperCase()}</Badge></p>
-                    <p><strong>Type:</strong> {selectedOrder.parcel.orderType.toUpperCase()}</p>
-                    <p><strong>Weight:</strong> {selectedOrder.parcel.weight} kg</p>
-                    <p><strong>Created:</strong> {new Date(selectedOrder.createdAt).toLocaleDateString()}</p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Payment Details</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <p><strong>Amount:</strong> ৳{selectedOrder.payment.pAmount}</p>
-                    <p><strong>Type:</strong> {selectedOrder.payment.pType}</p>
-                    <p><strong>Received:</strong> ৳{selectedOrder.payment.pReceived}</p>
-                    <p><strong>Discount:</strong> ৳{selectedOrder.payment.pDiscount}</p>
-                    <p><strong>Extra Charge:</strong> ৳{selectedOrder.payment.pExtraCharge}</p>
-                  </CardContent>
-                </Card>
+              {/* Route Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Route Information</h3>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-green-600">From (Sender)</Label>
+                    <div className="p-3 border rounded-lg bg-green-50">
+                      <p className="font-medium">{selectedOrder.parcel.sender.name}</p>
+                      <p className="text-sm text-gray-600">{selectedOrder.parcel.sender.phone}</p>
+                      <p className="text-sm">{selectedOrder.parcel.sender.address}</p>
+                      <p className="text-sm text-green-600 font-medium">{selectedOrder.parcel.from}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-red-600">To (Receiver)</Label>
+                    <div className="p-3 border rounded-lg bg-red-50">
+                      <p className="font-medium">{selectedOrder.parcel.receiver.name}</p>
+                      <p className="text-sm text-gray-600">{selectedOrder.parcel.receiver.phone}</p>
+                      <p className="text-sm">{selectedOrder.parcel.receiver.address}</p>
+                      <p className="text-sm text-red-600 font-medium">{selectedOrder.parcel.to}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {selectedOrder.moderator && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Assigned Moderator</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p><strong>Name:</strong> {selectedOrder.moderator.name}</p>
-                    <p><strong>Phone:</strong> {selectedOrder.moderator.phone}</p>
-                  </CardContent>
-                </Card>
+              {/* Items */}
+              {selectedOrder.parcel.item && selectedOrder.parcel.item.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Items</h3>
+                  <div className="border rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Item</TableHead>
+                          <TableHead>Qty</TableHead>
+                          <TableHead>Unit Price</TableHead>
+                          <TableHead>Total</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedOrder.parcel.item.map((item, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{item.name}</TableCell>
+                            <TableCell>{item.quantity}</TableCell>
+                            <TableCell>${item.unitPrice}</TableCell>
+                            <TableCell>${item.totalPrice}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              )}
+
+              {/* Payment Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Payment Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Payment Type</Label>
+                    <p className="text-sm">{selectedOrder.payment.pType}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Total Amount</Label>
+                    <p className="text-sm font-medium">${selectedOrder.payment.pAmount}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Received</Label>
+                    <p className="text-sm text-green-600">${selectedOrder.payment.pReceived}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Discount</Label>
+                    <p className="text-sm">${selectedOrder.payment.pDiscount}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Offer Discount</Label>
+                    <p className="text-sm">${selectedOrder.payment.pOfferDiscount}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Extra Charges</Label>
+                    <p className="text-sm">${selectedOrder.payment.pExtraCharge}</p>
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Outstanding Balance:</span>
+                    <span className={`font-bold ${
+                      selectedOrder.payment.pAmount - selectedOrder.payment.pReceived <= 0 
+                        ? 'text-green-600' 
+                        : 'text-red-600'
+                    }`}>
+                      ${selectedOrder.payment.pAmount - selectedOrder.payment.pReceived}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              {selectedOrder.parcel.description && (
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <p className="text-sm p-3 bg-gray-50 rounded-lg">
+                    {selectedOrder.parcel.description}
+                  </p>
+                </div>
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
 
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setIsViewModalOpen(false)}>
-              Close
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Create Order Dialog */}
+      <CreateOrderDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onSubmit={handleCreateOrder}
+      />
     </div>
   );
-};
+}
 
-export default DashboardOrders;
+// Create Order Dialog Component
+function CreateOrderDialog({
+  open,
+  onOpenChange,
+  onSubmit,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (orderData: any) => Promise<any>;
+}) {
+  const [formData, setFormData] = useState({
+    parcel: {
+      from: "",
+      to: "",
+      weight: 0,
+      priority: "normal",
+      orderType: "normal",
+      sender: {
+        name: "",
+        phone: "",
+        address: "",
+      },
+      receiver: {
+        name: "",
+        phone: "",
+        address: "",
+      },
+      description: "",
+    },
+    payment: {
+      pType: "cash",
+      pAmount: 0,
+    },
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.parcel.from || !formData.parcel.to || !formData.parcel.weight) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      await onSubmit(formData);
+      // Reset form
+      setFormData({
+        parcel: {
+          from: "",
+          to: "",
+          weight: 0,
+          priority: "normal",
+          orderType: "normal",
+          sender: { name: "", phone: "", address: "" },
+          receiver: { name: "", phone: "", address: "" },
+          description: "",
+        },
+        payment: {
+          pType: "cash",
+          pAmount: 0,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to create order:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl" data-testid="create-order-dialog">
+        <DialogHeader>
+          <DialogTitle>Create New Order</DialogTitle>
+          <DialogDescription>
+            Create a new order with sender and receiver details
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto">
+          {/* Route Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Route Information</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="from">From Country</Label>
+                <Input
+                  id="from"
+                  value={formData.parcel.from}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    parcel: {...formData.parcel, from: e.target.value}
+                  })}
+                  placeholder="Origin country"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="to">To Country</Label>
+                <Input
+                  id="to"
+                  value={formData.parcel.to}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    parcel: {...formData.parcel, to: e.target.value}
+                  })}
+                  placeholder="Destination country"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="weight">Weight (kg)</Label>
+                <Input
+                  id="weight"
+                  type="number"
+                  step="0.1"
+                  value={formData.parcel.weight}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    parcel: {...formData.parcel, weight: parseFloat(e.target.value) || 0}
+                  })}
+                  placeholder="0.0"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="priority">Priority</Label>
+                <Select 
+                  value={formData.parcel.priority} 
+                  onValueChange={(value) => setFormData({
+                    ...formData,
+                    parcel: {...formData.parcel, priority: value}
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="express">Express</SelectItem>
+                    <SelectItem value="super-express">Super Express</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          {/* Sender Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Sender Information</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="sender-name">Sender Name</Label>
+                <Input
+                  id="sender-name"
+                  value={formData.parcel.sender.name}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    parcel: {
+                      ...formData.parcel,
+                      sender: {...formData.parcel.sender, name: e.target.value}
+                    }
+                  })}
+                  placeholder="Sender full name"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="sender-phone">Sender Phone</Label>
+                <Input
+                  id="sender-phone"
+                  value={formData.parcel.sender.phone}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    parcel: {
+                      ...formData.parcel,
+                      sender: {...formData.parcel.sender, phone: e.target.value}
+                    }
+                  })}
+                  placeholder="Sender phone number"
+                  required
+                />
+              </div>
+              <div className="col-span-2">
+                <Label htmlFor="sender-address">Sender Address</Label>
+                <Textarea
+                  id="sender-address"
+                  value={formData.parcel.sender.address}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    parcel: {
+                      ...formData.parcel,
+                      sender: {...formData.parcel.sender, address: e.target.value}
+                    }
+                  })}
+                  placeholder="Complete sender address"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Receiver Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Receiver Information</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="receiver-name">Receiver Name</Label>
+                <Input
+                  id="receiver-name"
+                  value={formData.parcel.receiver.name}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    parcel: {
+                      ...formData.parcel,
+                      receiver: {...formData.parcel.receiver, name: e.target.value}
+                    }
+                  })}
+                  placeholder="Receiver full name"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="receiver-phone">Receiver Phone</Label>
+                <Input
+                  id="receiver-phone"
+                  value={formData.parcel.receiver.phone}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    parcel: {
+                      ...formData.parcel,
+                      receiver: {...formData.parcel.receiver, phone: e.target.value}
+                    }
+                  })}
+                  placeholder="Receiver phone number"
+                  required
+                />
+              </div>
+              <div className="col-span-2">
+                <Label htmlFor="receiver-address">Receiver Address</Label>
+                <Textarea
+                  id="receiver-address"
+                  value={formData.parcel.receiver.address}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    parcel: {
+                      ...formData.parcel,
+                      receiver: {...formData.parcel.receiver, address: e.target.value}
+                    }
+                  })}
+                  placeholder="Complete receiver address"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Payment Information</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="payment-type">Payment Type</Label>
+                <Select 
+                  value={formData.payment.pType} 
+                  onValueChange={(value) => setFormData({
+                    ...formData,
+                    payment: {...formData.payment, pType: value}
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cash">Cash</SelectItem>
+                    <SelectItem value="card">Card</SelectItem>
+                    <SelectItem value="bank-transfer">Bank Transfer</SelectItem>
+                    <SelectItem value="online">Online Payment</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="payment-amount">Amount ($)</Label>
+                <Input
+                  id="payment-amount"
+                  type="number"
+                  step="0.01"
+                  value={formData.payment.pAmount}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    payment: {...formData.payment, pAmount: parseFloat(e.target.value) || 0}
+                  })}
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div>
+            <Label htmlFor="description">Description (Optional)</Label>
+            <Textarea
+              id="description"
+              value={formData.parcel.description}
+              onChange={(e) => setFormData({
+                ...formData,
+                parcel: {...formData.parcel, description: e.target.value}
+              })}
+              placeholder="Additional notes or special instructions"
+            />
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting} data-testid="submit-create-order">
+              {isSubmitting ? "Creating..." : "Create Order"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

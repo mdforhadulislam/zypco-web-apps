@@ -1,5 +1,5 @@
-export const ROOT = `https://zypco.vercel.app/`;
-// export const ROOT = `http://localhost:3000/`;
+// export const ROOT = `https://zypco.vercel.app/`;
+export const ROOT = `http://localhost:3000/`;
 
 export const ROOT_API = `${ROOT}api/v1/`;
 
@@ -12,7 +12,7 @@ export const REFRESH_TOKEN = `${ROOT_API}auth/refresh-token`
 export const ACCOUNT_API = `${ROOT_API}accounts/`;
 export const SINGLE_ACCOUNT_API = (phone: string) =>`${ROOT_API}accounts/${phone}`;
 
-export const SINGLE_ACCOUNT_ADDRESS_API = (phone: string) =>`${ROOT_API}accounts/${phone}/address`;
+export const SINGLE_ACCOUNT_ADDRESS_API = (phone: string) =>`${ROOT_API}accounts/${phone}/address}`;
 export const SINGLE_ACCOUNT_SINGLE_ADDRESS_API = (phone: string,addressId: string) => `${ROOT_API}accounts/${phone}/address/${addressId}`;
 
 export const SINGLE_ACCOUNT_APICONFIG_API = (phone: string) =>`${ROOT_API}accounts/${phone}/api-config/`;
