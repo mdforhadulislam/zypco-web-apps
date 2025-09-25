@@ -1,9 +1,6 @@
 export const ROOT = `https://zypco.vercel.app/`;
-<<<<<<< HEAD
 // export const ROOT = `http://localhost:3000/`;
-=======
-//export const ROOT = `http://localhost:3000/`;
->>>>>>> 52edebb5476c35f770fa9cb9474a3e9384cb11fa
+
 export const ROOT_API = `${ROOT}api/v1/`;
 
 export const SIGNIN_API = `${ROOT_API}auth/signin`;
