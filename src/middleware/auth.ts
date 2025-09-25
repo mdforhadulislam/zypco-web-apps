@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { User } from "@/server/models/User.model";
 import { ApiAccessLog } from "@/server/models/ApiAccessLog.model";
 import connectDB from "@/config/db";
@@ -9,10 +9,11 @@ export interface AuthUser {
   id: string;
   phone: string;
   email: string;
+  name: string;
   role: "user" | "admin" | "moderator";
   isActive: boolean;
   isVerified: boolean;
-  permissions: string[];
+  permissions?: string[];
 }
 
 export interface AuthRequest extends NextRequest {
@@ -23,18 +24,25 @@ export interface AuthRequest extends NextRequest {
   };
 }
 
-// JWT Secret and Refresh Secret
+// JWT Secrets - consistent with updated auth system
 const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
-const ACCESS_TOKEN_EXPIRY = process.env.JWT_EXPIRES_IN || "15m";
-const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRES_IN || "7d";
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET!;
+const ACCESS_TOKEN_EXPIRY = "15m";
+const REFRESH_TOKEN_EXPIRY = "7d";
+
+export interface TokenPayload extends JwtPayload {
+  id: string;
+  role: string;
+  type?: string;
+}
 
 export class AuthMiddleware {
   /**
    * Extract and verify JWT token from request
    */
   static async extractToken(req: AuthRequest): Promise<string | null> {
-    const authHeader = req.headers.get("Authorization");
+    // Priority: Authorization header > cookies
+    const authHeader = req.headers.get("Authorization") || req.headers.get("authorization");
     
     if (authHeader && authHeader.startsWith("Bearer ")) {
       return authHeader.substring(7);
@@ -50,17 +58,26 @@ export class AuthMiddleware {
   }
 
   /**
-   * Verify access token and get user data
+   * Verify access token and get user data - Updated for consistency
    */
   static async verifyAccessToken(token: string): Promise<AuthUser | null> {
     try {
-       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
+      
+      // Validate token structure
+      if (!decoded.id || !decoded.role) {
+        return null;
+      }
+      
+      // Ensure it's an access token (if type is specified)
+      if (decoded.type && decoded.type !== 'access') {
+        return null;
+      }
       
       await connectDB();
-      const user = await User.findById(decoded.userId)
-        .populate('permissions')
-        .select('-password');
+      const user = await User.findById(decoded.id)
+        .select('-password -refreshTokens -emailVerification.code')
+        .lean();
       
       if (!user || !user.isActive) {
         return null;
@@ -68,61 +85,81 @@ export class AuthMiddleware {
 
       return {
         id: user._id.toString(),
+        name: user.name,
         phone: user.phone,
         email: user.email,
         role: user.role,
         isActive: user.isActive,
         isVerified: user.isVerified,
-        permissions: user.permissions || []
+        permissions: [] // Add permissions logic if needed
       };
     } catch (error) {
+      console.error('Token verification failed:', error);
       return null;
     }
   }
 
   /**
-   * Generate access and refresh tokens
+   * Generate access and refresh tokens - Updated structure
    */
-  static generateTokens(userId: string): { accessToken: string; refreshToken: string } {
-    const payload = { userId, type: 'access' };
-    const refreshPayload = { userId, type: 'refresh' };
+  static generateTokens(userId: string, role: string): { accessToken: string; refreshToken: string } {
+    const accessPayload: TokenPayload = { 
+      id: userId, 
+      role, 
+      type: 'access' 
+    };
+    
+    const refreshPayload: TokenPayload = { 
+      id: userId, 
+      role, 
+      type: 'refresh' 
+    };
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-    const accessToken = jwt.sign(payload, JWT_SECRET, { 
-      expiresIn: ACCESS_TOKEN_EXPIRY 
+    const accessToken = jwt.sign(accessPayload, JWT_SECRET, { 
+      expiresIn: ACCESS_TOKEN_EXPIRY,
+      issuer: 'zypco-api',
+      audience: 'zypco-client'
     });
     
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-    const refreshToken = jwt.sign(refreshPayload, JWT_REFRESH_SECRET, { 
-      expiresIn: REFRESH_TOKEN_EXPIRY 
+    const refreshToken = jwt.sign(refreshPayload, REFRESH_TOKEN_SECRET, { 
+      expiresIn: REFRESH_TOKEN_EXPIRY,
+      issuer: 'zypco-api',
+      audience: 'zypco-client'
     });
 
     return { accessToken, refreshToken };
   }
 
   /**
-   * Verify refresh token
+   * Verify refresh token - Updated for consistency
    */
-  static async verifyRefreshToken(token: string): Promise<string | null> {
+  static async verifyRefreshToken(token: string): Promise<{ userId: string; role: string } | null> {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const decoded = jwt.verify(token, JWT_REFRESH_SECRET) as any;
+      const decoded = jwt.verify(token, REFRESH_TOKEN_SECRET) as TokenPayload;
       
-      if (decoded.type !== 'refresh') {
+      // Validate token structure and type
+      if (!decoded.id || !decoded.role || (decoded.type && decoded.type !== 'refresh')) {
         return null;
       }
 
       await connectDB();
-      const user = await User.findById(decoded.userId);
+      const user = await User.findById(decoded.id).select('isActive refreshTokens');
       
       if (!user || !user.isActive) {
         return null;
       }
 
-      return decoded.userId;
+      // Optionally check if refresh token exists in user's stored tokens
+      if (user.refreshTokens && !user.refreshTokens.includes(token)) {
+        return null;
+      }
+
+      return { 
+        userId: decoded.id, 
+        role: decoded.role 
+      };
     } catch (error) {
+      console.error('Refresh token verification failed:', error);
       return null;
     }
   }
@@ -130,7 +167,7 @@ export class AuthMiddleware {
   /**
    * Authentication middleware
    */
-  static async authenticate(req: AuthRequest): Promise<{ success: boolean; response?: NextResponse }> {
+  static async authenticate(req: AuthRequest): Promise<{ success: boolean; user?: AuthUser; response?: NextResponse }> {
     try {
       const token = await this.extractToken(req);
       
@@ -140,8 +177,7 @@ export class AuthMiddleware {
           response: errorResponse({
             req,
             status: 401,
-            message: "Authentication required",
-            error: "No access token provided"
+            message: "Authentication required - No access token provided"
           })
         };
       }
@@ -154,8 +190,7 @@ export class AuthMiddleware {
           response: errorResponse({
             req,
             status: 401,
-            message: "Invalid or expired token",
-            error: "Authentication failed"
+            message: "Invalid or expired access token"
           })
         };
       }
@@ -166,26 +201,25 @@ export class AuthMiddleware {
           response: errorResponse({
             req,
             status: 403,
-            message: "Account not verified",
-            error: "Please verify your email address"
+            message: "Account not verified - Please verify your email address"
           })
         };
       }
 
-      // Log API access
+      // Log API access for security monitoring
       await this.logApiAccess(req, user);
       
       req.user = user;
-      return { success: true };
+      return { success: true, user };
       
     } catch (error) {
+      console.error('Authentication error:', error);
       return {
         success: false,
         response: errorResponse({
           req,
           status: 500,
-          message: "Authentication error",
-          error: "Internal server error"
+          message: "Internal authentication error"
         })
       };
     }
@@ -202,7 +236,7 @@ export class AuthMiddleware {
           response: errorResponse({
             req,
             status: 401,
-            message: "Authentication required"
+            message: "Authentication required for authorization"
           })
         };
       }
@@ -213,8 +247,8 @@ export class AuthMiddleware {
           response: errorResponse({
             req,
             status: 403,
-            message: "Access denied",
-            error: `Required role: ${allowedRoles.join(" or ")}`
+            message: "Access denied - Insufficient permissions",
+            details: `Required role: ${allowedRoles.join(" or ")}`
           })
         };
       }
@@ -234,21 +268,22 @@ export class AuthMiddleware {
           response: errorResponse({
             req,
             status: 401,
-            message: "Authentication required"
+            message: "Authentication required for permission check"
           })
         };
       }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-      if (!req.user.permissions.includes(permission) && req.user.role !== 'super_admin') {
+      const hasPermission = req.user.permissions?.includes(permission) || 
+                           ['admin', 'super_admin'].includes(req.user.role);
+
+      if (!hasPermission) {
         return {
           success: false,
           response: errorResponse({
             req,
             status: 403,
             message: "Permission denied",
-            error: `Required permission: ${permission}`
+            details: `Required permission: ${permission}`
           })
         };
       }
@@ -260,20 +295,25 @@ export class AuthMiddleware {
   /**
    * Resource ownership validation
    */
-  static async validateOwnership(req: AuthRequest, resourceId: string, resourceType: string,userField: string = 'user'): Promise<{ success: boolean; response?: NextResponse }> {
+  static async validateOwnership(
+    req: AuthRequest, 
+    resourceId: string, 
+    resourceType: string,
+    userField: string = 'user'
+  ): Promise<{ success: boolean; response?: NextResponse }> {
     if (!req.user) {
       return {
         success: false,
         response: errorResponse({
           req,
           status: 401,
-          message: "Authentication required"
+          message: "Authentication required for ownership validation"
         })
       };
     }
 
-    // Super admin and admin can access any resource
-    if (['super_admin', 'admin'].includes(req.user.role)) {
+    // Admin users can access any resource
+    if (['admin', 'super_admin'].includes(req.user.role)) {
       return { success: true };
     }
 
@@ -286,6 +326,8 @@ export class AuthMiddleware {
         address: () => import("@/server/models/Address.model").then(m => m.Address),
         notification: () => import("@/server/models/Notification.model").then(m => m.Notification),
         review: () => import("@/server/models/Review.model").then(m => m.Review),
+        pickup: () => import("@/server/models/Pickup.model").then(m => m.Pickup),
+        apiconfig: () => import("@/server/models/ApiConfig.model").then(m => m.ApiConfig),
       };
 
       const Model = await models[resourceType as keyof typeof models]?.();
@@ -296,7 +338,7 @@ export class AuthMiddleware {
           response: errorResponse({
             req,
             status: 400,
-            message: "Invalid resource type"
+            message: "Invalid resource type for ownership validation"
           })
         };
       }
@@ -322,8 +364,7 @@ export class AuthMiddleware {
           response: errorResponse({
             req,
             status: 403,
-            message: "Access denied",
-            error: "You can only access your own resources"
+            message: "Access denied - You can only access your own resources"
           })
         };
       }
@@ -331,13 +372,13 @@ export class AuthMiddleware {
       return { success: true };
       
     } catch (error) {
+      console.error('Ownership validation error:', error);
       return {
         success: false,
         response: errorResponse({
           req,
           status: 500,
-          message: "Authorization error",
-          error: "Failed to validate resource ownership"
+          message: "Failed to validate resource ownership"
         })
       };
     }
@@ -353,13 +394,13 @@ export class AuthMiddleware {
         response: errorResponse({
           req,
           status: 401,
-          message: "Authentication required"
+          message: "Authentication required for phone validation"
         })
       };
     }
 
-    // Super admin and admin can access any user's data
-    if (['super_admin', 'admin'].includes(req.user.role)) {
+    // Admin users can access any user's data
+    if (['admin', 'super_admin'].includes(req.user.role)) {
       return { success: true };
     }
 
@@ -370,8 +411,7 @@ export class AuthMiddleware {
         response: errorResponse({
           req,
           status: 403,
-          message: "Access denied",
-          error: "You can only access your own account data"
+          message: "Access denied - You can only access your own account data"
         })
       };
     }
@@ -386,22 +426,130 @@ export class AuthMiddleware {
     try {
       await connectDB();
       
+      const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+                      req.headers.get('x-real-ip') || 
+                      'unknown';
+      
       const log = new ApiAccessLog({
         userId: user.id,
         endpoint: req.nextUrl.pathname,
         method: req.method,
-        
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-        ip: req.ip || req.headers.get('x-forwarded-for') || 'unknown',
+        ip: clientIP,
         userAgent: req.headers.get('user-agent') || 'unknown',
         timestamp: new Date(),
-        statusCode: 200 // Will be updated by response middleware
+        statusCode: 200 // Will be updated by response middleware if available
       });
 
       await log.save();
     } catch (error) {
       console.error('Failed to log API access:', error);
+      // Don't throw error - logging should not break API functionality
+    }
+  }
+
+  /**
+   * Validate API key for external integrations
+   */
+  static async validateApiKey(req: NextRequest): Promise<{ success: boolean; user?: AuthUser; response?: NextResponse }> {
+    try {
+      const apiKey = req.headers.get('X-API-Key') || req.headers.get('x-api-key');
+      
+      if (!apiKey) {
+        return {
+          success: false,
+          response: errorResponse({
+            req,
+            status: 401,
+            message: "API key required"
+          })
+        };
+      }
+
+      await connectDB();
+      
+      // Import ApiConfig model
+      const { ApiConfig } = await import("@/server/models/ApiConfig.model");
+      
+      const config = await ApiConfig.findOne({ 
+        apiKey, 
+        isActive: true 
+      }).populate('user', 'name email phone role isActive isVerified');
+      
+      if (!config) {
+        return {
+          success: false,
+          response: errorResponse({
+            req,
+            status: 401,
+            message: "Invalid API key"
+          })
+        };
+      }
+
+      if (config.isExpired()) {
+        return {
+          success: false,
+          response: errorResponse({
+            req,
+            status: 401,
+            message: "API key has expired"
+          })
+        };
+      }
+
+      if (config.isRateLimited()) {
+        return {
+          success: false,
+          response: errorResponse({
+            req,
+            status: 429,
+            message: "API key rate limit exceeded"
+          })
+        };
+      }
+
+      // Validate IP if restrictions are set
+      const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+                      req.headers.get('x-real-ip') || 
+                      'unknown';
+      
+      if (!config.validateIP(clientIP)) {
+        return {
+          success: false,
+          response: errorResponse({
+            req,
+            status: 403,
+            message: "IP address not allowed"
+          })
+        };
+      }
+
+      // Update API usage
+      await config.updateUsage();
+
+      const user: AuthUser = {
+        id: config.user._id.toString(),
+        name: config.user.name,
+        phone: config.user.phone,
+        email: config.user.email,
+        role: config.user.role,
+        isActive: config.user.isActive,
+        isVerified: config.user.isVerified,
+        permissions: config.scopes
+      };
+
+      return { success: true, user };
+
+    } catch (error) {
+      console.error('API key validation error:', error);
+      return {
+        success: false,
+        response: errorResponse({
+          req,
+          status: 500,
+          message: "API key validation failed"
+        })
+      };
     }
   }
 }
@@ -410,7 +558,6 @@ export class AuthMiddleware {
  * Middleware wrapper for Next.js API routes
  */
 export function withAuth(allowedRoles?: string[], requiredPermissions?: string[]) {
-  
   return function (handler: (req: AuthRequest, res: NextResponse) => Promise<NextResponse>) {
     return async function (req: AuthRequest, res: NextResponse) {
       // Authenticate user
@@ -439,5 +586,25 @@ export function withAuth(allowedRoles?: string[], requiredPermissions?: string[]
 
       return handler(req, res);
     };
+  };
+}
+
+/**
+ * Simple verification function for use in API routes
+ */
+export async function verifyAuth(req: NextRequest): Promise<{ success: boolean; user?: AuthUser; message?: string }> {
+  const authRequest = req as AuthRequest;
+  const result = await AuthMiddleware.authenticate(authRequest);
+  
+  if (!result.success) {
+    return { 
+      success: false, 
+      message: "Authentication failed" 
+    };
+  }
+
+  return { 
+    success: true, 
+    user: result.user 
   };
 }

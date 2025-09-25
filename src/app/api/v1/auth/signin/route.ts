@@ -7,34 +7,108 @@ import jwt, { Secret } from "jsonwebtoken";
 import { Types } from "mongoose";
 import { NextRequest } from "next/server";
 
-type SigninBody = {
-  phone?: string;
-  password?: string;
-};
+interface SigninBody {
+  phone: string;
+  password: string;
+}
+
+interface LoginAttempt {
+  phone: string;
+  ipAddress: string;
+  userAgent: string;
+  timestamp: Date;
+}
+
+// Rate limiting: Track failed attempts per IP and phone
+const failedAttempts = new Map<string, LoginAttempt[]>();
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const MAX_ATTEMPTS_PER_IP = 10;
+
+function getClientInfo(req: NextRequest) {
+  const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || 
+                   req.headers.get("x-real-ip") || 
+                   req.ip || 
+                   "unknown";
+  const userAgent = req.headers.get("user-agent") || "unknown";
+  return { ipAddress, userAgent };
+}
+
+function isRateLimited(key: string): boolean {
+  const attempts = failedAttempts.get(key) || [];
+  const now = new Date();
+  const recentAttempts = attempts.filter(
+    attempt => now.getTime() - attempt.timestamp.getTime() < RATE_LIMIT_WINDOW
+  );
+  
+  // Update the attempts array
+  failedAttempts.set(key, recentAttempts);
+  
+  return recentAttempts.length >= MAX_ATTEMPTS_PER_IP;
+}
+
+function addFailedAttempt(key: string, attempt: LoginAttempt): void {
+  const attempts = failedAttempts.get(key) || [];
+  attempts.push(attempt);
+  failedAttempts.set(key, attempts);
+}
+
+async function logLoginAttempt(
+  user: any | null,
+  phone: string,
+  ipAddress: string,
+  userAgent: string,
+  success: boolean,
+  failureReason?: string,
+  action: string = success ? "login" : "failed_login"
+): Promise<void> {
+  try {
+    await LoginHistory.create({
+      user: user?._id || null,
+      phone,
+      ipAddress,
+      userAgent,
+      success,
+      failureReason,
+      action,
+      timestamp: new Date(),
+    });
+  } catch (error) {
+    console.error("Failed to log login attempt:", error);
+  }
+}
 
 export async function POST(req: NextRequest) {
+  const { ipAddress, userAgent } = getClientInfo(req);
+  let phone = "";
+
   try {
     await connectDB();
 
-    const body = (await req.json()) as SigninBody;
-    const { phone, password } = body;
+    // Check rate limiting by IP
+    if (isRateLimited(ipAddress)) {
+      return errorResponse({
+        status: 429,
+        message: "Too many requests. Please try again later.",
+        req,
+      });
+    }
 
-    const ipAddress =
-      req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
-      req.headers.get("x-real-ip") ||
-      "unknown";
-    const userAgent = req.headers.get("user-agent") || "unknown";
+    const body = await req.json() as SigninBody;
+    phone = body.phone;
+    const { password } = body;
 
     // Validate input
     if (!phone || !password) {
-      await LoginHistory.create({
-        phone: phone || "",
+      await logLoginAttempt(
+        null,
+        phone || "",
         ipAddress,
         userAgent,
-        success: false,
-        failureReason: "Missing phone or password",
-        timestamp: new Date(),
-      });
+        false,
+        "Missing phone or password"
+      );
 
       return errorResponse({
         status: 400,
@@ -43,150 +117,258 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Validate phone format (basic validation)
+    if (!/^\+?[1-9]\d{1,14}$/.test(phone)) {
+      await logLoginAttempt(
+        null,
+        phone,
+        ipAddress,
+        userAgent,
+        false,
+        "Invalid phone format"
+      );
+
+      return errorResponse({
+        status: 400,
+        message: "Invalid phone number format",
+        req,
+      });
+    }
+
+    // Check rate limiting by phone
+    if (isRateLimited(phone)) {
+      return errorResponse({
+        status: 429,
+        message: "Too many failed attempts. Please try again later.",
+        req,
+      });
+    }
+
     // Find user
-    const user = await User.findOne({ phone });
+    const user = await User.findOne({ phone }).select("+password +loginAttempts +lockUntil");
     if (!user) {
-      await LoginHistory.create({
-        user: null,
+      // Add failed attempt for IP and phone
+      addFailedAttempt(ipAddress, { phone, ipAddress, userAgent, timestamp: new Date() });
+      addFailedAttempt(phone, { phone, ipAddress, userAgent, timestamp: new Date() });
+
+      await logLoginAttempt(
+        null,
         phone,
         ipAddress,
         userAgent,
-        success: false,
-        failureReason: "User not found",
-        timestamp: new Date(),
-      });
+        false,
+        "User not found"
+      );
 
+      // Return generic message to prevent user enumeration
       return errorResponse({
-        status: 404,
-        message: "User not found",
+        status: 401,
+        message: "Invalid phone number or password",
         req,
       });
     }
 
-    // Check if active
+    // Check if account is locked
+    if (user.lockUntil && user.lockUntil > new Date()) {
+      await logLoginAttempt(
+        user,
+        phone,
+        ipAddress,
+        userAgent,
+        false,
+        "Account temporarily locked"
+      );
+
+      const lockRemaining = Math.ceil((user.lockUntil.getTime() - Date.now()) / 1000 / 60);
+      return errorResponse({
+        status: 423,
+        message: `Account is temporarily locked. Try again in ${lockRemaining} minutes.`,
+        req,
+      });
+    }
+
+    // Check if account is active
     if (!user.isActive) {
-      await LoginHistory.create({
-        user: user._id,
+      await logLoginAttempt(
+        user,
         phone,
         ipAddress,
         userAgent,
-        success: false,
-        failureReason: "Account deactivated",
-        timestamp: new Date(),
-      });
+        false,
+        "Account deactivated"
+      );
 
       return errorResponse({
         status: 403,
-        message: "User account is deactivated",
+        message: "Account has been deactivated. Please contact support.",
         req,
       });
     }
 
-    // Check if verified
+    // Check if email is verified
     if (!user.isVerified) {
-      await LoginHistory.create({
-        user: user._id,
+      await logLoginAttempt(
+        user,
         phone,
         ipAddress,
         userAgent,
-        success: false,
-        failureReason: "Email not verified",
-        timestamp: new Date(),
-      });
+        false,
+        "Email not verified"
+      );
 
       return errorResponse({
         status: 403,
-        message: "Email not verified. Please verify your account first",
+        message: "Please verify your email address before signing in.",
         req,
       });
     }
 
-    // Compare password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      await LoginHistory.create({
-        user: user._id,
+    // Verify password
+    const isValidPassword = await user.comparePassword(password);
+    if (!isValidPassword) {
+      // Increment failed attempts
+      user.loginAttempts = (user.loginAttempts || 0) + 1;
+
+      // Lock account after max failed attempts
+      if (user.loginAttempts >= MAX_FAILED_ATTEMPTS) {
+        user.lockUntil = new Date(Date.now() + LOCKOUT_DURATION);
+      }
+
+      await user.save();
+
+      // Add failed attempt for tracking
+      addFailedAttempt(ipAddress, { phone, ipAddress, userAgent, timestamp: new Date() });
+      addFailedAttempt(phone, { phone, ipAddress, userAgent, timestamp: new Date() });
+
+      await logLoginAttempt(
+        user,
         phone,
         ipAddress,
         userAgent,
-        success: false,
-        failureReason: "Invalid password",
-        timestamp: new Date(),
-      });
+        false,
+        "Invalid password"
+      );
 
       return errorResponse({
         status: 401,
-        message: "Invalid password",
+        message: "Invalid phone number or password",
         req,
       });
     }
 
-    // Successful login
-    await LoginHistory.create({
-      user: user._id,
+    // Reset failed attempts on successful login
+    user.loginAttempts = 0;
+    user.lockUntil = undefined;
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Check JWT secret
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET environment variable is not configured");
+    }
+
+    // Generate tokens
+    const userId = user._id as Types.ObjectId;
+    const accessToken = jwt.sign(
+      { 
+        id: userId.toString(), 
+        role: user.role,
+        type: "access"
+      },
+      process.env.JWT_SECRET as Secret,
+      { expiresIn: "15m" } // Short-lived access token
+    );
+
+    const refreshToken = jwt.sign(
+      { 
+        id: userId.toString(), 
+        role: user.role,
+        type: "refresh"
+      },
+      process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET as Secret,
+      { expiresIn: "7d" } // Longer-lived refresh token
+    );
+
+    // Store refresh token (optional but recommended)
+    try {
+      user.refreshTokens = user.refreshTokens || [];
+      user.refreshTokens.push(refreshToken);
+      
+      // Keep only last 5 refresh tokens per user
+      if (user.refreshTokens.length > 5) {
+        user.refreshTokens = user.refreshTokens.slice(-5);
+      }
+      
+      await user.save();
+    } catch (error) {
+      console.error("Failed to save refresh token:", error);
+      // Continue with login even if refresh token storage fails
+    }
+
+    // Log successful login
+    await logLoginAttempt(
+      user,
       phone,
       ipAddress,
       userAgent,
-      success: true,
-      action: "login",
-      timestamp: new Date(),
-    });
-
-    const userId = user._id as Types.ObjectId; // cast _id to ObjectId
-    const token: string = jwt.sign(
-      { id: userId.toString(), role: user.role },
-      process.env.JWT_SECRET as Secret,
-      { expiresIn: 7 * 24 * 60 * 60 } // 7 days
+      true,
+      undefined,
+      "login"
     );
 
     // Send login notification (non-blocking)
     notificationService
       .sendAuthNotification(
-        { phone: user.phone, email: user.email, name: user.name },
+        { 
+          phone: user.phone, 
+          email: user.email, 
+          name: user.name 
+        },
         "login_alert"
       )
       .catch((err) => console.error("Failed to send login alert:", err));
 
-    // Prepare response
+    // Prepare secure response data
     const responseData = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      ...(token && { token }),
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        avatar: user.avatar || null,
+        isVerified: user.isVerified,
+        isActive: user.isActive,
+        lastLogin: user.lastLogin,
+      },
+      accessToken,
+      refreshToken,
+      expiresIn: "15m",
     };
 
     return successResponse({
       status: 200,
-      message: "Signin successful",
+      message: "Sign in successful",
       data: responseData,
       req,
     });
+
   } catch (error: unknown) {
     console.error("Signin API Error:", error);
 
-    const errorMessage =
-      error instanceof Error ? error.message : "Something went wrong";
-
-    // Attempt to log failed attempt
-    try {
-      await LoginHistory.create({
-        phone: "unknown",
-        ipAddress: "unknown",
-        userAgent: "unknown",
-        success: false,
-        failureReason: errorMessage,
-        timestamp: new Date(),
-      });
-    } catch {
-      // ignore
-    }
+    // Log failed attempt due to server error
+    await logLoginAttempt(
+      null,
+      phone,
+      ipAddress,
+      userAgent,
+      false,
+      "Server error"
+    ).catch(() => {}); // Ignore logging errors
 
     return errorResponse({
       status: 500,
-      message: errorMessage,
-      error,
+      message: "An error occurred during sign in. Please try again.",
       req,
     });
   }
