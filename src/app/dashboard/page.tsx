@@ -376,7 +376,7 @@ export default function DashboardPage() {
             Welcome back, {user?.name}! 👋
           </h1>
           <p className="text-gray-600">
-            Here's what's happening with your courier service today.
+            Here{"'"}s what{"'"}s happening with your courier service today.
           </p>
         </div>
         <div className="flex items-center space-x-2">
@@ -393,7 +393,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <QuickStat
           title="Total Users"
           value={stats.totalUsers}

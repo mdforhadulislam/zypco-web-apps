@@ -1,11 +1,18 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/AuthContext";
+import Logo from "@/utilities/Logo";
 import { Eye, EyeOff, Loader2, Phone } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,7 +24,9 @@ export default function SigninPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{phone?: string; password?: string}>({});
+  const [errors, setErrors] = useState<{ phone?: string; password?: string }>(
+    {}
+  );
 
   const { login, user } = useAuth();
   const router = useRouter();
@@ -30,7 +39,7 @@ export default function SigninPage() {
   }, [user, router]);
 
   const validateForm = (): boolean => {
-    const newErrors: {phone?: string; password?: string} = {};
+    const newErrors: { phone?: string; password?: string } = {};
 
     // Phone validation
     if (!phone.trim()) {
@@ -52,22 +61,22 @@ export default function SigninPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       const success = await login(phone.trim(), password);
-      
+
       if (success) {
         toast.success("Sign in successful!");
         router.push("/dashboard");
       } else {
         toast.error("Invalid phone number or password");
-        setErrors({password: "Invalid credentials"});
+        setErrors({ password: "Invalid credentials" });
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -90,7 +99,18 @@ export default function SigninPage() {
       <Card className="w-full max-w-md" data-testid="signin-form">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Sign in to Zypco
+            <div className="flex flex-col items-center gap-2">
+              <Link
+                href={"/"}
+                className="flex flex-col items-center gap-2 font-medium"
+              >
+                <div className="flex size-50 items-center justify-center rounded-md">
+                  <Logo width={100} height={120} isFooter={true} />
+                </div>
+                <span className="sr-only">Zypco</span>
+              </Link>
+            </div>
+            Sign in
           </CardTitle>
           <CardDescription className="text-center">
             Enter your phone number and password to access your account
@@ -109,7 +129,8 @@ export default function SigninPage() {
                   value={phone}
                   onChange={(e) => {
                     setPhone(e.target.value);
-                    if (errors.phone) setErrors({...errors, phone: undefined});
+                    if (errors.phone)
+                      setErrors({ ...errors, phone: undefined });
                   }}
                   className={`pl-10 ${errors.phone ? "border-red-500" : ""}`}
                   data-testid="phone-input"
@@ -132,7 +153,8 @@ export default function SigninPage() {
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
-                    if (errors.password) setErrors({...errors, password: undefined});
+                    if (errors.password)
+                      setErrors({ ...errors, password: undefined });
                   }}
                   className={`pr-10 ${errors.password ? "border-red-500" : ""}`}
                   data-testid="password-input"
@@ -153,7 +175,10 @@ export default function SigninPage() {
                 </Button>
               </div>
               {errors.password && (
-                <p className="text-sm text-red-500" data-testid="password-error">
+                <p
+                  className="text-sm text-red-500"
+                  data-testid="password-error"
+                >
                   {errors.password}
                 </p>
               )}
@@ -180,9 +205,9 @@ export default function SigninPage() {
 
           <div className="text-center space-y-2">
             <p className="text-sm text-gray-600">
-              Don't have an account?{" "}
-              <Link 
-                href="/auth/signup" 
+              Don{"'"}t have an account?{" "}
+              <Link
+                href="/auth/signup"
                 className="font-medium text-primary hover:underline"
                 data-testid="signup-link"
               >
@@ -190,8 +215,8 @@ export default function SigninPage() {
               </Link>
             </p>
             <p className="text-sm">
-              <Link 
-                href="/auth/forgot-password" 
+              <Link
+                href="/auth/forgot-password"
                 className="font-medium text-primary hover:underline"
                 data-testid="forgot-password-link"
               >
@@ -201,8 +226,8 @@ export default function SigninPage() {
           </div>
 
           <div className="mt-6 text-center">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="text-sm text-gray-600 hover:underline"
               data-testid="home-link"
             >

@@ -45,25 +45,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const savedUser = localStorage.getItem("authUser");
         const accessToken = localStorage.getItem("accessToken");
-        
+
         if (savedUser && accessToken) {
           const userData = JSON.parse(savedUser);
-          
-          // Validate token with server
-          const isValid = await validateToken(accessToken);
-          
-          if (isValid) {
-            setUser(userData);
-          } else {
-            // Token is invalid, try to refresh
-            const refreshed = await refreshToken();
-            if (!refreshed) {
-              // Refresh failed, clear invalid data
-              localStorage.removeItem("authUser");
-              localStorage.removeItem("accessToken");
-              localStorage.removeItem("refreshToken");
-            }
-          }
+
+          setUser(userData);
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
@@ -78,20 +64,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     initializeAuth();
   }, []);
-
-  // Validate token with server
-  const validateToken = async (token: string): Promise<boolean> => {
-    try {
-      const response = await fetch("/api/v1/auth/validate", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response.ok;
-    } catch {
-      return false;
-    }
-  };
 
   // Login function
   const login = async (phone: string, password: string): Promise<boolean> => {
@@ -110,8 +82,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
 
-      const { user: userData, accessToken, refreshToken: newRefreshToken } = data.data;
-      
+      const {
+        user: userData,
+        accessToken,
+        refreshToken: newRefreshToken,
+      } = data.data;
+
       // Store user data and tokens
       setUser(userData);
       localStorage.setItem("authUser", JSON.stringify(userData));
@@ -119,7 +95,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (newRefreshToken) {
         localStorage.setItem("refreshToken", newRefreshToken);
       }
-      
+
       return true;
     } catch (err) {
       console.error("Login error:", err);
@@ -147,7 +123,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       const data = await response.json();
-      const { user: userData, accessToken, refreshToken: newRefreshToken } = data.data;
+      const {
+        user: userData,
+        accessToken,
+        refreshToken: newRefreshToken,
+      } = data.data;
 
       // Update stored data
       setUser(userData);
@@ -200,14 +180,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider 
-      value={{ 
-        user, 
-        loading, 
-        login, 
-        logout, 
-        refreshToken, 
-        updateUser 
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+        refreshToken,
+        updateUser,
       }}
     >
       {children}
