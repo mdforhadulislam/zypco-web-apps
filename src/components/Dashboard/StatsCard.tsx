@@ -1,37 +1,73 @@
 "use client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface StatsCardProps {
   title: string;
   value: string | number;
   change?: string;
-  icon: LucideIcon;
   trend?: "up" | "down" | "neutral";
+  icon: React.ComponentType<{ className?: string }>;
+  className?: string;
 }
 
-export function StatsCard({ title, value, change, icon: Icon, trend = "neutral" }: StatsCardProps) {
-  const trendColor = {
-    up: "text-green-600",
-    down: "text-red-600",
-    neutral: "text-gray-600",
+export function StatsCard({ 
+  title, 
+  value, 
+  change, 
+  trend = "neutral", 
+  icon: Icon,
+  className = ""
+}: StatsCardProps) {
+  const getTrendIcon = () => {
+    switch (trend) {
+      case "up":
+        return <TrendingUp className="h-3 w-3 text-green-600" />;
+      case "down":
+        return <TrendingDown className="h-3 w-3 text-red-600" />;
+      default:
+        return <Minus className="h-3 w-3 text-gray-600" />;
+    }
+  };
+
+  const getTrendColor = () => {
+    switch (trend) {
+      case "up":
+        return "text-green-600";
+      case "down":
+        return "text-red-600";
+      default:
+        return "text-gray-600";
+    }
   };
 
   return (
-    <Card data-testid={`stats-card-${title.toLowerCase().replace(/\s+/g, '-')}`}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold" data-testid={`stats-value-${title.toLowerCase().replace(/\s+/g, '-')}`}>
-          {typeof value === 'number' ? value.toLocaleString() : value}
+    <Card className={`hover:shadow-md transition-shadow ${className}`}>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <p className="text-sm font-medium text-muted-foreground mb-1">
+              {title}
+            </p>
+            <div className="space-y-1">
+              <p className="text-2xl font-bold tracking-tight">
+                {typeof value === 'number' ? value.toLocaleString() : value}
+              </p>
+              {change && (
+                <div className={`flex items-center space-x-1 text-xs ${getTrendColor()}`}>
+                  {getTrendIcon()}
+                  <span>{change}</span>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex-shrink-0 ml-4">
+            <div className="p-2 bg-muted rounded-lg">
+              <Icon className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </div>
         </div>
-        {change && (
-          <p className={`text-xs ${trendColor[trend]} mt-1`} data-testid={`stats-change-${title.toLowerCase().replace(/\s+/g, '-')}`}>
-            {change}
-          </p>
-        )}
       </CardContent>
     </Card>
   );

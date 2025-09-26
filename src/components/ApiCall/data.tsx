@@ -1,8 +1,9 @@
+"use client";
+
 import {
   BarChart3,
   BadgeDollarSign,
   Bell,
-  Bot,
   Boxes,
   CircleUserRound,
   LayoutDashboard,
@@ -14,6 +15,7 @@ import {
   UserStar,
 } from "lucide-react";
 
+// Navigation data for different user roles
 export const AdminData = {
   navMain: [
     {
@@ -23,7 +25,7 @@ export const AdminData = {
       isActive: true,
       items: [
         {
-          title: "Analaytics",
+          title: "Analytics",
           url: "/dashboard/analytics",
         },
         {
@@ -37,61 +39,61 @@ export const AdminData = {
       ],
     },
     {
-      title: "Analaytics",
-      url: "/dashboard/analaytics",
+      title: "Analytics",
+      url: "/dashboard/analytics", // Fixed spelling from "analaytics"
       icon: BarChart3,
       items: [
         {
-          title: "User Analaytics",
-          url: "/dashboard/analaytics/users",
+          title: "User Analytics",
+          url: "/dashboard/analytics/users",
         },
         {
-          title: "Login Analaytics",
-          url: "/dashboard/analaytics/login",
+          title: "Login Analytics",
+          url: "/dashboard/analytics/login",
         },
         {
-          title: "Revenue Analaytics",
-          url: "/dashboard/analaytics/revenue",
+          title: "Revenue Analytics",
+          url: "/dashboard/analytics/revenue",
         },
         {
-          title: "API Key Analaytics",
-          url: "/dashboard/analaytics/api-keys",
+          title: "API Key Analytics",
+          url: "/dashboard/analytics/api-keys",
         },
         {
-          title: "Addresses Analaytics",
-          url: "/dashboard/analaytics/addresses",
+          title: "Addresses Analytics",
+          url: "/dashboard/analytics/addresses",
         },
         {
-          title: "Order Analaytics",
-          url: "/dashboard/analaytics/orders",
+          title: "Order Analytics",
+          url: "/dashboard/analytics/orders",
         },
         {
-          title: "Operational Analaytics",
-          url: "/dashboard/analaytics/operational",
+          title: "Operational Analytics",
+          url: "/dashboard/analytics/operational",
         },
         {
-          title: "Offers Analaytics",
-          url: "/dashboard/analaytics/offers",
+          title: "Offers Analytics",
+          url: "/dashboard/analytics/offers",
         },
         {
-          title: "Countries Analaytics",
-          url: "/dashboard/analaytics/countries",
+          title: "Countries Analytics",
+          url: "/dashboard/analytics/countries",
         },
         {
-          title: "Notifications Analaytics",
-          url: "/dashboard/analaytics/notifications",
+          title: "Notifications Analytics",
+          url: "/dashboard/analytics/notifications",
         },
         {
-          title: "Contacts Analaytics",
-          url: "/dashboard/analaytics/contacts",
+          title: "Contacts Analytics",
+          url: "/dashboard/analytics/contacts",
         },
         {
-          title: "Content Analaytics",
-          url: "/dashboard/analaytics/content",
+          title: "Content Analytics",
+          url: "/dashboard/analytics/content",
         },
         {
-          title: "Reviews Analaytics",
-          url: "/dashboard/analaytics/reviews",
+          title: "Reviews Analytics",
+          url: "/dashboard/analytics/reviews",
         },
       ],
     },
@@ -274,7 +276,7 @@ export const AdminData = {
   ],
 };
 
-export const ModaretorData = {
+export const ModeratorData = {
   navMain: [
     {
       title: "Dashboard",
@@ -293,6 +295,25 @@ export const ModaretorData = {
         {
           title: "All Order",
           url: "/dashboard/orders",
+        },
+      ],
+    },
+    {
+      title: "Analytics",
+      url: "/dashboard/analytics", // Fixed spelling
+      icon: BarChart3,
+      items: [
+        {
+          title: "User Analytics",
+          url: "/dashboard/analytics/users",
+        },
+        {
+          title: "Order Analytics",
+          url: "/dashboard/analytics/orders",
+        },
+        {
+          title: "Revenue Analytics",
+          url: "/dashboard/analytics/revenue",
         },
       ],
     },
@@ -559,3 +580,29 @@ export const UserData = {
     },
   ],
 };
+
+// Export navigation data getter function
+export const getNavigationData = (role: "admin" | "moderator" | "user") => {
+  switch (role) {
+    case "admin":
+      return AdminData;
+    case "moderator":
+      return ModeratorData;
+    case "user":
+      return UserData;
+    default:
+      return UserData;
+  }
+};
+
+// Export constants for use in other components
+export const USER_ROLES = {
+  ADMIN: "admin",
+  MODERATOR: "moderator",
+  USER: "user",
+} as const;
+
+export const NAVIGATION_SECTIONS = {
+  MAIN: "navMain",
+  SECONDARY: "navSecondary",
+} as const;

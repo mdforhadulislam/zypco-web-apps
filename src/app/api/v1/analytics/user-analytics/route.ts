@@ -1,23 +1,22 @@
-// D:\New folder\zypco-web-apps\src\app\api\v1\analytics\user-analytics\route.ts
 import connectDB from "@/config/db";
-import { errorResponse, successResponse } from "@/server/common/response";
+import { createModeratorHandler } from "@/server/common/apiWrapper";
+import { successResponse, errorResponse } from "@/server/common/response";
 import { LoginHistory } from "@/server/models/LoginHistory.model";
 import { User } from "@/server/models/User.model";
-import { NextRequest } from "next/server";
 
-/**
- * User Analytics
- * Query params (optional):
- *  - startDate=YYYY-MM-DD
- *  - endDate=YYYY-MM-DD
- *  - days (for DAU trend) default 30
- *  - months (for MAU trend) default 12
- *  - dormancyDays default 90
- *  - limit default 10 (top lists)
- */
-export async function GET(req: NextRequest) {
+export const GET = createModeratorHandler(async ({ req, user }) => {
   try {
     await connectDB();
+
+    // Verify admin/moderator access
+    if (!user || (user.role !== "admin" && user.role !== "moderator")) {
+      return errorResponse({
+        status: 403,
+        message: "Admin or moderator access required",
+        req,
+      });
+    }
+
     const url = new URL(req.url);
     const params = url.searchParams;
 
@@ -48,7 +47,7 @@ export async function GET(req: NextRequest) {
       1
     );
 
-    // 1) Basic user totals & breakdowns
+    // Basic user totals & breakdowns
     const totalUsersPromise = User.countDocuments();
     const activeUsersPromise = User.countDocuments({ isActive: true });
     const verifiedUsersPromise = User.countDocuments({ isVerified: true });
@@ -78,9 +77,7 @@ export async function GET(req: NextRequest) {
       },
     ]);
 
-    // 2) Signup trend (daily) within provided dates or last `days`
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // Signup trend (daily) within provided dates or last `days`
     const signupMatch: any = {};
     if (startDate) signupMatch.createdAt = { $gte: startDate };
     else signupMatch.createdAt = { $gte: pastNDays };
@@ -98,9 +95,7 @@ export async function GET(req: NextRequest) {
       { $sort: { _id: 1 } },
     ]);
 
-    // 3) DAU (daily active users) last `days` (unique user count per day from successful logins)
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // DAU (daily active users) last `days`
     const dauMatch: any = { success: true, timestamp: { $gte: pastNDays } };
     if (startDate) dauMatch.timestamp.$gte = startDate;
     if (endDate) dauMatch.timestamp.$lte = endDate;
@@ -121,9 +116,7 @@ export async function GET(req: NextRequest) {
       { $sort: { day: 1 } },
     ]);
 
-    // 4) MAU (monthly unique active users) last `months`
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // MAU (monthly unique active users) last `months`
     const mauMatch: any = { success: true, timestamp: { $gte: pastNMonths } };
     if (startDate) mauMatch.timestamp.$gte = startDate;
     if (endDate) mauMatch.timestamp.$lte = endDate;
@@ -149,7 +142,7 @@ export async function GET(req: NextRequest) {
       { $sort: { year: 1, month: 1 } },
     ]);
 
-    // 5) Top users by successful login count
+    // Top users by successful login count
     const topUsersPromise = LoginHistory.aggregate([
       { $match: { success: true, user: { $ne: null } } },
       ...(startDate || endDate
@@ -188,7 +181,7 @@ export async function GET(req: NextRequest) {
       },
     ]);
 
-    // 6) Top failed login phones & IPs (failed attempts)
+    // Top failed login phones & IPs
     const topFailedPhonesPromise = LoginHistory.aggregate([
       { $match: { success: false } },
       { $group: { _id: "$phone", count: { $sum: 1 } } },
@@ -202,7 +195,7 @@ export async function GET(req: NextRequest) {
       { $limit: Math.max(limit, 10) },
     ]);
 
-    // 7) Last login per user (most recent N users by lastSeen)
+    // Last login per user
     const lastLoginPerUserPromise = LoginHistory.aggregate([
       { $match: { success: true, user: { $ne: null } } },
       {
@@ -233,10 +226,10 @@ export async function GET(req: NextRequest) {
       },
     ]);
 
-    // 8) Dormant users (no successful login in `dormancyDays`)
+    // Dormant users calculation
     const dormancyDate = new Date();
     dormancyDate.setDate(now.getDate() - dormancyDays);
-    // We'll compute last login per user and count users with lastLogin < dormancyDate OR never logged in.
+    
     const lastLoginAllUsersPromise = LoginHistory.aggregate([
       { $match: { success: true, user: { $ne: null } } },
       {
@@ -247,7 +240,7 @@ export async function GET(req: NextRequest) {
       },
     ]);
 
-    // run promises in parallel
+    // Execute all promises
     const [
       totalUsers,
       activeUsers,
@@ -278,44 +271,30 @@ export async function GET(req: NextRequest) {
       lastLoginAllUsersPromise,
     ]);
 
-    // compute dormant users count
-    // build a Map of userId -> lastLogin
+    // Compute dormant users count
     const lastLoginMap = new Map<string, Date>();
     for (const doc of lastLoginAllUsers) {
       if (doc._id && doc.lastLogin)
         lastLoginMap.set(String(doc._id), new Date(doc.lastLogin));
     }
 
-    // We'll fetch all users count and subtract active users within dormancyDate
-    // Approach: users with no successful login at all OR lastLogin < dormancyDate
-    // Count users with lastLogin >= dormancyDate
-    const activeSinceDormancyCount = Array.from(lastLoginMap.values()).filter(
-      (d) => d >= dormancyDate
-    ).length;
-
-    // usersWithAnyLogin = size of lastLoginMap
     const usersWithAnyLogin = lastLoginMap.size;
-
-    // usersWithoutAnyLogin = totalUsers - usersWithAnyLogin
     const usersWithoutAnyLogin = Math.max(0, totalUsers - usersWithAnyLogin);
 
-    // dormant users = usersWithoutAnyLogin + (usersWithAnyLogin but lastLogin < dormancyDate)
     let usersWithLastLoginBeforeDormancy = 0;
     for (const d of lastLoginMap.values()) {
       if (d < dormancyDate) usersWithLastLoginBeforeDormancy++;
     }
-    const dormantUsersCount =
-      usersWithoutAnyLogin + usersWithLastLoginBeforeDormancy;
+    const dormantUsersCount = usersWithoutAnyLogin + usersWithLastLoginBeforeDormancy;
 
-    // 9) New vs Returning users for period (if startDate provided, else last `days`)
+    // New vs Returning users calculation
     const periodStart = startDate || pastNDays;
     const periodEnd = endDate || now;
 
-    // new users: createdAt within period
-    const newUsersCountPromise = User.countDocuments({
+    const newUsersCount = await User.countDocuments({
       createdAt: { $gte: periodStart, $lte: periodEnd },
     });
-    // returning users: createdAt < periodStart AND had at least one successful login in period
+
     const returningUsersAgg = await LoginHistory.aggregate([
       {
         $match: {
@@ -324,9 +303,7 @@ export async function GET(req: NextRequest) {
           timestamp: { $gte: periodStart, $lte: periodEnd },
         },
       },
-      {
-        $group: { _id: "$user" },
-      },
+      { $group: { _id: "$user" } },
       {
         $lookup: {
           from: "users",
@@ -343,10 +320,10 @@ export async function GET(req: NextRequest) {
       },
       { $count: "returningCount" },
     ]);
-    const newUsersCount = await newUsersCountPromise;
+    
     const returningUsersCount = returningUsersAgg?.[0]?.returningCount || 0;
 
-    // 10) User growth rate: compare new users in this period vs previous same-length period
+    // Growth rate calculation
     const prevPeriodStart = new Date(periodStart);
     const prevPeriodEnd = new Date(periodEnd);
     const periodMs = periodEnd.getTime() - periodStart.getTime();
@@ -357,30 +334,28 @@ export async function GET(req: NextRequest) {
       createdAt: { $gte: prevPeriodStart, $lte: prevPeriodEnd },
     });
 
-    const growthRate =
-      prevNewUsersCount > 0
-        ? ((newUsersCount - prevNewUsersCount) / prevNewUsersCount) * 100
-        : null;
+    const growthRate = prevNewUsersCount > 0
+      ? ((newUsersCount - prevNewUsersCount) / prevNewUsersCount) * 100
+      : null;
 
-    // Prepare final analytics payload
+    // Prepare analytics response
     const analytics = {
       totals: {
         totalUsers,
         activeUsers,
         inactiveUsers: Math.max(0, totalUsers - activeUsers),
         verifiedUsers,
-        verificationRate:
-          totalUsers > 0 ? (verifiedUsers / totalUsers) * 100 : 0,
+        verificationRate: totalUsers > 0 ? (verifiedUsers / totalUsers) * 100 : 0,
       },
-      roleBreakdown, // [{_id: "user", count: N}, ...]
+      roleBreakdown,
       notificationPrefs: notificationPrefs[0] || {
         emailOn: 0,
         smsOn: 0,
         total: totalUsers,
       },
-      signupTrend, // [{_id: "2025-09-01", count: N}, ...]
-      dau, // [{day: "2025-09-01", activeUsers: N}, ...]
-      mau, // [{year: 2025, month: 9, activeUsers: N}, ...]
+      signupTrend,
+      dau,
+      mau,
       newVsReturning: {
         newUsersCount,
         returningUsersCount,
@@ -390,18 +365,26 @@ export async function GET(req: NextRequest) {
           end: periodEnd.toISOString(),
         },
       },
-      topUsers, // top successful logins with user details
+      topUsers,
       topFailedPhones,
       topFailedIPs,
-      lastLogins, // recent last-login users
+      lastLogins,
       dormantUsersCount,
-      filters: {
-        startDate: startDateParam,
-        endDate: endDateParam,
-        days,
-        months,
-        dormancyDays,
-        limit,
+      metadata: {
+        generatedAt: new Date().toISOString(),
+        generatedBy: {
+          userId: user.id,
+          role: user.role,
+          name: user.name,
+        },
+        filters: {
+          startDate: startDateParam,
+          endDate: endDateParam,
+          days,
+          months,
+          dormancyDays,
+          limit,
+        },
       },
     };
 
@@ -412,7 +395,6 @@ export async function GET(req: NextRequest) {
       req,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("User Analytics Error:", err);
     return errorResponse({
@@ -422,4 +404,4 @@ export async function GET(req: NextRequest) {
       req,
     });
   }
-}
+});

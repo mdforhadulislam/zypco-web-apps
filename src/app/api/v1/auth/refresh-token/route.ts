@@ -1,158 +1,193 @@
 import connectDB from "@/config/db";
+import { createRateLimitedHandler } from "@/server/common/apiWrapper";
 import { errorResponse, successResponse } from "@/server/common/response";
 import { User } from "@/server/models/User.model";
-import jwt, { Secret, JwtPayload } from "jsonwebtoken";
-import { NextRequest } from "next/server";
+import jwt, { Secret } from "jsonwebtoken";
+import { Types } from "mongoose";
 
-interface RefreshTokenPayload extends JwtPayload {
-  id: string;
-  role: string;
-  type?: string;
+interface RefreshTokenBody {
+  refreshToken: string;
 }
 
-// Use different secrets for access and refresh tokens in production
-const ACCESS_TOKEN_SECRET = process.env.JWT_SECRET as Secret;
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET as Secret;
-const ACCESS_TOKEN_EXPIRES = "15m"; // 15 minutes
-const REFRESH_TOKEN_EXPIRES = "7d"; // 7 days
-
-export async function POST(req: NextRequest) {
-  try {
-    await connectDB();
-
-    const { refreshToken } = await req.json();
-
-    if (!refreshToken) {
-      return errorResponse({
-        status: 400,
-        message: "Refresh token is required",
-        req,
-      });
-    }
-
-    // Verify refresh token
-    let decoded: RefreshTokenPayload;
+export const POST = createRateLimitedHandler(
+  async ({ req }) => {
     try {
-      decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET) as RefreshTokenPayload;
-    } catch (error) {
-      return errorResponse({
-        status: 401,
-        message: "Invalid or expired refresh token",
-        req,
-      });
-    }
+      await connectDB();
 
-    // Validate token payload
-    if (!decoded.id || !decoded.role) {
-      return errorResponse({
-        status: 401,
-        message: "Invalid token payload",
-        req,
-      });
-    }
+      const body = await req.json() as RefreshTokenBody;
+      const { refreshToken } = body;
 
-    // Find user and verify they still exist and are active
-    const user = await User.findById(decoded.id).select("-password");
-    if (!user) {
-      return errorResponse({
-        status: 404,
-        message: "User not found",
-        req,
-      });
-    }
-
-    // Check if user is still active and verified
-    if (!user.isActive) {
-      return errorResponse({
-        status: 403,
-        message: "Account is deactivated",
-        req,
-      });
-    }
-
-    if (!user.isVerified) {
-      return errorResponse({
-        status: 403,
-        message: "Account is not verified",
-        req,
-      });
-    }
-
-    // Check if refresh token exists in user's active tokens (if you store them)
-    // This is optional but recommended for better security
-    const hasValidRefreshToken = user.refreshTokens?.some((token: any) => {
-      try {
-        const tokenPayload = jwt.verify(token, REFRESH_TOKEN_SECRET) as RefreshTokenPayload;
-        return tokenPayload.id === user._id.toString();
-      } catch {
-        return false;
+      // Validate input
+      if (!refreshToken) {
+        return errorResponse({
+          status: 400,
+          message: "Refresh token is required",
+          req,
+        });
       }
-    });
 
-    // Generate new access token
-    const newAccessToken = jwt.sign(
-      { 
-        id: user._id.toString(), 
-        role: user.role,
-        type: "access"
-      },
-      ACCESS_TOKEN_SECRET,
-      { expiresIn: ACCESS_TOKEN_EXPIRES }
-    );
+      // Check JWT secret
+      if (!process.env.JWT_SECRET) {
+        throw new Error("JWT_SECRET environment variable is not configured");
+      }
 
-    // Optionally rotate refresh token for better security
-    const newRefreshToken = jwt.sign(
-      { 
-        id: user._id.toString(), 
-        role: user.role,
-        type: "refresh"
-      },
-      REFRESH_TOKEN_SECRET,
-      { expiresIn: REFRESH_TOKEN_EXPIRES }
-    );
+      const refreshSecret = process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET;
 
-    // Update user's refresh tokens if you store them
-    try {
-      // Remove old refresh token and add new one
-      await User.findByIdAndUpdate(user._id, {
-        $pull: { refreshTokens: refreshToken },
-        $push: { refreshTokens: newRefreshToken }
+      // Verify refresh token
+      let decoded: any;
+      try {
+        decoded = jwt.verify(refreshToken, refreshSecret as Secret);
+      } catch (jwtError) {
+        return errorResponse({
+          status: 401,
+          message: "Invalid or expired refresh token",
+          req,
+        });
+      }
+
+      // Check token type
+      if (decoded.type !== "refresh") {
+        return errorResponse({
+          status: 401,
+          message: "Invalid token type",
+          req,
+        });
+      }
+
+      // Find user
+      const user = await User.findById(decoded.id).select("+refreshTokens");
+      if (!user) {
+        return errorResponse({
+          status: 401,
+          message: "User not found",
+          req,
+        });
+      }
+
+      // Check if user is active
+      if (!user.isActive) {
+        return errorResponse({
+          status: 403,
+          message: "Account has been deactivated",
+          req,
+        });
+      }
+
+      // Verify refresh token exists in user's token array
+      if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
+        return errorResponse({
+          status: 401,
+          message: "Refresh token not found or has been revoked",
+          req,
+        });
+      }
+
+      // Generate new access token
+      const userId = user._id as Types.ObjectId;
+      const newAccessToken = jwt.sign(
+        { 
+          id: userId.toString(), 
+          role: user.role,
+          type: "access"
+        },
+        process.env.JWT_SECRET as Secret,
+        { expiresIn: "15m" } // Short-lived access token
+      );
+
+      // Optionally generate new refresh token (token rotation)
+      let newRefreshToken = refreshToken; // Keep existing by default
+      
+      // Implement refresh token rotation for enhanced security
+      const shouldRotateToken = true; // Can be made configurable
+      
+      if (shouldRotateToken) {
+        newRefreshToken = jwt.sign(
+          { 
+            id: userId.toString(), 
+            role: user.role,
+            type: "refresh"
+          },
+          refreshSecret as Secret,
+          { expiresIn: "7d" }
+        );
+
+        // Update user's refresh tokens
+        try {
+          // Remove the old refresh token and add the new one
+          user.refreshTokens = user.refreshTokens.filter(token => token !== refreshToken);
+          user.refreshTokens.push(newRefreshToken);
+          
+          // Keep only last 5 refresh tokens per user
+          if (user.refreshTokens.length > 5) {
+            user.refreshTokens = user.refreshTokens.slice(-5);
+          }
+          
+          await user.save();
+        } catch (error) {
+          console.error("Failed to update refresh tokens:", error);
+          // Continue with old refresh token if update fails
+          newRefreshToken = refreshToken;
+        }
+      }
+
+      // Update last login time
+      user.lastLogin = new Date();
+      await user.save().catch(() => {}); // Don't fail if this update fails
+
+      // Prepare response data
+      const responseData = {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          avatar: user.avatar || null,
+          isVerified: user.isVerified,
+          isActive: user.isActive,
+          lastLogin: user.lastLogin,
+        },
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+        expiresIn: "15m",
+        tokenRotated: shouldRotateToken,
+      };
+
+      return successResponse({
+        status: 200,
+        message: "Token refreshed successfully",
+        data: responseData,
+        req,
       });
-    } catch (error) {
-      // Don't fail the request if token storage update fails
-      console.error("Failed to update refresh tokens:", error);
+
+    } catch (error: unknown) {
+      console.error("Refresh Token API Error:", error);
+
+      // Handle specific JWT errors
+      if (error instanceof Error) {
+        if (error.name === 'JsonWebTokenError') {
+          return errorResponse({
+            status: 401,
+            message: "Invalid refresh token format",
+            req,
+          });
+        }
+        
+        if (error.name === 'TokenExpiredError') {
+          return errorResponse({
+            status: 401,
+            message: "Refresh token has expired",
+            req,
+          });
+        }
+      }
+
+      return errorResponse({
+        status: 500,
+        message: "An error occurred while refreshing token. Please sign in again.",
+        req,
+      });
     }
-
-    const responseData = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      avatar: user.avatar || null,
-      isVerified: user.isVerified,
-      isActive: user.isActive,
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
-      expiresIn: ACCESS_TOKEN_EXPIRES,
-    };
-
-    return successResponse({
-      status: 200,
-      message: "Tokens refreshed successfully",
-      data: responseData,
-      req,
-    });
-
-  } catch (error: unknown) {
-    console.error("Refresh token API error:", error);
-    
-    const errorMessage = error instanceof Error ? error.message : "Server error";
-    
-    return errorResponse({
-      status: 500,
-      message: "Internal server error",
-      req,
-    });
-  }
-}
+  },
+  { max: 20, windowMs: 60000 } // 20 requests per minute per IP
+);

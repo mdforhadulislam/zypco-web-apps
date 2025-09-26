@@ -1,11 +1,11 @@
 "use client";
 import {
-  COUNTRIES_ANALAYTICS_API,
-  LOGIN_ANALAYTICS_API,
-  OPERATIONAL_ANALAYTICS_API,
-  ORDER_ANALAYTICS_API,
-  REVENUE_ANALAYTICS_API,
-  USER_ANALAYTICS_API,
+  COUNTRIES_ANALYTICS_API,
+  LOGIN_ANALYTICS_API,
+  OPERATIONAL_ANALYTICS_API,
+  ORDER_ANALYTICS_API,
+  REVENUE_ANALYTICS_API,
+  USER_ANALYTICS_API,
 } from "@/components/ApiCall/url";
 import { DashboardChart } from "@/components/Dashboard/DashboardChart";
 import { StatsCard } from "@/components/Dashboard/StatsCard";
@@ -19,53 +19,111 @@ import {
   Package,
   TrendingUp,
   Users,
+  AlertCircle,
 } from "lucide-react";
 
 const DashboardAnalytics = () => {
   const { user } = useAuth();
 
-  // Fetch analytics data
-  const { data: userAnalytics } = useApi(USER_ANALAYTICS_API);
-  const { data: orderAnalytics } = useApi(ORDER_ANALAYTICS_API);
-  const { data: revenueAnalytics } = useApi(REVENUE_ANALAYTICS_API);
-  const { data: loginAnalytics } = useApi(LOGIN_ANALAYTICS_API);
-  const { data: countryAnalytics } = useApi(COUNTRIES_ANALAYTICS_API);
-  const { data: operationalAnalytics } = useApi(OPERATIONAL_ANALAYTICS_API);
+  // Check access permissions first
+  const canViewAnalytics = user?.role === "admin" || user?.role === "moderator";
 
-  // Check access permissions
-  if (user?.role === "user") {
+  // Fetch analytics data only if user has permission
+  const { data: userAnalytics, isLoading: userLoading, error: userError } = useApi(
+    canViewAnalytics ? USER_ANALYTICS_API : null
+  );
+  const { data: orderAnalytics, isLoading: orderLoading, error: orderError } = useApi(
+    canViewAnalytics ? ORDER_ANALYTICS_API : null
+  );
+  const { data: revenueAnalytics, isLoading: revenueLoading, error: revenueError } = useApi(
+    canViewAnalytics ? REVENUE_ANALYTICS_API : null
+  );
+  const { data: loginAnalytics, isLoading: loginLoading, error: loginError } = useApi(
+    canViewAnalytics ? LOGIN_ANALYTICS_API : null
+  );
+  const { data: countryAnalytics, isLoading: countryLoading, error: countryError } = useApi(
+    canViewAnalytics ? COUNTRIES_ANALYTICS_API : null
+  );
+  const { data: operationalAnalytics, isLoading: operationalLoading, error: operationalError } = useApi(
+    canViewAnalytics ? OPERATIONAL_ANALYTICS_API : null
+  );
+
+  // Access denied for regular users
+  if (!canViewAnalytics) {
     return (
       <div
         className="flex items-center justify-center h-96"
         data-testid="access-denied"
       >
-        <div className="text-center">
-          <BarChart3 className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">
-            Analytics Access
+        <div className="text-center max-w-md mx-auto">
+          <BarChart3 className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            Analytics Access Restricted
           </h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="text-gray-600">
             Analytics dashboard is available for admin and moderator users only.
+            Please contact your administrator for access.
           </p>
         </div>
       </div>
     );
   }
 
-  // Mock analytics data for demonstration
+  // Loading state
+  const isLoading = userLoading || orderLoading || revenueLoading || loginLoading || countryLoading || operationalLoading;
+  
+  if (isLoading) {
+    return (
+      <div className="space-y-6" data-testid="analytics-loading">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
+        </div>
+        <div className="flex justify-center py-12">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+            <p className="text-gray-600">Loading analytics data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  const hasError = userError || orderError || revenueError || loginError || countryError || operationalError;
+  
+  if (hasError) {
+    return (
+      <div className="space-y-6" data-testid="analytics-error">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
+        </div>
+        <div className="flex flex-col items-center justify-center py-12">
+          <AlertCircle className="h-16 w-16 text-red-500 mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            Error Loading Analytics
+          </h3>
+          <p className="text-gray-600 text-center max-w-md">
+            Unable to load analytics data. Please try refreshing the page or contact support if the problem persists.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Process analytics data - use real data if available, fallback to mock data
   const mockStats = {
-    totalUsers: userAnalytics?.totalUsers || 1250,
-    newUsers: userAnalytics?.newUsers || 85,
-    totalOrders: orderAnalytics?.totalOrders || 856,
-    pendingOrders: orderAnalytics?.pendingOrders || 23,
-    totalRevenue: revenueAnalytics?.totalRevenue || 45672,
-    monthlyGrowth: revenueAnalytics?.monthlyGrowth || 15.2,
-    avgOrderValue: revenueAnalytics?.avgOrderValue || 53.4,
-    deliveryRate: operationalAnalytics?.deliveryRate || 96.8,
+    totalUsers: userAnalytics?.totals?.totalUsers || 1250,
+    newUsers: userAnalytics?.newVsReturning?.newUsersCount || 85,
+    totalOrders: orderAnalytics?.totals?.totalOrders || 856,
+    pendingOrders: orderAnalytics?.totals?.pendingOrders || 23,
+    totalRevenue: revenueAnalytics?.totals?.totalRevenue || 45672,
+    monthlyGrowth: revenueAnalytics?.growth?.monthlyGrowth || 15.2,
+    avgOrderValue: revenueAnalytics?.totals?.avgOrderValue || 53.4,
+    deliveryRate: operationalAnalytics?.performance?.deliveryRate || 96.8,
   };
 
-  // Chart data
-  const monthlyRevenueData = [
+  // Chart data - use real data if available, fallback to mock data
+  const monthlyRevenueData = revenueAnalytics?.monthly || [
     { name: "Jan", revenue: 12500, orders: 65 },
     { name: "Feb", revenue: 15200, orders: 59 },
     { name: "Mar", revenue: 18900, orders: 80 },
@@ -76,7 +134,10 @@ const DashboardAnalytics = () => {
     { name: "Aug", revenue: 24300, orders: 95 },
   ];
 
-  const userGrowthData = [
+  const userGrowthData = userAnalytics?.signupTrend?.map((item: any) => ({
+    name: new Date(item._id).toLocaleDateString('en-US', { month: 'short' }),
+    users: item.count,
+  })) || [
     { name: "Jan", users: 1050 },
     { name: "Feb", users: 1089 },
     { name: "Mar", users: 1134 },
@@ -87,24 +148,18 @@ const DashboardAnalytics = () => {
     { name: "Aug", users: 1290 },
   ];
 
-  const orderTypeData = [
+  const orderTypeData = orderAnalytics?.byType || [
     { name: "Express", value: 45, count: 385 },
     { name: "Standard", value: 35, count: 299 },
     { name: "Super Express", value: 20, count: 172 },
   ];
 
-  const countryData = [
+  const countryData = countryAnalytics?.topCountries || [
     { name: "USA", value: 35, orders: 300 },
     { name: "Canada", value: 25, orders: 214 },
     { name: "UK", value: 20, orders: 171 },
     { name: "Australia", value: 15, orders: 128 },
     { name: "Others", value: 5, orders: 43 },
-  ];
-
-  const operationalData = [
-    { name: "On Time", delivered: 823, percentage: 96.1 },
-    { name: "Delayed", delivered: 28, percentage: 3.3 },
-    { name: "Failed", delivered: 5, percentage: 0.6 },
   ];
 
   return (
@@ -120,6 +175,11 @@ const DashboardAnalytics = () => {
           <p className="text-muted-foreground">
             Comprehensive analytics and insights for your courier operations
           </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="text-sm text-gray-500">
+            Access Level: <span className="font-medium capitalize">{user?.role}</span>
+          </div>
         </div>
       </div>
 
@@ -160,9 +220,6 @@ const DashboardAnalytics = () => {
         <DashboardChart
           title="Monthly Revenue"
           description="Revenue trend over the last 8 months"
-          
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
           data={monthlyRevenueData}
           type="bar"
           dataKey="revenue"
@@ -170,9 +227,6 @@ const DashboardAnalytics = () => {
         <DashboardChart
           title="User Growth"
           description="Total users over time"
-          
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
           data={userGrowthData}
           type="line"
           dataKey="users"
@@ -220,66 +274,73 @@ const DashboardAnalytics = () => {
         </div>
       </div>
 
-      {/* Operational Metrics */}
+      {/* Admin-only detailed metrics */}
       {user?.role === "admin" && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatsCard
-            title="On-Time Delivery"
-            value={`${operationalData[0].percentage}%`}
-            change={`${operationalData[0].delivered} orders`}
-            icon={Package}
-            trend="up"
-          />
-          <StatsCard
-            title="Customer Satisfaction"
-            value="4.8/5"
-            change="Based on 1,234 reviews"
-            icon={Users}
-            trend="up"
-          />
-          <StatsCard
-            title="Return Rate"
-            value="0.8%"
-            change="Industry leading"
-            icon={TrendingUp}
-            trend="down"
-          />
-          <StatsCard
-            title="Cost per Delivery"
-            value="$12.45"
-            change="-5% from last month"
-            icon={DollarSign}
-            trend="down"
-          />
-        </div>
-      )}
+        <>
+          {/* Operational Metrics */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <StatsCard
+              title="On-Time Delivery"
+              value="96.1%"
+              change="823 orders"
+              icon={Package}
+              trend="up"
+            />
+            <StatsCard
+              title="Customer Satisfaction"
+              value="4.8/5"
+              change="Based on 1,234 reviews"
+              icon={Users}
+              trend="up"
+            />
+            <StatsCard
+              title="Return Rate"
+              value="0.8%"
+              change="Industry leading"
+              icon={TrendingUp}
+              trend="down"
+            />
+            <StatsCard
+              title="Cost per Delivery"
+              value="$12.45"
+              change="-5% from last month"
+              icon={DollarSign}
+              trend="down"
+            />
+          </div>
 
-      {/* Additional Insights for Admin */}
-      {user?.role === "admin" && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border">
-          <h2 className="text-xl font-semibold mb-4">Key Insights</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <h3 className="font-medium mb-2">Performance Highlights</h3>
-              <ul className="space-y-1 text-sm text-gray-600">
-                <li>• 15% increase in monthly revenue</li>
-                <li>• 96.8% on-time delivery rate</li>
-                <li>• 85 new user registrations this month</li>
-                <li>• Express orders growing by 22%</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-medium mb-2">Areas for Improvement</h3>
-              <ul className="space-y-1 text-sm text-gray-600">
-                <li>• Reduce processing time by 0.2 days</li>
-                <li>• Expand to 2 new countries</li>
-                <li>• Increase customer reviews by 15%</li>
-                <li>• Optimize super express pricing</li>
-              </ul>
+          {/* Admin Insights Panel */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border">
+            <h2 className="text-xl font-semibold mb-4">Admin Insights</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <h3 className="font-medium mb-2">Performance Highlights</h3>
+                <ul className="space-y-1 text-sm text-gray-600">
+                  <li>• {mockStats.monthlyGrowth}% increase in monthly revenue</li>
+                  <li>• {mockStats.deliveryRate}% on-time delivery rate</li>
+                  <li>• {mockStats.newUsers} new user registrations this month</li>
+                  <li>• Express orders growing by 22%</li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-medium mb-2">Areas for Improvement</h3>
+                <ul className="space-y-1 text-sm text-gray-600">
+                  <li>• Reduce processing time by 0.2 days</li>
+                  <li>• Expand to 2 new countries</li>
+                  <li>• Increase customer reviews by 15%</li>
+                  <li>• Optimize super express pricing</li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
+
+      {/* Data freshness indicator */}
+      <div className="text-xs text-gray-500 text-center">
+        Last updated: {new Date().toLocaleString()} | 
+        Data source: {userAnalytics ? 'Live' : 'Mock'} data
+      </div>
     </div>
   );
 };
