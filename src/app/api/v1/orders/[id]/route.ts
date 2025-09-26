@@ -1,77 +1,192 @@
-// F:\New folder (2)\zypco-web-apps\src\app\api\v1\orders\[id]\route.ts
-import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/config/db";
+import { createAuthHandler, createModeratorHandler, createAdminHandler } from "@/server/common/apiWrapper";
+import { errorResponse, successResponse } from "@/server/common/response";
 import { Order } from "@/server/models/Order.model";
-import { successResponse, errorResponse } from "@/server/common/response";
 import { Types } from "mongoose";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{  id: string }> }
-): Promise<NextResponse> {
+interface Params {
+  id: string;
+}
+
+// GET: Users can view their own orders, Admin/Moderator can view all
+export const GET = createAuthHandler(async ({ req, user }) => {
   try {
     await connectDB();
 
-    const { id } = await params;
-    if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid order id", req });
+    const url = new URL(req.url);
+    const orderId = url.pathname.split('/').pop();
 
-    const order = await Order.findById(id).lean();
-    if (!order) return errorResponse({ status: 404, message: "Order not found", req });
+    if (!orderId || !Types.ObjectId.isValid(orderId)) {
+      return errorResponse({
+        status: 400,
+        message: "Invalid order ID",
+        req,
+      });
+    }
 
-    return successResponse({ status: 200, message: "Order fetched successfully", data: order, req });
+    // Build query based on user role
+    const query: any = { _id: new Types.ObjectId(orderId) };
+    
+    // Users can only see their own orders
+    if (user?.role === "user") {
+      query.$or = [
+        { "parcel.sender.phone": user.phone },
+        { "parcel.sender.email": user.email }
+      ];
+    }
+    // Admin and moderator can see all orders
+
+    const order = await Order.findOne(query).lean();
+
+    if (!order) {
+      return errorResponse({
+        status: 404,
+        message: "Order not found or access denied",
+        req,
+      });
+    }
+
+    return successResponse({
+      status: 200,
+      message: "Order fetched successfully",
+      data: order,
+      req,
+    });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Failed to fetch order";
     return errorResponse({ status: 500, message: msg, error, req });
   }
-}
+});
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{  id: string }> }
-): Promise<NextResponse> {
+// PUT: Users can update their own orders, Moderators can update any order
+export const PUT = createAuthHandler(async ({ req, user }) => {
   try {
     await connectDB();
 
-    const { id } = await params;
-    if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid order id", req });
+    const url = new URL(req.url);
+    const orderId = url.pathname.split('/').pop();
+
+    if (!orderId || !Types.ObjectId.isValid(orderId)) {
+      return errorResponse({
+        status: 400,
+        message: "Invalid order ID",
+        req,
+      });
+    }
 
     const body = await req.json();
 
-    // Update document using $set
+    // Build query based on user role
+    const query: any = { _id: new Types.ObjectId(orderId) };
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const update: any = {};
-    if (body.parcel) update.parcel = body.parcel;
-    if (body.payment) update.payment = body.payment;
-    if (body.handover_by) update.handover_by = body.handover_by;
-    if (body.orderDate) update.orderDate = new Date(body.orderDate);
+    // Users can only update their own orders
+    if (user?.role === "user") {
+      query.$or = [
+        { "parcel.sender.phone": user.phone },
+        { "parcel.sender.email": user.email }
+      ];
+    }
+    // Admin and moderator can update any order
 
-    const order = await Order.findByIdAndUpdate(id, { $set: update }, { new: true });
-    if (!order) return errorResponse({ status: 404, message: "Order not found", req });
+    const existingOrder = await Order.findOne(query);
 
-    return successResponse({ status: 200, message: "Order updated successfully", data: order, req });
+    if (!existingOrder) {
+      return errorResponse({
+        status: 404,
+        message: "Order not found or access denied",
+        req,
+      });
+    }
+
+    // Restrict what users can update vs admin/moderator
+    let allowedUpdates: any = {};
+
+    if (user?.role === "user") {
+      // Users can only update limited fields
+      const userAllowedFields = [
+        "parcel.receiver",
+        "parcel.description", 
+        "parcel.notes",
+        "parcel.item"
+      ];
+      
+      for (const field of userAllowedFields) {
+        if (body[field] !== undefined) {
+          allowedUpdates[field] = body[field];
+        }
+      }
+    } else {
+      // Admin/Moderator can update most fields except system-generated ones
+      const restrictedFields = ["_id", "trackId", "createdAt"];
+      allowedUpdates = { ...body };
+      
+      for (const field of restrictedFields) {
+        delete allowedUpdates[field];
+      }
+    }
+
+    // Update the order
+    const updatedOrder = await Order.findOneAndUpdate(
+      query,
+      { $set: allowedUpdates },
+      { new: true, runValidators: true }
+    ).lean();
+
+    return successResponse({
+      status: 200,
+      message: "Order updated successfully",
+      data: updatedOrder,
+      req,
+    });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Failed to update order";
     return errorResponse({ status: 500, message: msg, error, req });
   }
-}
+});
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{  id: string }> }
-): Promise<NextResponse> {
+// DELETE: Only Admin can delete orders
+export const DELETE = createAdminHandler(async ({ req, user }) => {
   try {
     await connectDB();
 
-    const { id } = await params;
-    if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid order id", req });
+    const url = new URL(req.url);
+    const orderId = url.pathname.split('/').pop();
 
-    const order = await Order.findByIdAndDelete(id);
-    if (!order) return errorResponse({ status: 404, message: "Order not found", req });
+    if (!orderId || !Types.ObjectId.isValid(orderId)) {
+      return errorResponse({
+        status: 400,
+        message: "Invalid order ID",
+        req,
+      });
+    }
 
-    return successResponse({ status: 200, message: "Order deleted successfully", data: order, req });
+    const deletedOrder = await Order.findByIdAndDelete(orderId);
+
+    if (!deletedOrder) {
+      return errorResponse({
+        status: 404,
+        message: "Order not found",
+        req,
+      });
+    }
+
+    return successResponse({
+      status: 200,
+      message: "Order deleted successfully",
+      data: {
+        deletedOrderId: orderId,
+        trackId: deletedOrder.trackId,
+        deletedBy: {
+          userId: user?.id,
+          role: user?.role,
+          name: user?.name,
+        },
+        deletedAt: new Date().toISOString(),
+      },
+      req,
+    });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Failed to delete order";
     return errorResponse({ status: 500, message: msg, error, req });
   }
-}
+});

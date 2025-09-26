@@ -1,7 +1,8 @@
 import connectDB from "@/config/db";
+import { createPublicHandler, createAuthHandler, createModeratorHandler } from "@/server/common/apiWrapper";
 import { errorResponse, successResponse } from "@/server/common/response";
 import { Order } from "@/server/models/Order.model";
-import { NextRequest } from "next/server";
+import { notificationService } from "@/services/notificationService";
 
 type GetQuery = {
   trackId?: string;
@@ -18,7 +19,6 @@ type GetQuery = {
   search?: string;
 };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function validateAndFixItems(items: any[]): {
   valid: boolean;
   message?: string;
@@ -61,7 +61,6 @@ function validateAndFixItems(items: any[]): {
     const qty = Number(it.quantity);
     const unit = Number(it.unitPrice);
     const computed = qty * unit;
-    // if totalPrice missing or differs, set it to computed
     if (it.totalPrice == null || Number(it.totalPrice) !== computed) {
       it.totalPrice = computed;
     }
@@ -70,7 +69,8 @@ function validateAndFixItems(items: any[]): {
   return { valid: true };
 }
 
-export async function GET(req: NextRequest) {
+// GET: Everyone can view orders, but filtered by role
+export const GET = createAuthHandler(async ({ req, user }) => {
   try {
     await connectDB();
 
@@ -78,18 +78,25 @@ export async function GET(req: NextRequest) {
     const q: GetQuery = Object.fromEntries(url.searchParams.entries());
 
     const page = Math.max(1, parseInt(q.page || "1", 10));
-    const limit = Math.max(1, Math.min(200, parseInt(q.limit || "10", 10))); // cap limit to 200
+    const limit = Math.max(1, Math.min(200, parseInt(q.limit || "10", 10)));
     const skip = (page - 1) * limit;
 
-    // Build query
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // Build query - users can only see their own orders unless admin/moderator
     const query: any = {};
+    
+    // Role-based filtering
+    if (user?.role === "user") {
+      // Regular users can only see orders they created or where they're the sender
+      query.$or = [
+        { "parcel.sender.phone": user.phone },
+        { "parcel.sender.email": user.email }
+      ];
+    }
+    // Admin and moderator can see all orders (no additional filter needed)
 
     if (q.trackId) {
-      // allow both exact and partial (if user wants)
       const t = q.trackId.trim();
       if (t.includes("*") || t.includes("%")) {
-        // convert wildcard to regex
         const pattern = t.replace(/\*/g, ".*").replace(/%/g, ".*");
         query.trackId = { $regex: pattern, $options: "i" };
       } else {
@@ -134,7 +141,6 @@ export async function GET(req: NextRequest) {
       : "createdAt";
     const sortOrder = (q.sortOrder || "desc").toLowerCase() === "asc" ? 1 : -1;
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sortObj: any = {};
     sortObj[sortBy] = sortOrder;
 
@@ -154,26 +160,22 @@ export async function GET(req: NextRequest) {
         limit,
         total,
         totalPages: Math.max(1, Math.ceil(total / limit)),
+        userRole: user?.role || "guest",
+        filteredByRole: user?.role === "user",
       },
       req,
     });
   } catch (error: unknown) {
-    const msg =
-      error instanceof Error ? error.message : "Failed to fetch orders";
+    const msg = error instanceof Error ? error.message : "Failed to fetch orders";
     return errorResponse({ status: 500, message: msg, error, req });
   }
-}
+});
 
-/**
- * POST - create a new order
- * Required: parcel (with from, to, weight)
- * Optional: payment (if not provided we create a sensible default)
- */
-export async function POST(req: NextRequest) {
+// POST: Everyone can create orders (public access with optional auth)
+export const POST = createPublicHandler(async ({ req, user }) => {
   try {
     await connectDB();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const body = (await req.json()) as any;
 
     // Validate parcel existence
@@ -185,28 +187,83 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const parcel = body.parcel as Record<string, any>;
 
     // Validate required parcel fields
     if (!parcel.from) {
       return errorResponse({
         status: 400,
-        message: "parcel.from is required",
+        message: "Origin country (parcel.from) is required",
         req,
       });
     }
     if (!parcel.to) {
       return errorResponse({
         status: 400,
-        message: "parcel.to is required",
+        message: "Destination country (parcel.to) is required",
         req,
       });
     }
     if (!parcel.weight && parcel.weight !== 0) {
       return errorResponse({
         status: 400,
-        message: "parcel.weight is required",
+        message: "Package weight (parcel.weight) is required",
+        req,
+      });
+    }
+
+    // Validate sender information
+    if (!parcel.sender) {
+      return errorResponse({
+        status: 400,
+        message: "Sender information (parcel.sender) is required",
+        req,
+      });
+    }
+
+    if (!parcel.sender.name || !parcel.sender.phone) {
+      return errorResponse({
+        status: 400,
+        message: "Sender name and phone are required",
+        req,
+      });
+    }
+
+    // Add authenticated user info if available, otherwise use provided sender info
+    if (user) {
+      // If user is authenticated, use their info
+      parcel.sender.phone = user.phone;
+      parcel.sender.email = user.email;
+      if (!parcel.sender.name) {
+        parcel.sender.name = user.name;
+      }
+    } else {
+      // For non-authenticated users, validate email format if provided
+      if (parcel.sender.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(parcel.sender.email)) {
+          return errorResponse({
+            status: 400,
+            message: "Invalid email format",
+            req,
+          });
+        }
+      }
+    }
+
+    // Validate receiver information
+    if (!parcel.receiver) {
+      return errorResponse({
+        status: 400,
+        message: "Receiver information (parcel.receiver) is required",
+        req,
+      });
+    }
+
+    if (!parcel.receiver.name || !parcel.receiver.phone) {
+      return errorResponse({
+        status: 400,
+        message: "Receiver name and phone are required",
         req,
       });
     }
@@ -221,14 +278,18 @@ export async function POST(req: NextRequest) {
           req,
         });
       }
-      // propagate fixed items back
       body.parcel.item = parcel.item;
     }
+
+    // Set default values for optional fields
+    if (!parcel.orderType) parcel.orderType = "standard";
+    if (!parcel.priority) parcel.priority = "normal";
+    if (!parcel.description) parcel.description = "";
 
     // If payment not provided, create default
     if (!body.payment || typeof body.payment !== "object") {
       body.payment = {
-        pType: "not-set",
+        pType: "cash-on-delivery",
         pAmount: 0,
         pOfferDiscount: 0,
         pExtraCharge: 0,
@@ -253,22 +314,53 @@ export async function POST(req: NextRequest) {
           body.payment[f] = Number(body.payment[f]);
         }
       }
-      if (!body.payment.pType) body.payment.pType = "not-set";
+      if (!body.payment.pType) body.payment.pType = "cash-on-delivery";
     }
 
     // Construct order document and save
     const order = new Order(body);
     await order.save();
 
+    // Send order creation notifications (only if user is authenticated)
+    if (user) {
+      try {
+        await notificationService.sendNotification({
+          userId: user.id,
+          title: "Order Created Successfully",
+          message: `Your order ${order.trackId} has been created and will be processed soon.`,
+          type: "success",
+          category: "order",
+          priority: "normal",
+          channels: ["inapp", "email"],
+          actionUrl: `/dashboard/orders/${order._id}`,
+          actionText: "View Order",
+          data: {
+            orderId: order._id,
+            trackId: order.trackId,
+            from: parcel.from,
+            to: parcel.to,
+          },
+        });
+      } catch (notificationError) {
+        console.error("Failed to send order notification:", notificationError);
+        // Don't fail order creation if notification fails
+      }
+    }
+
     return successResponse({
       status: 201,
       message: "Order created successfully",
-      data: order,
+      data: {
+        ...order.toObject(),
+        instructions: user 
+          ? "You can track this order in your dashboard"
+          : "Please save your tracking ID to track this order later",
+        trackingUrl: `/track/${order.trackId}`,
+      },
       req,
     });
   } catch (error: unknown) {
-    const msg =
-      error instanceof Error ? error.message : "Failed to create order";
+    const msg = error instanceof Error ? error.message : "Failed to create order";
     return errorResponse({ status: 500, message: msg, error, req });
   }
-}
+});

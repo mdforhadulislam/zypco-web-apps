@@ -1,3 +1,5 @@
+"use client";
+
 import {
   BadgeDollarSign,
   BarChart3,
@@ -14,6 +16,7 @@ import {
   UserStar,
 } from "lucide-react";
 
+// Navigation data for different user roles
 export const AdminData = {
   navMain: [
     {
@@ -21,6 +24,7 @@ export const AdminData = {
       url: "/dashboard",
       icon: LayoutDashboard,
       isActive: true,
+<<<<<<< HEAD
       items: [],
     },
     {
@@ -28,6 +32,81 @@ export const AdminData = {
       url: "/dashboard/analytics",
       icon: BarChart3,
       items: [],
+=======
+      items: [
+        {
+          title: "Analytics",
+          url: "/dashboard/analytics",
+        },
+        {
+          title: "All Pickup",
+          url: "/dashboard/pickups",
+        },
+        {
+          title: "All Order",
+          url: "/dashboard/orders",
+        },
+      ],
+    },
+    {
+      title: "Analytics",
+      url: "/dashboard/analytics", // Fixed spelling from "analaytics"
+      icon: BarChart3,
+      items: [
+        {
+          title: "User Analytics",
+          url: "/dashboard/analytics/users",
+        },
+        {
+          title: "Login Analytics",
+          url: "/dashboard/analytics/login",
+        },
+        {
+          title: "Revenue Analytics",
+          url: "/dashboard/analytics/revenue",
+        },
+        {
+          title: "API Key Analytics",
+          url: "/dashboard/analytics/api-keys",
+        },
+        {
+          title: "Addresses Analytics",
+          url: "/dashboard/analytics/addresses",
+        },
+        {
+          title: "Order Analytics",
+          url: "/dashboard/analytics/orders",
+        },
+        {
+          title: "Operational Analytics",
+          url: "/dashboard/analytics/operational",
+        },
+        {
+          title: "Offers Analytics",
+          url: "/dashboard/analytics/offers",
+        },
+        {
+          title: "Countries Analytics",
+          url: "/dashboard/analytics/countries",
+        },
+        {
+          title: "Notifications Analytics",
+          url: "/dashboard/analytics/notifications",
+        },
+        {
+          title: "Contacts Analytics",
+          url: "/dashboard/analytics/contacts",
+        },
+        {
+          title: "Content Analytics",
+          url: "/dashboard/analytics/content",
+        },
+        {
+          title: "Reviews Analytics",
+          url: "/dashboard/analytics/reviews",
+        },
+      ],
+>>>>>>> 089c2160029c35f7edd4bf3f478385d7cb688f7d
     },
     {
       title: "Pickups",
@@ -159,7 +238,7 @@ export const AdminData = {
   ],
 };
 
-export const ModaretorData = {
+export const ModeratorData = {
   navMain: [
     {
       title: "Dashboard",
@@ -167,6 +246,25 @@ export const ModaretorData = {
       icon: LayoutDashboard,
       isActive: true,
       items: [],
+    },
+    {
+      title: "Analytics",
+      url: "/dashboard/analytics", // Fixed spelling
+      icon: BarChart3,
+      items: [
+        {
+          title: "User Analytics",
+          url: "/dashboard/analytics/users",
+        },
+        {
+          title: "Order Analytics",
+          url: "/dashboard/analytics/orders",
+        },
+        {
+          title: "Revenue Analytics",
+          url: "/dashboard/analytics/revenue",
+        },
+      ],
     },
     {
       title: "Pickups",
@@ -380,3 +478,32 @@ export const UserData = {
     },
   ],
 };
+<<<<<<< HEAD
+=======
+
+// Export navigation data getter function
+export const getNavigationData = (role: "admin" | "moderator" | "user") => {
+  switch (role) {
+    case "admin":
+      return AdminData;
+    case "moderator":
+      return ModeratorData;
+    case "user":
+      return UserData;
+    default:
+      return UserData;
+  }
+};
+
+// Export constants for use in other components
+export const USER_ROLES = {
+  ADMIN: "admin",
+  MODERATOR: "moderator",
+  USER: "user",
+} as const;
+
+export const NAVIGATION_SECTIONS = {
+  MAIN: "navMain",
+  SECONDARY: "navSecondary",
+} as const;
+>>>>>>> 089c2160029c35f7edd4bf3f478385d7cb688f7d

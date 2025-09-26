@@ -1,15 +1,22 @@
 import connectDB from "@/config/db";
-import { errorResponse, successResponse } from "@/server/common/response";
-import { NextRequest } from "next/server";
-
-// Models
+import { createModeratorHandler } from "@/server/common/apiWrapper";
+import { successResponse, errorResponse } from "@/server/common/response";
 import { LoginHistory } from "@/server/models/LoginHistory.model";
 import { Order } from "@/server/models/Order.model";
 import { User } from "@/server/models/User.model";
 
-export async function GET(req: NextRequest) {
+export const GET = createModeratorHandler(async ({ req, user }) => {
   try {
     await connectDB();
+
+    // Only admin and moderator can access analytics
+    if (!user || (user.role !== "admin" && user.role !== "moderator")) {
+      return errorResponse({
+        status: 403,
+        message: "Admin or moderator access required for analytics",
+        req,
+      });
+    }
 
     const url = new URL(req.url);
     const params = url.searchParams;
@@ -38,9 +45,7 @@ export async function GET(req: NextRequest) {
       endDate.setHours(23, 59, 59, 999);
     }
 
-    //
-    // ---------- Users Section ----------
-    //
+    // Users Section
     const totalUsersP = User.countDocuments();
     const activeUsersP = User.countDocuments({ isActive: true });
     const verifiedUsersP = User.countDocuments({ isVerified: true });
@@ -70,7 +75,7 @@ export async function GET(req: NextRequest) {
       },
     ]);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // Signup trend
     const signupMatch: any = {};
     signupMatch.createdAt = { $gte: startDate || pastNDays };
     if (endDate) signupMatch.createdAt.$lte = endDate;
@@ -86,11 +91,7 @@ export async function GET(req: NextRequest) {
       { $sort: { _id: 1 } },
     ]);
 
-    //
-    // ---------- Security / Login ----------
-    //
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // Security / Login Analytics
     const dauMatch: any = {
       success: true,
       timestamp: { $gte: startDate || pastNDays },
@@ -131,17 +132,12 @@ export async function GET(req: NextRequest) {
       { $limit: Math.max(limit, 10) },
     ]);
 
-    //
-    // ---------- Orders / Revenue ----------
-    //
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // Orders / Revenue Analytics
     const orderMatch: any = {};
     if (startDate) orderMatch.orderDate = { $gte: startDate };
     if (endDate)
       orderMatch.orderDate = { ...(orderMatch.orderDate || {}), $lte: endDate };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ordersPipeline: any[] = [];
     if (Object.keys(orderMatch).length)
       ordersPipeline.push({ $match: orderMatch });
@@ -275,6 +271,7 @@ export async function GET(req: NextRequest) {
       }
     );
 
+    // Execute all analytics queries
     const [
       totalUsers,
       activeUsers,
@@ -301,27 +298,53 @@ export async function GET(req: NextRequest) {
       Order.aggregate(ordersPipeline),
     ]);
 
-    return successResponse({
-      message: "",
-      data: {
-        totalUsers,
-        activeUsers,
-        verifiedUsers,
-        roleBreakdown,
-        notificationPrefs,
-        signupTrend,
-        dau,
-        topFailedPhones,
-        topFailedIPs,
-        topIPs,
-        ordersSummary: ordersSummary[0] || {},
+    const analyticsData = {
+      // User analytics
+      totalUsers,
+      activeUsers,
+      verifiedUsers,
+      roleBreakdown,
+      notificationPrefs,
+      signupTrend,
+      dau,
+      
+      // Security analytics
+      topFailedPhones,
+      topFailedIPs,
+      topIPs,
+      
+      // Order analytics
+      ordersSummary: ordersSummary[0] || {},
+      
+      // Metadata
+      generatedAt: new Date().toISOString(),
+      generatedBy: {
+        userId: user.id,
+        role: user.role,
+        name: user.name,
       },
+      filters: {
+        startDate: startDateParam,
+        endDate: endDateParam,
+        days,
+        months,
+        limit,
+      },
+    };
+
+    return successResponse({
+      status: 200,
+      message: "Analytics data fetched successfully",
+      data: analyticsData,
+      req,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Analytics API Error:", error);
     return errorResponse({
-      message: "Dashboard analytics fetch failed",
+      status: 500,
+      message: "Failed to fetch analytics data",
       error,
+      req,
     });
   }
-}
+});

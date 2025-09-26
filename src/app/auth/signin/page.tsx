@@ -1,5 +1,7 @@
 "use client";
 
+import { postRequestSend } from "@/components/ApiCall/methord";
+import { SIGNIN_API } from "@/components/ApiCall/url";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -69,7 +71,8 @@ export default function SigninPage() {
     setIsLoading(true);
 
     try {
-      const success = await login(phone.trim(), password);
+      const isSignin = await postRequestSend(SIGNIN_API,{},{phone,password});
+      const success = await login(isSignin.data.user,isSignin.data.accessToken,isSignin.data.refreshToken );
 
       if (success) {
         toast.success("Sign in successful!");
