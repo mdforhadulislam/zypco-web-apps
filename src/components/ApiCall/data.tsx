@@ -1,9 +1,9 @@
 import {
-  BarChart3,
   BadgeDollarSign,
+  BarChart3,
   Bell,
-  Bot,
   Boxes,
+  BoxIcon,
   CircleUserRound,
   LayoutDashboard,
   LifeBuoy,
@@ -21,102 +21,19 @@ export const AdminData = {
       url: "/dashboard",
       icon: LayoutDashboard,
       isActive: true,
-      items: [
-        {
-          title: "Analaytics",
-          url: "/dashboard/analytics",
-        },
-        {
-          title: "All Pickup",
-          url: "/dashboard/pickups",
-        },
-        {
-          title: "All Order",
-          url: "/dashboard/orders",
-        },
-      ],
+      items: [],
     },
     {
-      title: "Analaytics",
-      url: "/dashboard/analaytics",
+      title: "Analytics",
+      url: "/dashboard/analytics",
       icon: BarChart3,
-      items: [
-        {
-          title: "User Analaytics",
-          url: "/dashboard/analaytics/users",
-        },
-        {
-          title: "Login Analaytics",
-          url: "/dashboard/analaytics/login",
-        },
-        {
-          title: "Revenue Analaytics",
-          url: "/dashboard/analaytics/revenue",
-        },
-        {
-          title: "API Key Analaytics",
-          url: "/dashboard/analaytics/api-keys",
-        },
-        {
-          title: "Addresses Analaytics",
-          url: "/dashboard/analaytics/addresses",
-        },
-        {
-          title: "Order Analaytics",
-          url: "/dashboard/analaytics/orders",
-        },
-        {
-          title: "Operational Analaytics",
-          url: "/dashboard/analaytics/operational",
-        },
-        {
-          title: "Offers Analaytics",
-          url: "/dashboard/analaytics/offers",
-        },
-        {
-          title: "Countries Analaytics",
-          url: "/dashboard/analaytics/countries",
-        },
-        {
-          title: "Notifications Analaytics",
-          url: "/dashboard/analaytics/notifications",
-        },
-        {
-          title: "Contacts Analaytics",
-          url: "/dashboard/analaytics/contacts",
-        },
-        {
-          title: "Content Analaytics",
-          url: "/dashboard/analaytics/content",
-        },
-        {
-          title: "Reviews Analaytics",
-          url: "/dashboard/analaytics/reviews",
-        },
-      ],
+      items: [],
     },
     {
       title: "Pickups",
       url: "/dashboard/pickups",
       icon: Package,
-      items: [
-        {
-          title: "All Pickup",
-          url: "/dashboard/pickups",
-        },
-        {
-          title: "Pending Pickup",
-          url: "/dashboard/pickups?status=pending",
-        },
-        {
-          title: "Cancel Pickup",
-          url: "/dashboard/pickups?status=cancelled",
-        },
-        {
-          title: "Done Pickup",
-          url: "/dashboard/pickups?status=completed",
-        },
-      ],
+      items: [],
     },
     {
       title: "Rate Charts",
@@ -124,12 +41,16 @@ export const AdminData = {
       icon: BadgeDollarSign,
       items: [
         {
-          title: "Countries",
-          url: "/dashboard/rate-charts/countries",
+          title: "countrys",
+          url: "/dashboard/rate-charts/countrys",
         },
         {
           title: "Rate Charts",
           url: "/dashboard/rate-charts",
+        },
+        {
+          title: "Address Book",
+          url: "/dashboard/rate-charts/address",
         },
       ],
     },
@@ -137,47 +58,19 @@ export const AdminData = {
       title: "Orders",
       url: "/dashboard/orders",
       icon: Boxes,
-      items: [
-        {
-          title: "All Orders",
-          url: "/dashboard/orders",
-        },
-        {
-          title: "Normal Order",
-          url: "/dashboard/orders?type=normal",
-        },
-        {
-          title: "Express Order",
-          url: "/dashboard/orders?type=express",
-        },
-        {
-          title: "Super Express",
-          url: "/dashboard/orders?type=super-express",
-        },
-        {
-          title: "Tax Paid",
-          url: "/dashboard/orders?status=tax-paid",
-        },
-      ],
+      items: [],
+    },
+    {
+      title: "Parcel Tracking",
+      url: "/dashboard/orders",
+      icon: BoxIcon,
+      items: [],
     },
     {
       title: "Reviews",
       url: "/dashboard/reviews",
       icon: UserStar,
-      items: [
-        {
-          title: "All Reviews",
-          url: "/dashboard/reviews",
-        },
-        {
-          title: "Pending Reviews",
-          url: "/dashboard/reviews?status=pending",
-        },
-        {
-          title: "Approved Reviews",
-          url: "/dashboard/reviews?status=approved",
-        },
-      ],
+      items: [],
     },
     {
       title: "Content",
@@ -185,16 +78,12 @@ export const AdminData = {
       icon: Rss,
       items: [
         {
-          title: "All Content",
-          url: "/dashboard/contents",
+          title: "All Contact",
+          url: "/dashboard/contact",
         },
         {
           title: "Blog Posts",
           url: "/dashboard/contents/blogs",
-        },
-        {
-          title: "Notifications",
-          url: "/dashboard/notifications",
         },
       ],
     },
@@ -202,21 +91,9 @@ export const AdminData = {
       title: "Notifications",
       url: "/dashboard/notifications",
       icon: Bell,
-      items: [
-        {
-          title: "All Notifications",
-          url: "/dashboard/notifications",
-        },
-        {
-          title: "Unread Notifications",
-          url: "/dashboard/notifications?read=false",
-        },
-        {
-          title: "System Notifications",
-          url: "/dashboard/notifications?type=info",
-        },
-      ],
+      items: [],
     },
+
     {
       title: "Users",
       url: "/dashboard/users",
@@ -250,12 +127,20 @@ export const AdminData = {
           url: "/dashboard/settings",
         },
         {
+          title: "Address",
+          url: "/dashboard/settings/address",
+        },
+        {
           title: "Offers",
           url: "/dashboard/settings/offers",
         },
         {
           title: "Api Key",
-          url: "/dashboard/settings/api-keys",
+          url: "/dashboard/settings/api-config-and-access",
+        },
+        {
+          title: "Account Activity",
+          url: "/dashboard/settings/login-history",
         },
       ],
     },
@@ -281,43 +166,13 @@ export const ModaretorData = {
       url: "/dashboard",
       icon: LayoutDashboard,
       isActive: true,
-      items: [
-        {
-          title: "Analytics",
-          url: "/dashboard/analytics",
-        },
-        {
-          title: "All Pickup",
-          url: "/dashboard/pickups",
-        },
-        {
-          title: "All Order",
-          url: "/dashboard/orders",
-        },
-      ],
+      items: [],
     },
     {
       title: "Pickups",
       url: "/dashboard/pickups",
       icon: Package,
-      items: [
-        {
-          title: "All Pickup",
-          url: "/dashboard/pickups",
-        },
-        {
-          title: "Pending Pickup",
-          url: "/dashboard/pickups?status=pending",
-        },
-        {
-          title: "Cancel Pickup",
-          url: "/dashboard/pickups?status=cancelled",
-        },
-        {
-          title: "Done Pickup",
-          url: "/dashboard/pickups?status=completed",
-        },
-      ],
+      items: [],
     },
     {
       title: "Rate Charts",
@@ -325,8 +180,8 @@ export const ModaretorData = {
       icon: BadgeDollarSign,
       items: [
         {
-          title: "Countries",
-          url: "/dashboard/rate-charts/countries",
+          title: "Countrys",
+          url: "/dashboard/rate-charts/countrys",
         },
         {
           title: "Rate Charts",
@@ -338,28 +193,7 @@ export const ModaretorData = {
       title: "Orders",
       url: "/dashboard/orders",
       icon: Boxes,
-      items: [
-        {
-          title: "All Orders",
-          url: "/dashboard/orders",
-        },
-        {
-          title: "Normal Order",
-          url: "/dashboard/orders?type=normal",
-        },
-        {
-          title: "Express Order",
-          url: "/dashboard/orders?type=express",
-        },
-        {
-          title: "Super Express",
-          url: "/dashboard/orders?type=super-express",
-        },
-        {
-          title: "Tax Paid",
-          url: "/dashboard/orders?status=tax-paid",
-        },
-      ],
+      items: [],
     },
     {
       title: "Reviews",
@@ -386,7 +220,7 @@ export const ModaretorData = {
       icon: Rss,
       items: [
         {
-          title: "All Content",
+          title: "All Contacts",
           url: "/dashboard/contents",
         },
         {
@@ -405,7 +239,7 @@ export const ModaretorData = {
           url: "/dashboard/notifications",
         },
         {
-          title: "Unread Notifications", 
+          title: "Unread Notifications",
           url: "/dashboard/notifications?read=false",
         },
       ],
@@ -420,8 +254,17 @@ export const ModaretorData = {
           url: "/dashboard/settings",
         },
         {
-          title: "Offers",
-          url: "/dashboard/settings/offers",
+          title: "Address",
+          url: "/dashboard/settings/address",
+        },
+
+        {
+          title: "Api Key",
+          url: "/dashboard/settings/api-config-and-access",
+        },
+        {
+          title: "Account Activity",
+          url: "/dashboard/settings/login-history",
         },
       ],
     },
@@ -447,39 +290,13 @@ export const UserData = {
       url: "/dashboard",
       icon: LayoutDashboard,
       isActive: true,
-      items: [
-        {
-          title: "My Orders",
-          url: "/dashboard/orders",
-        },
-        {
-          title: "My Pickups",
-          url: "/dashboard/pickups",
-        },
-        {
-          title: "My Notifications", 
-          url: "/dashboard/notifications",
-        },
-      ],
+      items: [],
     },
     {
       title: "Pickups",
       url: "/dashboard/pickups",
       icon: Package,
-      items: [
-        {
-          title: "All Pickup",
-          url: "/dashboard/pickups",
-        },
-        {
-          title: "Pending Pickup",
-          url: "/dashboard/pickups?status=pending",
-        },
-        {
-          title: "Done Pickup",
-          url: "/dashboard/pickups?status=completed",
-        },
-      ],
+      items: [],
     },
     {
       title: "Rate Charts",
@@ -487,8 +304,8 @@ export const UserData = {
       icon: BadgeDollarSign,
       items: [
         {
-          title: "Countries",
-          url: "/dashboard/rate-charts/countries",
+          title: "Countrys",
+          url: "/dashboard/rate-charts/countrys",
         },
         {
           title: "Rate Charts",
@@ -542,6 +359,10 @@ export const UserData = {
         {
           title: "API Keys",
           url: "/dashboard/settings/api-keys",
+        },
+        {
+          title: "Login History",
+          url: "/dashboard/settings/login-history",
         },
       ],
     },

@@ -392,17 +392,7 @@ export default function SignupPage() {
                 Sign in
               </Link>
             </p>
-          </div>
-
-          <div className="mt-6 text-center">
-            <Link 
-              href="/" 
-              className="text-sm text-gray-600 hover:underline"
-              data-testid="home-link"
-            >
-              ← Back to Home
-            </Link>
-          </div>
+          </div> 
         </CardContent>
       </Card>
     </div>

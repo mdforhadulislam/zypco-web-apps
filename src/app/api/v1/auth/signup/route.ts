@@ -103,7 +103,7 @@ function recordSignupAttempt(ipAddress: string): void {
 export async function POST(req: NextRequest) {
   const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || 
                    req.headers.get("x-real-ip") || 
-                   req.ip || 
+                   req?.ip || 
                    "unknown";
 
   try {

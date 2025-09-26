@@ -223,17 +223,7 @@ export default function SigninPage() {
                 Forgot your password?
               </Link>
             </p>
-          </div>
-
-          <div className="mt-6 text-center">
-            <Link
-              href="/"
-              className="text-sm text-gray-600 hover:underline"
-              data-testid="home-link"
-            >
-              ← Back to Home
-            </Link>
-          </div>
+          </div> 
         </CardContent>
       </Card>
     </div>
