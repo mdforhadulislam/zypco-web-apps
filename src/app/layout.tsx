@@ -1,8 +1,8 @@
 import { AuthProvider } from "@/hooks/AuthContext";
-import { ReFreshTokenProvider } from "@/hooks/ReFreshTokenContext";
 import SiteLayout from "@/utilities/SiteLayout";
 import type { Metadata } from "next";
 import "./globals.css";
+import { RefreshTokenProvider } from "@/hooks/ReFreshTokenContext";
 
 export const metadata: Metadata = {
   title: {
@@ -154,9 +154,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          <ReFreshTokenProvider>
+          <RefreshTokenProvider>
             <SiteLayout>{children}</SiteLayout>
-          </ReFreshTokenProvider>
+          </RefreshTokenProvider>
         </AuthProvider>
       </body>
     </html>

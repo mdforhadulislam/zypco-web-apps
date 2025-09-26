@@ -24,89 +24,33 @@ export const AdminData = {
       url: "/dashboard",
       icon: LayoutDashboard,
       isActive: true,
-<<<<<<< HEAD
       items: [],
     },
     {
       title: "Analytics",
       url: "/dashboard/analytics",
       icon: BarChart3,
-      items: [],
-=======
       items: [
-        {
-          title: "Analytics",
-          url: "/dashboard/analytics",
-        },
-        {
-          title: "All Pickup",
-          url: "/dashboard/pickups",
-        },
-        {
-          title: "All Order",
-          url: "/dashboard/orders",
-        },
-      ],
-    },
-    {
-      title: "Analytics",
-      url: "/dashboard/analytics", // Fixed spelling from "analaytics"
-      icon: BarChart3,
-      items: [
-        {
-          title: "User Analytics",
-          url: "/dashboard/analytics/users",
-        },
-        {
-          title: "Login Analytics",
-          url: "/dashboard/analytics/login",
-        },
-        {
-          title: "Revenue Analytics",
-          url: "/dashboard/analytics/revenue",
-        },
-        {
-          title: "API Key Analytics",
-          url: "/dashboard/analytics/api-keys",
-        },
-        {
-          title: "Addresses Analytics",
-          url: "/dashboard/analytics/addresses",
-        },
-        {
-          title: "Order Analytics",
-          url: "/dashboard/analytics/orders",
-        },
+        { title: "User Analytics", url: "/dashboard/analytics/users" },
+        { title: "Login Analytics", url: "/dashboard/analytics/login" },
+        { title: "Revenue Analytics", url: "/dashboard/analytics/revenue" },
+        { title: "API Key Analytics", url: "/dashboard/analytics/api-keys" },
+        { title: "Addresses Analytics", url: "/dashboard/analytics/addresses" },
+        { title: "Order Analytics", url: "/dashboard/analytics/orders" },
         {
           title: "Operational Analytics",
           url: "/dashboard/analytics/operational",
         },
-        {
-          title: "Offers Analytics",
-          url: "/dashboard/analytics/offers",
-        },
-        {
-          title: "Countries Analytics",
-          url: "/dashboard/analytics/countries",
-        },
+        { title: "Offers Analytics", url: "/dashboard/analytics/offers" },
+        { title: "Countries Analytics", url: "/dashboard/analytics/countries" },
         {
           title: "Notifications Analytics",
           url: "/dashboard/analytics/notifications",
         },
-        {
-          title: "Contacts Analytics",
-          url: "/dashboard/analytics/contacts",
-        },
-        {
-          title: "Content Analytics",
-          url: "/dashboard/analytics/content",
-        },
-        {
-          title: "Reviews Analytics",
-          url: "/dashboard/analytics/reviews",
-        },
+        { title: "Contacts Analytics", url: "/dashboard/analytics/contacts" },
+        { title: "Content Analytics", url: "/dashboard/analytics/content" },
+        { title: "Reviews Analytics", url: "/dashboard/analytics/reviews" },
       ],
->>>>>>> 089c2160029c35f7edd4bf3f478385d7cb688f7d
     },
     {
       title: "Pickups",
@@ -119,18 +63,9 @@ export const AdminData = {
       url: "/dashboard/rate-charts",
       icon: BadgeDollarSign,
       items: [
-        {
-          title: "countrys",
-          url: "/dashboard/rate-charts/countrys",
-        },
-        {
-          title: "Rate Charts",
-          url: "/dashboard/rate-charts",
-        },
-        {
-          title: "Address Book",
-          url: "/dashboard/rate-charts/address",
-        },
+        { title: "Countrys", url: "/dashboard/rate-charts/countrys" },
+        { title: "Rate Charts", url: "/dashboard/rate-charts" },
+        { title: "Address Book", url: "/dashboard/rate-charts/address" },
       ],
     },
     {
@@ -156,14 +91,8 @@ export const AdminData = {
       url: "/dashboard/contents",
       icon: Rss,
       items: [
-        {
-          title: "All Contact",
-          url: "/dashboard/contact",
-        },
-        {
-          title: "Blog Posts",
-          url: "/dashboard/contents/blogs",
-        },
+        { title: "All Contact", url: "/dashboard/contact" },
+        { title: "Blog Posts", url: "/dashboard/contents/blogs" },
       ],
     },
     {
@@ -172,28 +101,15 @@ export const AdminData = {
       icon: Bell,
       items: [],
     },
-
     {
       title: "Users",
       url: "/dashboard/users",
       icon: CircleUserRound,
       items: [
-        {
-          title: "All Users",
-          url: "/dashboard/users",
-        },
-        {
-          title: "Normal User",
-          url: "/dashboard/users?role=user",
-        },
-        {
-          title: "Admin Users",
-          url: "/dashboard/users?role=admin",
-        },
-        {
-          title: "Moderator User",
-          url: "/dashboard/users?role=moderator",
-        },
+        { title: "All Users", url: "/dashboard/users" },
+        { title: "Normal User", url: "/dashboard/users?role=user" },
+        { title: "Admin Users", url: "/dashboard/users?role=admin" },
+        { title: "Moderator User", url: "/dashboard/users?role=moderator" },
       ],
     },
     {
@@ -201,40 +117,17 @@ export const AdminData = {
       url: "/dashboard/settings",
       icon: Settings2,
       items: [
-        {
-          title: "General",
-          url: "/dashboard/settings",
-        },
-        {
-          title: "Address",
-          url: "/dashboard/settings/address",
-        },
-        {
-          title: "Offers",
-          url: "/dashboard/settings/offers",
-        },
-        {
-          title: "Api Key",
-          url: "/dashboard/settings/api-config-and-access",
-        },
-        {
-          title: "Account Activity",
-          url: "/dashboard/settings/login-history",
-        },
+        { title: "General", url: "/dashboard/settings" },
+        { title: "Address", url: "/dashboard/settings/address" },
+        { title: "Offers", url: "/dashboard/settings/offers" },
+        { title: "Api Key", url: "/dashboard/settings/api-config-and-access" },
+        { title: "Account Activity", url: "/dashboard/settings/login-history" },
       ],
     },
   ],
   navSecondary: [
-    {
-      title: "Support",
-      url: "/dashboard/support",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "/dashboard/feedback",
-      icon: Send,
-    },
+    { title: "Support", url: "/dashboard/support", icon: LifeBuoy },
+    { title: "Feedback", url: "/dashboard/feedback", icon: Send },
   ],
 };
 
@@ -249,21 +142,12 @@ export const ModeratorData = {
     },
     {
       title: "Analytics",
-      url: "/dashboard/analytics", // Fixed spelling
+      url: "/dashboard/analytics",
       icon: BarChart3,
       items: [
-        {
-          title: "User Analytics",
-          url: "/dashboard/analytics/users",
-        },
-        {
-          title: "Order Analytics",
-          url: "/dashboard/analytics/orders",
-        },
-        {
-          title: "Revenue Analytics",
-          url: "/dashboard/analytics/revenue",
-        },
+        { title: "User Analytics", url: "/dashboard/analytics/users" },
+        { title: "Order Analytics", url: "/dashboard/analytics/orders" },
+        { title: "Revenue Analytics", url: "/dashboard/analytics/revenue" },
       ],
     },
     {
@@ -277,14 +161,9 @@ export const ModeratorData = {
       url: "/dashboard/rate-charts",
       icon: BadgeDollarSign,
       items: [
-        {
-          title: "Countrys",
-          url: "/dashboard/rate-charts/countrys",
-        },
-        {
-          title: "Rate Charts",
-          url: "/dashboard/rate-charts",
-        },
+        { title: "Countrys", url: "/dashboard/rate-charts/countrys" },
+        { title: "Rate Charts", url: "/dashboard/rate-charts" },
+        { title: "Address Book", url: "/dashboard/rate-charts/address" },
       ],
     },
     {
@@ -298,14 +177,8 @@ export const ModeratorData = {
       url: "/dashboard/reviews",
       icon: UserStar,
       items: [
-        {
-          title: "All Reviews",
-          url: "/dashboard/reviews",
-        },
-        {
-          title: "Pending Reviews",
-          url: "/dashboard/reviews?status=pending",
-        },
+        { title: "All Reviews", url: "/dashboard/reviews" },
+        { title: "Pending Reviews", url: "/dashboard/reviews?status=pending" },
         {
           title: "Approved Reviews",
           url: "/dashboard/reviews?status=approved",
@@ -317,14 +190,8 @@ export const ModeratorData = {
       url: "/dashboard/contents",
       icon: Rss,
       items: [
-        {
-          title: "All Contacts",
-          url: "/dashboard/contents",
-        },
-        {
-          title: "Blog Posts",
-          url: "/dashboard/contents/blogs",
-        },
+        { title: "All Contacts", url: "/dashboard/contents" },
+        { title: "Blog Posts", url: "/dashboard/contents/blogs" },
       ],
     },
     {
@@ -332,10 +199,7 @@ export const ModeratorData = {
       url: "/dashboard/notifications",
       icon: Bell,
       items: [
-        {
-          title: "All Notifications",
-          url: "/dashboard/notifications",
-        },
+        { title: "All Notifications", url: "/dashboard/notifications" },
         {
           title: "Unread Notifications",
           url: "/dashboard/notifications?read=false",
@@ -347,37 +211,16 @@ export const ModeratorData = {
       url: "/dashboard/settings",
       icon: Settings2,
       items: [
-        {
-          title: "General",
-          url: "/dashboard/settings",
-        },
-        {
-          title: "Address",
-          url: "/dashboard/settings/address",
-        },
-
-        {
-          title: "Api Key",
-          url: "/dashboard/settings/api-config-and-access",
-        },
-        {
-          title: "Account Activity",
-          url: "/dashboard/settings/login-history",
-        },
+        { title: "General", url: "/dashboard/settings" },
+        { title: "Address", url: "/dashboard/settings/address" },
+        { title: "Api Key", url: "/dashboard/settings/api-config-and-access" },
+        { title: "Account Activity", url: "/dashboard/settings/login-history" },
       ],
     },
   ],
   navSecondary: [
-    {
-      title: "Support",
-      url: "/dashboard/support",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "/dashboard/feedback",
-      icon: Send,
-    },
+    { title: "Support", url: "/dashboard/support", icon: LifeBuoy },
+    { title: "Feedback", url: "/dashboard/feedback", icon: Send },
   ],
 };
 
@@ -401,14 +244,8 @@ export const UserData = {
       url: "/dashboard/rate-charts",
       icon: BadgeDollarSign,
       items: [
-        {
-          title: "Countrys",
-          url: "/dashboard/rate-charts/countrys",
-        },
-        {
-          title: "Rate Charts",
-          url: "/dashboard/rate-charts",
-        },
+        { title: "Countrys", url: "/dashboard/rate-charts/countrys" },
+        { title: "Rate Charts", url: "/dashboard/rate-charts" },
       ],
     },
     {
@@ -416,14 +253,8 @@ export const UserData = {
       url: "/dashboard/orders",
       icon: Boxes,
       items: [
-        {
-          title: "My Orders",
-          url: "/dashboard/orders",
-        },
-        {
-          title: "Track Orders",
-          url: "/dashboard/orders/track",
-        },
+        { title: "My Orders", url: "/dashboard/orders" },
+        { title: "Track Orders", url: "/dashboard/orders/track" },
       ],
     },
     {
@@ -431,14 +262,8 @@ export const UserData = {
       url: "/dashboard/reviews",
       icon: UserStar,
       items: [
-        {
-          title: "My Reviews",
-          url: "/dashboard/reviews",
-        },
-        {
-          title: "Write Review",
-          url: "/dashboard/reviews/new",
-        },
+        { title: "My Reviews", url: "/dashboard/reviews" },
+        { title: "Write Review", url: "/dashboard/reviews/new" },
       ],
     },
     {
@@ -446,40 +271,18 @@ export const UserData = {
       url: "/dashboard/settings",
       icon: Settings2,
       items: [
-        {
-          title: "Profile",
-          url: "/dashboard/settings",
-        },
-        {
-          title: "Addresses",
-          url: "/dashboard/settings/addresses",
-        },
-        {
-          title: "API Keys",
-          url: "/dashboard/settings/api-keys",
-        },
-        {
-          title: "Login History",
-          url: "/dashboard/settings/login-history",
-        },
+        { title: "Profile", url: "/dashboard/settings" },
+        { title: "Addresses", url: "/dashboard/settings/addresses" },
+        { title: "API Keys", url: "/dashboard/settings/api-keys" },
+        { title: "Login History", url: "/dashboard/settings/login-history" },
       ],
     },
   ],
   navSecondary: [
-    {
-      title: "Support",
-      url: "/dashboard/support",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "/dashboard/feedback",
-      icon: Send,
-    },
+    { title: "Support", url: "/dashboard/support", icon: LifeBuoy },
+    { title: "Feedback", url: "/dashboard/feedback", icon: Send },
   ],
 };
-<<<<<<< HEAD
-=======
 
 // Export navigation data getter function
 export const getNavigationData = (role: "admin" | "moderator" | "user") => {
@@ -506,4 +309,3 @@ export const NAVIGATION_SECTIONS = {
   MAIN: "navMain",
   SECONDARY: "navSecondary",
 } as const;
->>>>>>> 089c2160029c35f7edd4bf3f478385d7cb688f7d

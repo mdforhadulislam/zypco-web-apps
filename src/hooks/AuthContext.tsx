@@ -40,6 +40,8 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [userAccessToken, setUserAccessToken] = useState<string>("")
+  const [userRefreshToken, setUserRefreshToken] = useState<string>("")
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -51,10 +53,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const storedUser = localStorage.getItem("authUser");
         const accessToken = localStorage.getItem("accessToken");
+        const refreshToken = localStorage.getItem("refreshToken");
 
-        if (storedUser && accessToken) {
+        if (storedUser && accessToken && refreshToken) {
           const userData = JSON.parse(storedUser);
           setUser(userData);
+          setUserAccessToken(accessToken)
+          setUserRefreshToken(refreshToken)
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
@@ -75,7 +80,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!user) return;
 
     const interval = setInterval(async () => {
-      const accessToken = localStorage.getItem("accessToken");
+      const accessToken = localStorage.getItem("accessToken"); 
       if (!accessToken) {
         logout();
         return;

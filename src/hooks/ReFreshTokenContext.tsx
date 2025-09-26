@@ -2,50 +2,48 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-type UserType = {
+// Updated UserType with refreshToken
+export type UserType = {
   id: string;
   name: string;
   email: string;
   phone: string;
   role: string;
-  token: string;
+  token: string;         // access token
+  refreshToken: string;  // refresh token
+  avatar?: string | null;
+  isVerified?: boolean;
+  isActive?: boolean;
+  lastLogin?: Date;
 };
 
-type ReFreshTokenContextType = {
+type RefreshTokenContextType = {
   user: UserType | null;
   loading: boolean;
   refreshUserData: () => Promise<boolean>;
 };
 
-const defaultContext: ReFreshTokenContextType = {
+const defaultContext: RefreshTokenContextType = {
   user: null,
-  loading: false,
+  loading: true,
   refreshUserData: async () => false,
 };
 
-const ReFreshTokenContext = createContext<ReFreshTokenContextType>(defaultContext);
+const RefreshTokenContext = createContext<RefreshTokenContextType>(defaultContext);
 
-export const ReFreshTokenProvider = ({ children }: { children: React.ReactNode }) => {
+export const RefreshTokenProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserType | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
 
-  // Load saved user from localStorage
-  useEffect(() => {
-    const savedUser = localStorage.getItem("authUser");
-    if (savedUser) setUser(JSON.parse(savedUser));
-    setLoading(false);
-  }, []);
-
-  // Function to refresh user data from backend
   const refreshUserData = async (): Promise<boolean> => {
-    if (!user?.token) return false;
+    if (!user?.refreshToken) return false;
 
     setLoading(true);
     try {
       const res = await fetch("/api/v1/auth/refresh-token", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessToken: user.token  }),
+        body: JSON.stringify({ refreshToken: user.refreshToken }),
       });
 
       const data = await res.json();
@@ -57,16 +55,24 @@ export const ReFreshTokenProvider = ({ children }: { children: React.ReactNode }
       }
 
       const updatedUser: UserType = {
-        id: data.data.id,
-        name: data.data.name,
-        email: data.data.email,
-        phone: user.phone, // keep phone from old user if not returned
-        role: data.data.role,
-        token: data.data.token, // updated token from backend
+        id: data.data.user.id,
+        name: data.data.user.name,
+        email: data.data.user.email,
+        phone: data.data.user.phone,
+        role: data.data.user.role,
+        token: data.data.accessToken,
+        refreshToken: data.data.refreshToken,
+        avatar: data.data.user.avatar || null,
+        isVerified: data.data.user.isVerified,
+        isActive: data.data.user.isActive,
+        lastLogin: data.data.user.lastLogin,
       };
 
       setUser(updatedUser);
       localStorage.setItem("authUser", JSON.stringify(updatedUser));
+      localStorage.setItem("accessToken", updatedUser.token);
+      localStorage.setItem("refreshToken", updatedUser.refreshToken);
+
       setLoading(false);
       return true;
     } catch (err) {
@@ -76,17 +82,25 @@ export const ReFreshTokenProvider = ({ children }: { children: React.ReactNode }
       return false;
     }
   };
+  // Load saved user from localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem("authUser");
+    if (storedUser) setUser(JSON.parse(storedUser));
+    setLoading(false);
+    refreshUserData()
+  }, []);
+
 
   return (
-    <ReFreshTokenContext.Provider value={{ user, loading, refreshUserData }}>
+    <RefreshTokenContext.Provider value={{ user, loading, refreshUserData }}>
       {children}
-    </ReFreshTokenContext.Provider>
+    </RefreshTokenContext.Provider>
   );
 };
 
-// Hook to use ReFreshTokenContext
+// Hook to use the context
 export const useRefreshUser = () => {
-  const context = useContext(ReFreshTokenContext);
-  if (!context) toast.error("RefreshTokenContext not found");
+  const context = useContext(RefreshTokenContext);
+  if (!context) throw new Error("RefreshTokenContext not found");
   return context;
 };

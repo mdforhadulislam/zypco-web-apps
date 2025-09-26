@@ -7,9 +7,11 @@ import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import useSWR, { SWRConfiguration, mutate } from "swr";
 
+type RequestMethod = "POST" | "PUT" | "DELETE" | "PATCH";
 
-const fetcher = async (url: string) => {
-  let headers = getAuthHeaders();
+// ✅ universal fetcher
+const fetcher = async <T = unknown>(url: string): Promise<ApiResponse<T>> => {
+  let headers: Record<string, string> = getAuthHeaders();
 
   try {
     let response = await fetch(url, { headers });
@@ -24,10 +26,10 @@ const fetcher = async (url: string) => {
         });
 
         if (refreshResponse.ok) {
-          const refreshData = await refreshResponse.json();
+          const refreshData = (await refreshResponse.json()) as ApiResponse<{ accessToken: string }>;
           localStorage.setItem("accessToken", refreshData.data.accessToken);
 
-          // retry original request
+          // retry with new token
           headers = {
             ...headers,
             Authorization: `Bearer ${refreshData.data.accessToken}`,
@@ -39,32 +41,32 @@ const fetcher = async (url: string) => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP ${response.status}`);
+      throw new Error((errorData as { message?: string }).message || `HTTP ${response.status}`);
     }
 
-    return response.json();
+    return (await response.json()) as ApiResponse<T>;
   } catch (error) {
     throw handleApiError(error);
   }
 };
 
-
-export const useApi = <T = any>(url: string | null, options?: SWRConfiguration) => {
+// ✅ Normal API hook
+export const useApi = <T = unknown>(url: string | null, options?: SWRConfiguration) => {
   const { user, refreshToken } = useAuth();
   const router = useRouter();
 
-  const shouldFetch = !!(user && url);
+  const shouldFetch = Boolean(user && url);
 
-  const { data, error, isLoading, isValidating, mutate: mutateSWR } = useSWR<ApiResponse<T>>(
+  const { data, error, isLoading, isValidating, mutate: mutateSWR } = useSWR<ApiResponse<T>, Error>(
     shouldFetch ? url : null,
-    fetcher,
+    (u: string) => fetcher<T>(u),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
       errorRetryCount: 2,
       errorRetryInterval: 1000,
-      onError: async (err) => {
-        if (err.message?.includes("Authentication failed")) {
+      onError: async (err: Error) => {
+        if (err?.message?.includes("Authentication failed")) {
           const success = await refreshToken();
           if (!success) router.push("/auth/signin");
         }
@@ -74,7 +76,7 @@ export const useApi = <T = any>(url: string | null, options?: SWRConfiguration) 
   );
 
   return {
-    data: data?.data,
+    data: data?.data as T | undefined,
     response: data,
     error,
     isLoading,
@@ -84,34 +86,37 @@ export const useApi = <T = any>(url: string | null, options?: SWRConfiguration) 
   };
 };
 
-export const usePaginatedApi = <T = any>(baseUrl: string, params: Record<string, any> = {}) => {
-  const { page = 1, limit = 20, ...otherParams } = params;
+// ✅ Paginated API hook
+export const usePaginatedApi = <T = unknown>(baseUrl: string, params: Record<string, unknown> = {}) => {
+  const { page = 1, limit = 20, ...otherParams } = params as { page?: number; limit?: number };
 
   const queryParams = new URLSearchParams({
     page: String(page),
     limit: String(limit),
-    ...Object.fromEntries(Object.entries(otherParams).map(([k, v]) => [k, String(v)])),
+    ...Object.fromEntries(
+      Object.entries(otherParams).map(([k, v]) => [k, v != null ? String(v) : ""])
+    ),
   });
 
-  const url = `${baseUrl}?${queryParams}`;
+  const url = `${baseUrl}?${queryParams.toString()}`;
   const result = useApi<T[]>(url);
 
   return {
     ...result,
     meta: result.response?.meta,
-    currentPage: page,
+    currentPage: Number(page),
     totalPages: result.response?.meta?.totalPages || 1,
     total: result.response?.meta?.total || 0,
   };
 };
 
-
+// ✅ Mutation API hook
 export const useApiMutation = () => {
   const { refreshToken } = useAuth();
   const router = useRouter();
 
   const mutateApi = useCallback(
-    async <T = any>(
+    async <T = unknown>(
       url: string,
       {
         method,
@@ -122,21 +127,22 @@ export const useApiMutation = () => {
         showErrorToast = true,
         successMessage,
       }: {
-        method: "POST" | "PUT" | "DELETE" | "PATCH";
-        data?: any;
+        method: RequestMethod;
+        data?: unknown;
         onSuccess?: (data: T) => void;
-        onError?: (error: any) => void;
+        onError?: (error: unknown) => void;
         showSuccessToast?: boolean;
         showErrorToast?: boolean;
         successMessage?: string;
       }
     ): Promise<ApiResponse<T> | null> => {
       try {
-        let headers = getAuthHeaders();
+        let headers: Record<string, string> = getAuthHeaders();
+
         let response = await fetch(url, {
           method,
           headers,
-          ...(data && { body: JSON.stringify(data) }),
+          ...(data ? { body: JSON.stringify(data) } : {}),
         });
 
         if (response.status === 401) {
@@ -146,7 +152,7 @@ export const useApiMutation = () => {
             response = await fetch(url, {
               method,
               headers,
-              ...(data && { body: JSON.stringify(data) }),
+              ...(data ? { body: JSON.stringify(data) } : {}),
             });
           } else {
             router.push("/auth/signin");
@@ -156,13 +162,13 @@ export const useApiMutation = () => {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          const errorMessage = errorData.message || `HTTP ${response.status}`;
+          const errorMessage = (errorData as { message?: string }).message || `HTTP ${response.status}`;
           if (showErrorToast) toast.error(errorMessage);
           onError?.(errorData);
           throw new Error(errorMessage);
         }
 
-        const result = await response.json();
+        const result = (await response.json()) as ApiResponse<T>;
         if (showSuccessToast) toast.success(successMessage || result.message || "Operation successful");
         onSuccess?.(result.data);
         return result;
@@ -180,17 +186,22 @@ export const useApiMutation = () => {
   return { mutateApi };
 };
 
-
-export const useOptimisticApi = <T = any>(url: string) => {
+// ✅ Optimistic API hook
+export const useOptimisticApi = <T = unknown>(url: string) => {
   const { mutateApi } = useApiMutation();
 
   const optimisticUpdate = useCallback(
-    async (newData: T, mutationUrl: string, mutationOptions: Parameters<typeof mutateApi>[1]) => {
+     async (newData: T, mutationUrl: string, mutationOptions: Parameters<typeof mutateApi>[1]) => {
       mutate(
         url,
         (currentData: ApiResponse<T[]> | undefined) =>
           currentData
-            ? { ...currentData, data: Array.isArray(currentData.data) ? [...currentData.data, newData] : newData }
+            ? {
+                ...currentData,
+                data: Array.isArray(currentData.data)
+                  ? [...currentData.data, newData]
+                  : [newData],
+              }
             : currentData,
         false
       );
@@ -203,15 +214,13 @@ export const useOptimisticApi = <T = any>(url: string) => {
         mutate(url); // rollback
         throw error;
       }
-    },
-    [url, mutateApi]
-  );
+    },[url, mutateApi]);
 
   return { optimisticUpdate };
 };
 
-
-export const useRealtimeApi = <T = any>(url: string) => {
+// ✅ Realtime API hook
+export const useRealtimeApi = <T = unknown>(url: string) => {
   const result = useApi<T>(url);
 
   useEffect(() => {
@@ -220,8 +229,12 @@ export const useRealtimeApi = <T = any>(url: string) => {
     const ws = new WebSocket(wsUrl);
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === "update" && data.url === url) mutate(url);
+      try {
+        const data = JSON.parse(event.data);
+        if (data?.type === "update" && data.url === url) mutate(url);
+      } catch (e) {
+        console.warn("Invalid WS message:", e);
+      }
     };
 
     ws.onerror = (err) => console.warn("WebSocket error:", err);
@@ -231,16 +244,17 @@ export const useRealtimeApi = <T = any>(url: string) => {
   return result;
 };
 
-// Prebuilt API hooks
-export const useUsers = (params?: Record<string, any>) => usePaginatedApi("/api/v1/accounts", params);
-export const useOrders = (params?: Record<string, any>) => usePaginatedApi("/api/v1/orders", params);
-export const usePickups = (params?: Record<string, any>) => usePaginatedApi("/api/v1/pickups", params);
-export const useReviews = (params?: Record<string, any>) => usePaginatedApi("/api/v1/reviews", params);
-export const useOffers = (params?: Record<string, any>) => usePaginatedApi("/api/v1/offers", params);
-export const useNotifications = (params?: Record<string, any>) => usePaginatedApi("/api/v1/notifications", params);
+// ✅ Prebuilt API hooks
+export const useUsers = (params?: Record<string, unknown>) => usePaginatedApi("/api/v1/accounts", params);
+export const useOrders = (params?: Record<string, unknown>) => usePaginatedApi("/api/v1/orders", params);
+export const usePickups = (params?: Record<string, unknown>) => usePaginatedApi("/api/v1/pickups", params);
+export const useReviews = (params?: Record<string, unknown>) => usePaginatedApi("/api/v1/reviews", params);
+export const useOffers = (params?: Record<string, unknown>) => usePaginatedApi("/api/v1/offers", params);
+export const useNotifications = (params?: Record<string, unknown>) =>
+  usePaginatedApi("/api/v1/notifications", params);
 export const useAnalytics = () => useApi("/api/v1/analytics");
 
-// Cache utilities
+// ✅ Cache utilities
 export const invalidateCache = (pattern?: string) => {
   if (pattern) {
     mutate((key) => typeof key === "string" && key.includes(pattern), undefined, { revalidate: true });

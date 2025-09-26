@@ -21,14 +21,34 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  isVerified:boolean;
+  isActive:boolean;
+  [key: string]: any;
+}
+
+interface SigninResponse {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
+}
+
+interface SigninFormErrors {
+  phone?: string;
+  password?: string;
+}
+
 export default function SigninPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ phone?: string; password?: string }>(
-    {}
-  );
+  const [errors, setErrors] = useState<SigninFormErrors>({});
 
   const { login, user } = useAuth();
   const router = useRouter();
@@ -41,16 +61,14 @@ export default function SigninPage() {
   }, [user, router]);
 
   const validateForm = (): boolean => {
-    const newErrors: { phone?: string; password?: string } = {};
+    const newErrors: SigninFormErrors = {};
 
-    // Phone validation
     if (!phone.trim()) {
       newErrors.phone = "Phone number is required";
     } else if (!/^\+?[1-9]\d{7,14}$/.test(phone.trim())) {
       newErrors.phone = "Please enter a valid phone number";
     }
 
-    // Password validation
     if (!password) {
       newErrors.password = "Password is required";
     } else if (password.length < 6) {
@@ -63,27 +81,35 @@ export default function SigninPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsLoading(true);
 
     try {
-      const isSignin = await postRequestSend(SIGNIN_API,{},{phone,password});
-      const success = await login(isSignin.data.user,isSignin.data.accessToken,isSignin.data.refreshToken );
+      const response = (await postRequestSend(
+        SIGNIN_API,
+        {},
+        { phone, password }
+      )) as { data: SigninResponse };
 
-      if (success) {
-        toast.success("Sign in successful!");
-        router.push("/dashboard");
-      } else {
-        toast.error("Invalid phone number or password");
-        setErrors({ password: "Invalid credentials" });
+      if (response?.data?.accessToken && response?.data?.user) {
+        const success = await login(response.data.user, {
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken,
+        });
+
+        if (success) {
+          toast.success("Sign in successful!");
+          router.push("/dashboard");
+          return;
+        }
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("An error occurred during sign in");
+
+      toast.error("Invalid phone number or password");
+      setErrors({ password: "Invalid credentials" });
+    } catch (err: any) {
+      console.error("Login error:", err);
+      toast.error(err?.message || "An error occurred during sign in");
     } finally {
       setIsLoading(false);
     }
@@ -103,15 +129,14 @@ export default function SigninPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
             <div className="flex flex-col items-center gap-2">
-              <Link
-                href={"/"}
+              <div
                 className="flex flex-col items-center gap-2 font-medium"
               >
                 <div className="flex size-50 items-center justify-center rounded-md">
                   <Logo width={100} height={120} isFooter={true} />
                 </div>
                 <span className="sr-only">Zypco</span>
-              </Link>
+              </div>
             </div>
             Sign in
           </CardTitle>
@@ -119,8 +144,10 @@ export default function SigninPage() {
             Enter your phone number and password to access your account
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Phone input */}
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
               <div className="relative">
@@ -146,6 +173,7 @@ export default function SigninPage() {
               )}
             </div>
 
+            {/* Password input */}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
@@ -226,7 +254,7 @@ export default function SigninPage() {
                 Forgot your password?
               </Link>
             </p>
-          </div> 
+          </div>
         </CardContent>
       </Card>
     </div>

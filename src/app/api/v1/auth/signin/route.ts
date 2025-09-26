@@ -55,7 +55,7 @@ function addFailedAttempt(key: string, attempt: LoginAttempt): void {
 }
 
 async function logLoginAttempt(
-  user: any | null,
+  user: string | null ,
   phone: string,
   ipAddress: string,
   userAgent: string,
@@ -147,6 +147,8 @@ export const POST = createRateLimitedHandler(
 
       // Find user
       const user = await User.findOne({ phone }).select("+password +loginAttempts +lockUntil");
+      console.log(phone, user);
+      
       if (!user) {
         // Add failed attempt for IP and phone
         addFailedAttempt(ipAddress, { phone, ipAddress, userAgent, timestamp: new Date() });

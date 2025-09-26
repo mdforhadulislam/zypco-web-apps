@@ -1,25 +1,10 @@
 "use client";
 import FooterBar from "@/components/Footer/FooterBar";
-import { AppSideBar } from "@/components/Nav/AppSideBar";
 import NavBar from "@/components/Nav/NavBar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/AuthContext";
-import { BellRing } from "lucide-react";
+import { useRefreshUser } from "@/hooks/ReFreshTokenContext";
 import { usePathname, useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 import { Toaster } from "sonner";
 
 export default function SiteLayout({
@@ -31,8 +16,11 @@ export default function SiteLayout({
   const pathName = usePathname().split("/")[1];
   const router = useRouter();
   const auth = useAuth();
-
-  if (pathName == "auth" && auth.user?.token) {
+  const {refreshUserData} = useRefreshUser()
+useEffect(()=>{
+refreshUserData()
+},[])
+  if (pathName == "auth" && auth?.isAuthenticated) {
     router.push("/dashboard");
   }
 
@@ -53,7 +41,7 @@ export default function SiteLayout({
         <div className="w-full h-[99px]"></div>
         {children}
         <FooterBar />
-        <Toaster expand={false} position="top-center" closeButton  />
+        <Toaster expand={false} position="top-center" closeButton />
       </>
     );
   }
