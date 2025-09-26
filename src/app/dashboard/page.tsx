@@ -1,6 +1,6 @@
-"use client";
-import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
-import { UserDashboard } from "@/components/dashboard/UserDashboard";
+"use client"; 
+import { DashboardOverview } from "@/components/Dashboard/DashboardOverview";
+import { UserDashboard } from "@/components/Dashboard/UserDashboard";
 import { useAuth } from "@/hooks/AuthContext";
 
 export default function DashboardPage() {

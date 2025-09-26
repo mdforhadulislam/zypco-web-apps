@@ -198,7 +198,7 @@ export function DashboardOverview() {
           Welcome back, {user?.name}!
         </h1>
         <p className="text-muted-foreground">
-          Here's what's happening with your {user?.role === "user" ? "shipments" : "business"} today.
+          Here{"'"}s what{"'"}s happening with your {user?.role === "user" ? "shipments" : "business"} today.
         </p>
       </div>
 

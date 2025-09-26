@@ -15,6 +15,8 @@ interface RoleGuardProps {
 export function RoleGuard({ children, allowedRoles, fallbackRoute = "/" }: RoleGuardProps) {
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
+  console.log(user, isAuthenticated);
+  
 
   useEffect(() => {
     if (!loading) {
@@ -28,7 +30,7 @@ export function RoleGuard({ children, allowedRoles, fallbackRoute = "/" }: RoleG
         return;
       }
     }
-  }, [user, loading, isAuthenticated, allowedRoles, router]);
+  }, []);
 
   if (loading) {
     return (
