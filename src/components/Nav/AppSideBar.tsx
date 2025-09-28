@@ -9,9 +9,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/AuthContext";
-import { useRefreshUser } from "@/hooks/ReFreshTokenContext";
 import Logo from "@/utilities/Logo";
-import { useEffect } from "react";
 import { AdminData, ModaretorData, UserData } from "../ApiCall/data";
 import { NavUser } from "./NavIUser";
 import { NavMain } from "./NavMain";
@@ -19,11 +17,6 @@ import { NavSecondary } from "./NavSecondary";
 
 export function AppSideBar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const auth = useAuth();
-  const { refreshUserData } = useRefreshUser();
-
-  useEffect(() => {
-    refreshUserData();
-  }, []);
 
   const data =
     auth.user?.role == "user"

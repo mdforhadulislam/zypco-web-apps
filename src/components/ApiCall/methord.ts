@@ -41,7 +41,28 @@ export const postRequestSend = async <Req, Res>(
       },
       body: JSON.stringify(dataSend),
     });
-    const data = await response.json();
+    
+    // Handle empty or invalid JSON responses
+    const responseText = await response.text();
+    let data;
+    
+    if (responseText.trim()) {
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("JSON parse error:", parseError, "Response:", responseText);
+        return { 
+          message: "Invalid JSON response from server", 
+          status: response.status, 
+          data: null 
+        };
+      }
+    } else {
+      data = { 
+        message: response.ok ? "Success" : `HTTP ${response.status}`, 
+        status: response.status 
+      };
+    }
     
     return data;
   } catch (error: unknown) {

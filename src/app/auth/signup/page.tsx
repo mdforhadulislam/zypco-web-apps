@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/AuthContext";
+import { postRequestSend } from "@/components/ApiCall/methord";
+import { SIGNUP_API } from "@/components/ApiCall/url";
 import { Eye, EyeOff, Loader2, Mail, Phone, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -142,30 +144,28 @@ export default function SignupPage() {
     setIsLoading(true);
     
     try {
-      const response = await fetch("/api/v1/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await postRequestSend(
+        SIGNUP_API,
+        {},
+        {
           name: formData.name.trim(),
           phone: formData.phone.trim(),
           email: formData.email.trim().toLowerCase(),
           password: formData.password,
           agreeToTerms: formData.agreeToTerms,
-        }),
-      });
+        }
+      );
 
-      const data = await response.json();
+      console.log("Signup response:", response); // Debug log
 
-      if (response.ok) {
+      if (response && response.status == 201 && response.data) {
         toast.success("Account created successfully! Please check your email for verification.");
         router.push(`/auth/email-verify?email=${encodeURIComponent(formData.email.trim())}`);
       } else {
-        toast.error(data.message || "Failed to create account");
+        toast.error(response?.message || "Failed to create account");
         
         // Handle specific field errors
-        if (data.message?.includes("already exists")) {
+        if (response?.message?.includes("already exists")) {
           setErrors({email: "An account with this email or phone already exists"});
         }
       }

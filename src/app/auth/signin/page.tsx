@@ -90,26 +90,45 @@ export default function SigninPage() {
         SIGNIN_API,
         {},
         { phone, password }
-      )) as { data: SigninResponse };
+      )) as { data: SigninResponse; message: string; status: number };
 
-      if (response?.data?.accessToken && response?.data?.user) {
+      console.log("Signin response:", response); // Debug log
+
+      // Check if signin was successful (status 200)
+      if (response && response.status == 200 && response.data?.accessToken && response.data?.user) {
         const success = await login(response.data.user, {
           accessToken: response.data.accessToken,
           refreshToken: response.data.refreshToken,
         });
 
         if (success) {
-          toast.success("Sign in successful!");
           router.push("/dashboard");
           return;
+        } else {
+          toast.error("Failed to authenticate. Please try again.");
+          setErrors({ password: "Authentication failed" });
+        }
+      } else {
+        // Handle different error cases
+        const errorMessage = response?.message || "Invalid phone number or password";
+        toast.error(errorMessage);
+        
+        if (response?.status == 403 && errorMessage.includes("verify")) {
+          setErrors({ password: "Please verify your email first" });
+        } else if (response?.status == 401) {
+          setErrors({ password: "Invalid phone number or password" });
+        } else {
+          setErrors({ password: "Invalid phone number or password" });
         }
       }
-
-      toast.error("Invalid phone number or password");
-      setErrors({ password: "Invalid credentials" });
     } catch (err: any) {
       console.error("Login error:", err);
-      toast.error(err?.message || "An error occurred during sign in");
+      const errorMessage = err?.message || "An error occurred during sign in";
+      toast.error(errorMessage);
+      
+      if (errorMessage.toLowerCase().includes("invalid") || errorMessage.toLowerCase().includes("unauthorized")) {
+        setErrors({ password: "Invalid credentials" });
+      }
     } finally {
       setIsLoading(false);
     }

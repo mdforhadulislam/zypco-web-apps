@@ -4,6 +4,7 @@ import { errorResponse, successResponse } from "@/server/common/response";
 import { LoginHistory } from "@/server/models/LoginHistory.model";
 import { User } from "@/server/models/User.model";
 import { notificationService } from "@/services/notificationService";
+import { User as IUser } from "@/types";
 import jwt, { Secret } from "jsonwebtoken";
 import { Types } from "mongoose";
 
@@ -54,7 +55,7 @@ function addFailedAttempt(key: string, attempt: LoginAttempt) {
 }
 
 async function logLoginAttempt(
-  user: User | null,
+  user: IUser | null,
   phone: string,
   ipAddress: string,
   userAgent: string,

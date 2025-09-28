@@ -2,7 +2,6 @@
 import FooterBar from "@/components/Footer/FooterBar";
 import NavBar from "@/components/Nav/NavBar";
 import { useAuth } from "@/hooks/AuthContext";
-import { useRefreshUser } from "@/hooks/ReFreshTokenContext";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { Toaster } from "sonner";
@@ -16,12 +15,12 @@ export default function SiteLayout({
   const pathName = usePathname().split("/")[1];
   const router = useRouter();
   const auth = useAuth();
-  const {refreshUserData} = useRefreshUser()
-useEffect(()=>{
-refreshUserData()
-auth.refreshToken()
-},[])
-  if (pathName == "auth" && auth?.userAccessToken) {
+
+  useEffect(() => {
+    // The AuthContext already handles auto-refresh, so no need to manually trigger it here
+  }, []);
+
+  if (pathName == "auth" && auth?.accessToken) {
     router.push("/dashboard");
   }
 
