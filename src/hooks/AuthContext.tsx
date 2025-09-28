@@ -30,6 +30,8 @@ interface AuthContextType {
   refreshToken: () => Promise<boolean>;
   loading: boolean;
   isAuthenticated: boolean;
+  userRefreshToken: string;
+  userAccessToken:string
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -198,6 +200,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     refreshToken,
     loading,
     isAuthenticated,
+    userRefreshToken,
+    userAccessToken
   };
 
   return (

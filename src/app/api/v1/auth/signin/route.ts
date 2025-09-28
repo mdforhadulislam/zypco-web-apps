@@ -19,50 +19,49 @@ interface LoginAttempt {
   timestamp: Date;
 }
 
-// Rate limiting: Track failed attempts per IP and phone
-const failedAttempts = new Map<string, LoginAttempt[]>();
+// ==================== CONFIG ====================
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_ATTEMPTS_PER_IP = 10;
 
+// In-memory storage for rate limiting (use Redis for production)
+const failedAttempts = new Map<string, LoginAttempt[]>();
+
+// ==================== HELPERS ====================
 function getClientInfo(req: Request) {
   const headers = req.headers as any;
-  const ipAddress = headers.get("x-forwarded-for")?.split(",")[0].trim() || 
-                   headers.get("x-real-ip") || 
-                   "unknown";
+  const ipAddress =
+    headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    headers.get("x-real-ip") ||
+    "unknown";
   const userAgent = headers.get("user-agent") || "unknown";
   return { ipAddress, userAgent };
 }
 
 function isRateLimited(key: string): boolean {
   const attempts = failedAttempts.get(key) || [];
-  const now = new Date();
-  const recentAttempts = attempts.filter(
-    attempt => now.getTime() - attempt.timestamp.getTime() < RATE_LIMIT_WINDOW
-  );
-  
-  // Update the attempts array
-  failedAttempts.set(key, recentAttempts);
-  
-  return recentAttempts.length >= MAX_ATTEMPTS_PER_IP;
+  const now = Date.now();
+  const recent = attempts.filter((a) => now - a.timestamp.getTime() < RATE_LIMIT_WINDOW);
+  failedAttempts.set(key, recent);
+  return recent.length >= MAX_ATTEMPTS_PER_IP;
 }
 
-function addFailedAttempt(key: string, attempt: LoginAttempt): void {
+function addFailedAttempt(key: string, attempt: LoginAttempt) {
   const attempts = failedAttempts.get(key) || [];
   attempts.push(attempt);
   failedAttempts.set(key, attempts);
 }
 
 async function logLoginAttempt(
-  user: string | null ,
+  user: User | null,
   phone: string,
   ipAddress: string,
   userAgent: string,
   success: boolean,
   failureReason?: string,
   action: string = success ? "login" : "failed_login"
-): Promise<void> {
+) {
   try {
     await LoginHistory.create({
       user: user?._id || null,
@@ -74,11 +73,12 @@ async function logLoginAttempt(
       action,
       timestamp: new Date(),
     });
-  } catch (error) {
-    console.error("Failed to log login attempt:", error);
+  } catch (err) {
+    console.error("Failed to log login attempt:", err);
   }
 }
 
+// ==================== LOGIN HANDLER ====================
 export const POST = createRateLimitedHandler(
   async ({ req }) => {
     const { ipAddress, userAgent } = getClientInfo(req);
@@ -87,294 +87,127 @@ export const POST = createRateLimitedHandler(
     try {
       await connectDB();
 
-      // Check rate limiting by IP
+      // Rate limit by IP
       if (isRateLimited(ipAddress)) {
-        return errorResponse({
-          status: 429,
-          message: "Too many requests. Please try again later.",
-          req,
-        });
+        return errorResponse({ status: 429, message: "Too many requests. Try again later.", req });
       }
 
-      const body = await req.json() as SigninBody;
+      const body = (await req.json()) as SigninBody;
       phone = body.phone;
       const { password } = body;
 
       // Validate input
       if (!phone || !password) {
-        await logLoginAttempt(
-          null,
-          phone || "",
-          ipAddress,
-          userAgent,
-          false,
-          "Missing phone or password"
-        );
-
-        return errorResponse({
-          status: 400,
-          message: "Phone and password are required",
-          req,
-        });
+        await logLoginAttempt(null, phone || "", ipAddress, userAgent, false, "Missing phone or password");
+        return errorResponse({ status: 400, message: "Phone and password are required", req });
       }
 
-      // Validate phone format (basic validation)
+      // Validate phone format
       if (!/^\+?[1-9]\d{1,14}$/.test(phone)) {
-        await logLoginAttempt(
-          null,
-          phone,
-          ipAddress,
-          userAgent,
-          false,
-          "Invalid phone format"
-        );
-
-        return errorResponse({
-          status: 400,
-          message: "Invalid phone number format",
-          req,
-        });
+        await logLoginAttempt(null, phone, ipAddress, userAgent, false, "Invalid phone format");
+        return errorResponse({ status: 400, message: "Invalid phone number format", req });
       }
 
-      // Check rate limiting by phone
+      // Rate limit by phone
       if (isRateLimited(phone)) {
-        return errorResponse({
-          status: 429,
-          message: "Too many failed attempts. Please try again later.",
-          req,
-        });
+        return errorResponse({ status: 429, message: "Too many failed attempts. Try again later.", req });
       }
 
       // Find user
       const user = await User.findOne({ phone }).select("+password +loginAttempts +lockUntil");
-      console.log(phone, user);
-      
       if (!user) {
-        // Add failed attempt for IP and phone
         addFailedAttempt(ipAddress, { phone, ipAddress, userAgent, timestamp: new Date() });
         addFailedAttempt(phone, { phone, ipAddress, userAgent, timestamp: new Date() });
-
-        await logLoginAttempt(
-          null,
-          phone,
-          ipAddress,
-          userAgent,
-          false,
-          "User not found"
-        );
-
-        // Return generic message to prevent user enumeration
-        return errorResponse({
-          status: 401,
-          message: "Invalid phone number or password",
-          req,
-        });
+        await logLoginAttempt(null, phone, ipAddress, userAgent, false, "User not found");
+        return errorResponse({ status: 401, message: "Invalid phone number or password", req });
       }
 
-      // Check if account is locked
+      // Check lock
       if (user.lockUntil && user.lockUntil > new Date()) {
-        await logLoginAttempt(
-          user,
-          phone,
-          ipAddress,
-          userAgent,
-          false,
-          "Account temporarily locked"
-        );
-
-        const lockRemaining = Math.ceil((user.lockUntil.getTime() - Date.now()) / 1000 / 60);
-        return errorResponse({
-          status: 423,
-          message: `Account is temporarily locked. Try again in ${lockRemaining} minutes.`,
-          req,
-        });
+        const remaining = Math.ceil((user.lockUntil.getTime() - Date.now()) / 1000 / 60);
+        await logLoginAttempt(user, phone, ipAddress, userAgent, false, "Account locked");
+        return errorResponse({ status: 423, message: `Account temporarily locked. Try again in ${remaining} minutes.`, req });
       }
 
-      // Check if account is active
+      // Check active & verified
       if (!user.isActive) {
-        await logLoginAttempt(
-          user,
-          phone,
-          ipAddress,
-          userAgent,
-          false,
-          "Account deactivated"
-        );
-
-        return errorResponse({
-          status: 403,
-          message: "Account has been deactivated. Please contact support.",
-          req,
-        });
+        await logLoginAttempt(user, phone, ipAddress, userAgent, false, "Account deactivated");
+        return errorResponse({ status: 403, message: "Account deactivated. Contact support.", req });
       }
 
-      // Check if email is verified
       if (!user.isVerified) {
-        await logLoginAttempt(
-          user,
-          phone,
-          ipAddress,
-          userAgent,
-          false,
-          "Email not verified"
-        );
-
-        return errorResponse({
-          status: 403,
-          message: "Please verify your email address before signing in.",
-          req,
-        });
+        await logLoginAttempt(user, phone, ipAddress, userAgent, false, "Email not verified");
+        return errorResponse({ status: 403, message: "Please verify your email first.", req });
       }
 
-      // Verify password
+      // Check password
       const isValidPassword = await user.comparePassword(password);
       if (!isValidPassword) {
-        // Increment failed attempts
         user.loginAttempts = (user.loginAttempts || 0) + 1;
-
-        // Lock account after max failed attempts
-        if (user.loginAttempts >= MAX_FAILED_ATTEMPTS) {
-          user.lockUntil = new Date(Date.now() + LOCKOUT_DURATION);
-        }
-
+        if (user.loginAttempts >= MAX_FAILED_ATTEMPTS) user.lockUntil = new Date(Date.now() + LOCKOUT_DURATION);
         await user.save();
 
-        // Add failed attempt for tracking
         addFailedAttempt(ipAddress, { phone, ipAddress, userAgent, timestamp: new Date() });
         addFailedAttempt(phone, { phone, ipAddress, userAgent, timestamp: new Date() });
+        await logLoginAttempt(user, phone, ipAddress, userAgent, false, "Invalid password");
 
-        await logLoginAttempt(
-          user,
-          phone,
-          ipAddress,
-          userAgent,
-          false,
-          "Invalid password"
-        );
-
-        return errorResponse({
-          status: 401,
-          message: "Invalid phone number or password",
-          req,
-        });
+        return errorResponse({ status: 401, message: "Invalid phone number or password", req });
       }
 
-      // Reset failed attempts on successful login
+      // Successful login
       user.loginAttempts = 0;
       user.lockUntil = undefined;
       user.lastLogin = new Date();
       await user.save();
 
-      // Check JWT secret
-      if (!process.env.JWT_SECRET) {
-        throw new Error("JWT_SECRET environment variable is not configured");
-      }
+      if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET not configured");
 
-      // Generate tokens
       const userId = user._id as Types.ObjectId;
-      const accessToken = jwt.sign(
-        { 
-          id: userId.toString(), 
-          role: user.role,
-          type: "access"
-        },
-        process.env.JWT_SECRET as Secret,
-        { expiresIn: "15m" } // Short-lived access token
-      );
+      const accessToken = jwt.sign({ id: userId.toString(), role: user.role, type: "access" }, process.env.JWT_SECRET as Secret, { expiresIn: "15m" });
+      const refreshToken = jwt.sign({ id: userId.toString(), role: user.role, type: "refresh" }, process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET as Secret, { expiresIn: "7d" });
 
-      const refreshToken = jwt.sign(
-        { 
-          id: userId.toString(), 
-          role: user.role,
-          type: "refresh"
-        },
-        process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET as Secret,
-        { expiresIn: "7d" } // Longer-lived refresh token
-      );
-
-      // Store refresh token (optional but recommended)
+      // Store refresh token (last 5)
       try {
         user.refreshTokens = user.refreshTokens || [];
         user.refreshTokens.push(refreshToken);
-        
-        // Keep only last 5 refresh tokens per user
-        if (user.refreshTokens.length > 5) {
-          user.refreshTokens = user.refreshTokens.slice(-5);
-        }
-        
+        if (user.refreshTokens.length > 5) user.refreshTokens = user.refreshTokens.slice(-5);
         await user.save();
-      } catch (error) {
-        console.error("Failed to save refresh token:", error);
-        // Continue with login even if refresh token storage fails
+      } catch (err) {
+        console.error("Failed to store refresh token:", err);
       }
 
-      // Log successful login
-      await logLoginAttempt(
-        user,
-        phone,
-        ipAddress,
-        userAgent,
-        true,
-        undefined,
-        "login"
-      );
+      await logLoginAttempt(user, phone, ipAddress, userAgent, true, undefined, "login");
 
-      // Send login notification (non-blocking)
-      notificationService
-        .sendAuthNotification(
-          { 
-            phone: user.phone, 
-            email: user.email, 
-            name: user.name 
-          },
-          "login_alert"
-        )
-        .catch((err) => console.error("Failed to send login alert:", err));
-
-      // Prepare secure response data
-      const responseData = {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          role: user.role,
-          avatar: user.avatar || null,
-          isVerified: user.isVerified,
-          isActive: user.isActive,
-          lastLogin: user.lastLogin,
-        },
-        accessToken,
-        refreshToken,
-        expiresIn: "15m",
-      };
+      // Send login notification
+      notificationService.sendAuthNotification({ phone: user.phone, email: user.email, name: user.name }, "login_alert").catch(console.error);
 
       return successResponse({
         status: 200,
         message: "Sign in successful",
-        data: responseData,
+        data: {
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            role: user.role,
+            avatar: user.avatar || null,
+            isVerified: user.isVerified,
+            isActive: user.isActive,
+            lastLogin: user.lastLogin,
+          },
+          accessToken,
+          refreshToken,
+          expiresIn: "15m",
+        },
         req,
       });
 
-    } catch (error: unknown) {
-      console.error("Signin API Error:", error);
-
-      // Log failed attempt due to server error
-      await logLoginAttempt(
-        null,
-        phone,
-        ipAddress,
-        userAgent,
-        false,
-        "Server error"
-      ).catch(() => {}); // Ignore logging errors
-
-      return errorResponse({
-        status: 500,
-        message: "An error occurred during sign in. Please try again.",
-        req,
-      });
+    } catch (err: unknown) {
+      console.error("Signin API Error:", err);
+      await logLoginAttempt(null, phone, ipAddress, userAgent, false, "Server error").catch(() => {});
+      return errorResponse({ status: 500, message: "Error during sign in. Try again.", req });
     }
   },
-  { max: 10, windowMs: 60000 } // 10 requests per minute per IP
+  { max: 10, windowMs: 60000 }
 );

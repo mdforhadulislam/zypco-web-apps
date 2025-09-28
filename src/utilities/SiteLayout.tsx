@@ -19,8 +19,9 @@ export default function SiteLayout({
   const {refreshUserData} = useRefreshUser()
 useEffect(()=>{
 refreshUserData()
+auth.refreshToken()
 },[])
-  if (pathName == "auth" && auth?.isAuthenticated) {
+  if (pathName == "auth" && auth?.userAccessToken) {
     router.push("/dashboard");
   }
 

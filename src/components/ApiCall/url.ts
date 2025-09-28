@@ -1,11 +1,4 @@
-const getBaseUrl = () => {
-  if (typeof window !== "undefined") {
-    return window.location.origin;
-  }
-
-  return process.env.PUBLIC_APP_URL || "http://localhost:3000";
-};
-export const ROOT = `${getBaseUrl()}/`;
+export const ROOT = `/`;
 export const ROOT_API = `${ROOT}api/v1/`;
 
 export const SIGNIN_API = `${ROOT_API}auth/signin`;
