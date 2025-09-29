@@ -81,6 +81,50 @@ export async function PUT(
 }
 
 /**
+ * PUT - update a country by ID
+ */
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{  id: string }> }
+): Promise<NextResponse> {
+  try {
+    await connectDB();
+
+    const { id } = await params;
+    if (!Types.ObjectId.isValid(id)) {
+      return errorResponse({ status: 400, message: "Invalid country ID", req });
+    }
+
+    const body = await req.json();
+
+    if (body.code) body.code = String(body.code).trim().toUpperCase();
+    if (body.name) body.name = String(body.name).trim();
+
+    const updated = await Country.findByIdAndUpdate(
+      id,
+      { $set: body },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return errorResponse({ status: 404, message: "Country not found", req });
+    }
+
+    return successResponse({
+      status: 200,
+      message: "Country updated successfully",
+      data: updated,
+      req,
+    });
+  } catch (error: unknown) {
+    const msg =
+      error instanceof Error ? error.message : "Failed to update country";
+    return errorResponse({ status: 500, message: msg, error, req });
+  }
+}
+
+
+/**
  * DELETE - remove a country by ID
  */
 export async function DELETE(

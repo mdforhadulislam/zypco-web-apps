@@ -139,26 +139,26 @@ export function DataTable<TData, TValue>({
   );
 
   return (
-    <div className="w-full space-y-4" data-testid="data-table">
+    <div className="w-full space-y-2" data-testid="data-table">
       {/* Header Actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
+      <div className="flex items-center justify-between flex-col sm:flex-row space-y-2  sm:space-y-0">
+        <div className="flex items-center w-full sm:w-auto space-y-2 sm:space-y-0 space-x-0 sm:space-x-2 flex-col sm:flex-row">
           {showSearch && (
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={searchPlaceholder}
                 value={globalFilter}
                 onChange={(event) => handleSearch(event.target.value)}
-                className="pl-8 max-w-sm"
+                className="pl-8 w-full sm:max-w-sm"
                 data-testid="table-search"
               />
             </div>
           )}
           
           {showFilter && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <DropdownMenu >
+              <DropdownMenuTrigger asChild className="w-full sm:w-auto">
                 <Button variant="outline" size="sm" data-testid="column-filter">
                   <Filter className="mr-2 h-4 w-4" />
                   Columns
@@ -209,14 +209,14 @@ export function DataTable<TData, TValue>({
           )}
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex sm:items-center items-end w-full sm:w-auto sm:space-x-2 space-y-2 sm:space-y-0 flex-col sm:flex-row">
           {showRefresh && (
             <Button 
               variant="outline" 
               size="sm" 
               onClick={onRefresh}
               disabled={loading}
-              data-testid="refresh-table"
+              data-testid="refresh-table "
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             </Button>
@@ -228,8 +228,10 @@ export function DataTable<TData, TValue>({
               size="sm" 
               onClick={onExport}
               data-testid="export-table"
+              className="
+              w-full sm:w-auto"
             >
-              <Download className="mr-2 h-4 w-4" />
+              <Download className="sm:mr-2 h-4 w-4" />
               Export
             </Button>
           )}
@@ -239,8 +241,9 @@ export function DataTable<TData, TValue>({
               size="sm" 
               onClick={onCreateNew}
               data-testid="create-new-btn"
+              className="w-full sm:w-auto"
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="sm:mr-2 h-4 w-4" />
               {createNewLabel}
             </Button>
           )}
@@ -308,9 +311,9 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination */}
-      {pagination && (
-        <div className="flex items-center justify-between px-2">
-          <div className="flex-1 text-sm text-muted-foreground">
+      {pagination && ( 
+        <div className="flex items-center justify-between px-2 ">
+          <div className="flex-1 text-sm text-muted-foreground  ">
             {table.getFilteredSelectedRowModel().rows.length > 0 && (
               <>
                 {table.getFilteredSelectedRowModel().rows.length} of{" "}
@@ -318,7 +321,7 @@ export function DataTable<TData, TValue>({
               </>
             )}
           </div>
-          <div className="flex items-center space-x-6 lg:space-x-8">
+          <div className="flex items-center space-x-6 lg:space-x-8 flex-col sm:flex-row space-y-2">
             <div className="flex items-center space-x-2">
               <p className="text-sm font-medium">Rows per page</p>
               <select
@@ -333,7 +336,8 @@ export function DataTable<TData, TValue>({
                 <option value={100}>100</option>
               </select>
             </div>
-            <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+           <div className="flex flex-row">
+             <div className="flex w-[100px] items-center justify-center text-sm font-medium">
               Page {pagination.page} of {Math.ceil(pagination.total / pagination.limit)}
             </div>
             <div className="flex items-center space-x-2">
@@ -378,6 +382,7 @@ export function DataTable<TData, TValue>({
                 {">>"}
               </Button>
             </div>
+           </div>
           </div>
         </div>
       )}

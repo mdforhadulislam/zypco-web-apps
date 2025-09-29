@@ -68,6 +68,41 @@ export async function PUT(
     return errorResponse({ status: 500, message: msg, error, req });
   }
 }
+// PATCH - mark a notification as read/unread or update
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
+  try {
+    await connectDB();
+
+    const { phone } = await params;
+
+    const user = await User.findOne({ phone });
+    if (!user) return errorResponse({ status: 404, message: "User not found", req });
+
+    const body: { notificationId: string; read?: boolean; title?: string; message?: string } = await req.json();
+    if (!body.notificationId) return errorResponse({ status: 400, message: "Notification ID required", req });
+
+    const updateData: any = {};
+    if (body.read !== undefined) updateData.read = body.read;
+    if (body.title) updateData.title = body.title;
+    if (body.message) updateData.message = body.message;
+
+    const updatedNotification = await Notification.findOneAndUpdate(
+      { _id: body.notificationId, user: user._id },
+      { $set: updateData },
+      { new: true }
+    );
+
+    if (!updatedNotification) return errorResponse({ status: 404, message: "Notification not found", req });
+
+    return successResponse({ status: 200, message: "Notification updated", data: updatedNotification, req });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Failed to update notification";
+    return errorResponse({ status: 500, message: msg, error, req });
+  }
+}
 
 // DELETE - remove a notification
 export async function DELETE(

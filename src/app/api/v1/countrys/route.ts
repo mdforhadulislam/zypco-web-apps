@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
     await country.save();
 
     return successResponse({
-      status: 201,
+      status: 200,
       message: "Country created successfully",
       data: country,
       req,

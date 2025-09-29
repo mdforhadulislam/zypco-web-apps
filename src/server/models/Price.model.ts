@@ -28,6 +28,7 @@ interface IRate {
   profitPercentage: number;
   gift: number;
   price: IPriceCategory;
+  fuel:number;
 }
 
 export interface IPrice extends Document {
@@ -70,6 +71,7 @@ const rateSchema = new Schema<IRate>(
     profitPercentage: { type: Number, required: true, default: 15 },
     gift: { type: Number, required: true, default: 15 },
     price: { type: priceCategorySchema, default: {} },
+    fuel:{type:Number, require:true}
   },
   { _id: false }
 );

@@ -59,7 +59,7 @@ class CountryService {
   }
 
   async toggleCountryStatus(countryId: string, isActive: boolean): Promise<ApiResponse<Country>> {
-    return api.patch<Country>(`${this.baseEndpoint}/${countryId}`, { isActive });
+    return api.patch<Country>(`${this.baseEndpoint}/${countryId}`, { isActive:isActive });
   }
 
   // Get all active countries for dropdowns

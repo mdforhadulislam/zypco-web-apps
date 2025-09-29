@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/AuthContext";
 import Logo from "@/utilities/Logo";
-import { AdminData, ModaretorData, UserData } from "../ApiCall/data";
+import { AdminData, ModeratorData, UserData } from "../ApiCall/data";
 import { NavUser } from "./NavIUser";
 import { NavMain } from "./NavMain";
 import { NavSecondary } from "./NavSecondary";
@@ -30,7 +30,7 @@ export function AppSideBar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         }
       : auth.user?.role == "moderator"
       ? {
-          ...ModaretorData,
+          ...ModeratorData,
           user: {
             name: auth.user?.name ?? "",
             email: auth.user?.email ?? "",

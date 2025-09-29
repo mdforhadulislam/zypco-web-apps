@@ -1,9 +1,8 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
-import { Country, Role } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,8 +10,17 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, Edit, Trash2, Globe, MapPin, ArrowUpDown } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Country, Role } from "@/types";
+import { ColumnDef } from "@tanstack/react-table";
+import {
+  ArrowUpDown,
+  Edit,
+  Eye,
+  Globe,
+  MoreHorizontal,
+  Phone,
+  Trash2,
+} from "lucide-react";
 
 interface CountryColumnsProps {
   userRole: Role;
@@ -70,10 +78,16 @@ export const createCountryColumns = ({
         <div className="flex items-center space-x-3">
           <Globe className="h-4 w-4 text-muted-foreground" />
           <div>
-            <div className="font-medium" data-testid={`country-name-${country._id}`}>
+            <div
+              className="font-medium"
+              data-testid={`country-name-${country._id}`}
+            >
               {country.name}
             </div>
-            <div className="text-sm text-muted-foreground" data-testid={`country-code-${country._id}`}>
+            <div
+              className="text-sm text-muted-foreground"
+              data-testid={`country-code-${country._id}`}
+            >
               {country.code}
             </div>
           </div>
@@ -81,62 +95,28 @@ export const createCountryColumns = ({
       );
     },
   },
+
   {
-    accessorKey: "region",
-    header: "Region",
-    cell: ({ row }) => {
-      const region = row.getValue("region") as string;
-      const regionColors = {
-        "North America": "bg-blue-100 text-blue-800",
-        "South America": "bg-green-100 text-green-800",
-        "Europe": "bg-purple-100 text-purple-800",
-        "Asia": "bg-orange-100 text-orange-800",
-        "Africa": "bg-yellow-100 text-yellow-800",
-        "Oceania": "bg-cyan-100 text-cyan-800",
-      };
-      
-      return (
-        <Badge 
-          className={regionColors[region as keyof typeof regionColors] || "bg-gray-100 text-gray-800"}
-          data-testid={`country-region-${row.original._id}`}
-        >
-          <MapPin className="h-3 w-3 mr-1" />
-          {region}
-        </Badge>
-      );
-    },
-  },
-  {
-    accessorKey: "currency",
-    header: "Currency",
+    accessorKey: "phoneCode",
+    header: "Phone Code",
     cell: ({ row }) => (
-      <div className="font-mono text-sm" data-testid={`country-currency-${row.original._id}`}>
-        {row.getValue("currency")}
+      <div
+        className="flex items-center space-x-1 font-mono text-sm"
+        data-testid={`country-phonecode-${row.original._id}`}
+      >
+        <Phone className="h-3 w-3 text-muted-foreground" />
+        {row.getValue("phoneCode")}
       </div>
     ),
-  },
-  {
-    accessorKey: "deliveryDays",
-    header: "Delivery Days",
-    cell: ({ row }) => {
-      const deliveryDays = row.original.deliveryDays;
-      return (
-        <div className="text-sm space-y-1">
-          <div>Standard: {deliveryDays.standard} days</div>
-          <div>Express: {deliveryDays.express} days</div>
-          <div>Overnight: {deliveryDays.overnight} days</div>
-        </div>
-      );
-    },
   },
   {
     accessorKey: "isActive",
     header: "Status",
     cell: ({ row }) => {
       const isActive = row.getValue("isActive") as boolean;
-      
+
       return (
-        <Badge 
+        <Badge
           variant={isActive ? "default" : "secondary"}
           data-testid={`country-status-${row.original._id}`}
         >
@@ -154,8 +134,8 @@ export const createCountryColumns = ({
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="h-8 w-8 p-0"
               data-testid={`actions-${country._id}`}
             >
@@ -165,7 +145,7 @@ export const createCountryColumns = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            
+
             <DropdownMenuItem
               onClick={() => onView(country)}
               data-testid={`view-country-${country._id}`}

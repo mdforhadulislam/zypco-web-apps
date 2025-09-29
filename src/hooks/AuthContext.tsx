@@ -250,8 +250,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       const data = await response.json();
+      console.log(data);
+      
 
-      if (!data.success || !data.data) {
+      if (!data.status == 200 || !data.data) {
         throw new Error("Invalid refresh response format");
       }
 

@@ -58,7 +58,7 @@ export function NotificationPanel() {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.success && data.data) {
+        if (data.status==200 && data.data) {
           setNotifications(data.data);
         }
       }

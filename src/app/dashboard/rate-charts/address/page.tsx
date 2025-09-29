@@ -109,9 +109,9 @@ export default function AddressBookPage() {
   });
 
   // Calculate stats
-  const uniqueCountries = new Set(addresses.map(addr => addr.address.country)).size;
-  const uniqueCities = new Set(addresses.map(addr => addr.address.city)).size;
-  const defaultAddresses = addresses.filter(addr => addr.isDefault).length;
+  const uniqueCountries = new Set(addresses?.map(addr => addr?.address?.country)).size ?? 0;
+  const uniqueCities = new Set(addresses?.map(addr => addr?.address?.city)).size?? 0;
+  const defaultAddresses = addresses?.filter(addr => addr?.isDefault).length?? 0;
 
   if (!user) return null;
 
@@ -125,7 +125,7 @@ export default function AddressBookPage() {
               <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold">Access Denied</h3>
               <p className="text-muted-foreground">
-                You don't have permission to view the global address book.
+                You don{"'"}t have permission to view the global address book.
               </p>
             </div>
           </CardContent>

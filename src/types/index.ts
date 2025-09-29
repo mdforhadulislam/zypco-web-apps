@@ -73,7 +73,13 @@ export interface Order {
   orderDate: string;
   parcel: Parcel;
   payment: Payment;
-  status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+  status:
+    | "pending"
+    | "confirmed"
+    | "processing"
+    | "shipped"
+    | "delivered"
+    | "cancelled";
   estimatedDelivery?: string;
   actualDelivery?: string;
   notes?: string;
@@ -89,7 +95,13 @@ export interface Pickup {
   scheduledDate: string;
   scheduledTime: string;
   actualPickupDate?: string;
-  status: "scheduled" | "confirmed" | "in-progress" | "completed" | "failed" | "cancelled";
+  status:
+    | "scheduled"
+    | "confirmed"
+    | "in-progress"
+    | "completed"
+    | "failed"
+    | "cancelled";
   address: Address;
   contactPerson: {
     name: string;
@@ -210,26 +222,39 @@ export interface Country {
 }
 
 export interface PriceChart {
-  _id: string;
-  fromCountry: string;
-  toCountry: string;
-  serviceType: "standard" | "express" | "overnight";
-  weightTiers: {
-    minWeight: number;
-    maxWeight: number;
-    pricePerKg: number;
-    basePrice: number;
+  from: string;
+  to: string;
+  rate: {
+    name: string;
+    profitPercentage: number;
+    gift: number;
+    fuel:number
+    price: Record<string, number>; // each weight mapped to a number
   }[];
-  additionalCharges: {
-    fuelSurcharge?: number;
-    remoteSurcharge?: number;
-    securitySurcharge?: number;
-    customsClearance?: number;
-  };
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
+
+export type WeightPrices = {
+  gm500: number;
+  gm1000: number;
+  gm1500: number;
+  gm2000: number;
+  gm2500: number;
+  gm3000: number;
+  gm3500: number;
+  gm4000: number;
+  gm4500: number;
+  gm5000: number;
+  gm5500: number;
+  kg6to10: number;
+  kg11to20: number;
+  kg21to30: number;
+  kg31to40: number;
+  kg41to50: number;
+  kg51to80: number;
+  kg81to100: number;
+  kg101to500: number;
+  kg501to1000: number;
+};
 
 // Analytics Types
 export interface AnalyticsData {
@@ -293,7 +318,17 @@ export interface PaginatedResponse<T> {
 export interface FormField {
   name: string;
   label: string;
-  type: "text" | "email" | "tel" | "number" | "select" | "textarea" | "date" | "datetime-local" | "checkbox" | "radio";
+  type:
+    | "text"
+    | "email"
+    | "tel"
+    | "number"
+    | "select"
+    | "textarea"
+    | "date"
+    | "datetime-local"
+    | "checkbox"
+    | "radio";
   placeholder?: string;
   required?: boolean;
   validation?: {
@@ -378,7 +413,15 @@ export interface SystemSettings {
 // Utility Types
 export type Role = "admin" | "moderator" | "user";
 export type Permission = "create" | "read" | "update" | "delete";
-export type EntityType = "orders" | "users" | "pickups" | "reviews" | "notifications" | "content" | "offers" | "settings";
+export type EntityType =
+  | "orders"
+  | "users"
+  | "pickups"
+  | "reviews"
+  | "notifications"
+  | "content"
+  | "offers"
+  | "settings";
 
 export interface RolePermissions {
   [key: string]: Permission[];
@@ -420,7 +463,11 @@ export const DEFAULT_PERMISSIONS: Record<Role, RolePermissions> = {
 };
 
 // Utility function to check permissions
-export const hasPermission = (userRole: Role, entity: EntityType, permission: Permission): boolean => {
+export const hasPermission = (
+  userRole: Role,
+  entity: EntityType,
+  permission: Permission
+): boolean => {
   const permissions = DEFAULT_PERMISSIONS[userRole]?.[entity] || [];
   return permissions.includes(permission);
 };

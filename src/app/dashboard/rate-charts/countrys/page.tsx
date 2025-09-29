@@ -64,7 +64,7 @@ export default function CountriesPage() {
       setLoading(true);
       const response = await countryService.getCountries(filters);
       
-      if (response.success && response.data) {
+      if (response.status==200 && response.data) {
         setCountries(Array.isArray(response.data) ? response.data : [response.data]);
         if (response.meta) {
           setPagination({
@@ -86,7 +86,7 @@ export default function CountriesPage() {
   const loadStats = async () => {
     try {
       const response = await countryService.getCountryStats();
-      if (response.success && response.data) {
+      if (response.status==200 && response.data) {
         setStats(response.data);
       }
     } catch (error) {
@@ -107,7 +107,7 @@ export default function CountriesPage() {
       setActionLoading(true);
       const response = await countryService.createCountry(data);
       
-      if (response.success) {
+      if (response.status==200) {
         toast.success("Country created successfully");
         setIsCreateModalOpen(false);
         loadCountries();
@@ -127,7 +127,7 @@ export default function CountriesPage() {
       setActionLoading(true);
       const response = await countryService.updateCountry(selectedCountry._id, data);
       
-      if (response.success) {
+      if (response.status==200) {
         toast.success("Country updated successfully");
         setIsEditModalOpen(false);
         setSelectedCountry(null);
@@ -148,7 +148,7 @@ export default function CountriesPage() {
       setActionLoading(true);
       const response = await countryService.deleteCountry(selectedCountry._id);
       
-      if (response.success) {
+      if (response.status==200) {
         toast.success("Country deleted successfully");
         setIsDeleteModalOpen(false);
         setSelectedCountry(null);
@@ -166,7 +166,7 @@ export default function CountriesPage() {
     try {
       const response = await countryService.toggleCountryStatus(country._id, !country.isActive);
       
-      if (response.success) {
+      if (response.status==200) {
         toast.success(`Country ${!country.isActive ? 'activated' : 'deactivated'} successfully`);
         loadCountries();
       }
@@ -373,6 +373,7 @@ export default function CountriesPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle data-testid="view-country-modal-title">Country Details</DialogTitle>
+          
           </DialogHeader>
           {selectedCountry && (
             <div className="space-y-6">
@@ -395,7 +396,7 @@ export default function CountriesPage() {
                 </div>
                 <div>
                   <h4 className="font-semibold">Currency</h4>
-                  <p data-testid="view-country-currency">{selectedCountry.currency}</p>
+                  <p data-testid="view-country-currency">{selectedCountry?.currency}</p>
                 </div>
                 <div>
                   <h4 className="font-semibold">Status</h4>
@@ -404,27 +405,7 @@ export default function CountriesPage() {
                   </Badge>
                 </div>
               </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Delivery Configuration</h4>
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div className="text-center p-3 bg-muted rounded">
-                    <div className="font-medium">Standard</div>
-                    <div className="text-lg">{selectedCountry.deliveryDays.standard}</div>
-                    <div className="text-muted-foreground">days</div>
-                  </div>
-                  <div className="text-center p-3 bg-muted rounded">
-                    <div className="font-medium">Express</div>
-                    <div className="text-lg">{selectedCountry.deliveryDays.express}</div>
-                    <div className="text-muted-foreground">days</div>
-                  </div>
-                  <div className="text-center p-3 bg-muted rounded">
-                    <div className="font-medium">Overnight</div>
-                    <div className="text-lg">{selectedCountry.deliveryDays.overnight}</div>
-                    <div className="text-muted-foreground">days</div>
-                  </div>
-                </div>
-              </div>
+ 
             </div>
           )}
         </DialogContent>

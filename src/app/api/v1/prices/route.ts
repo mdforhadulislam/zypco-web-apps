@@ -22,7 +22,10 @@ function validateRates(rates: any[]): { valid: boolean; message: string } {
   if (!Array.isArray(rates)) return { valid: false, message: "rate must be an array" };
   for (let i = 0; i < rates.length; i++) {
     const r = rates[i];
+    console.log(r);
+    
     if (!r.name || typeof r.name !== "string") return { valid: false, message: `rate[${i}].name is required` };
+    if (!r.fuel || isNaN(Number(r.fuel))) return { valid: false, message: `rate[${i}].fuel is required` };
     if (r.profitPercentage == null || isNaN(Number(r.profitPercentage))) return { valid: false, message: `rate[${i}].profitPercentage must be a number` };
     if (r.gift == null || isNaN(Number(r.gift))) return { valid: false, message: `rate[${i}].gift must be a number` };
     if (r.price && typeof r.price !== "object") return { valid: false, message: `rate[${i}].price must be an object` };
@@ -84,6 +87,8 @@ export async function POST(req: NextRequest) {
     await connectDB();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const body = (await req.json()) as any;
+   
+    
 
     if (!body.from || !Types.ObjectId.isValid(body.from)) return errorResponse({ status: 400, message: "from is required", req });
     if (!body.to || !Types.ObjectId.isValid(body.to)) return errorResponse({ status: 400, message: "to is required", req });
@@ -96,7 +101,7 @@ export async function POST(req: NextRequest) {
     const price = new Price(body);
     await price.save();
 
-    return successResponse({ status: 201, message: "Price created successfully", data: price, req });
+    return successResponse({ status: 200, message: "Price created successfully", data: price, req });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Failed to create price";
     return errorResponse({ status: 500, message: msg, error, req });

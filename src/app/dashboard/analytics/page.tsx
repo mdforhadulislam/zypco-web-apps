@@ -1,24 +1,21 @@
 "use client";
-import { useState, useEffect } from "react";
-import { RoleGuard } from "@/middleware/roleGuard";
+import { DashboardChart } from "@/components/Dashboard/DashboardChart";
+import { StatsCard } from "@/components/Dashboard/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StatsCard } from "@/components/Dashboard/StatsCard";
-import { DashboardChart } from "@/components/Dashboard/DashboardChart";
+import { RoleGuard } from "@/middleware/roleGuard";
 import { AnalyticsService } from "@/services/dashboardService";
-import { 
-  Users, 
-  Package, 
-  DollarSign, 
-  TrendingUp, 
+import {
   Activity,
-  Shield,
+  BarChart3,
   Bell,
-  Star,
-  Calendar,
-  BarChart3
+  DollarSign,
+  Package,
+  Shield,
+  TrendingUp,
+  Users,
 } from "lucide-react";
-import { toast } from "sonner";
+import { useEffect, useState } from "react";
 
 interface AnalyticsData {
   totalUsers?: number;
@@ -71,10 +68,11 @@ export default function AnalyticsPage() {
       setLoading(true);
       setError(null);
 
-      const days = selectedPeriod === "7d" ? 7 : selectedPeriod === "30d" ? 30 : 90;
+      const days =
+        selectedPeriod === "7d" ? 7 : selectedPeriod === "30d" ? 30 : 90;
       const response = await AnalyticsService.getOverview({ days });
 
-      if (response.success) {
+      if (response.status == 200) {
         setData(response.data);
       } else {
         setError(response.message || "Failed to fetch analytics");
@@ -110,7 +108,7 @@ export default function AnalyticsPage() {
           <CardContent className="pt-6">
             <div className="text-center text-red-600">
               <p>Error loading analytics: {error}</p>
-              <button 
+              <button
                 onClick={fetchAnalytics}
                 className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
               >
@@ -130,7 +128,9 @@ export default function AnalyticsPage() {
       <div className="space-y-6" data-testid="analytics-page">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Analytics Dashboard
+            </h1>
             <p className="text-muted-foreground">
               Comprehensive insights into your business performance
             </p>
@@ -139,8 +139,8 @@ export default function AnalyticsPage() {
             <button
               onClick={() => setSelectedPeriod("7d")}
               className={`px-3 py-2 rounded-md text-sm font-medium ${
-                selectedPeriod === "7d" 
-                  ? "bg-blue-600 text-white" 
+                selectedPeriod === "7d"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
               data-testid="period-7d"
@@ -150,8 +150,8 @@ export default function AnalyticsPage() {
             <button
               onClick={() => setSelectedPeriod("30d")}
               className={`px-3 py-2 rounded-md text-sm font-medium ${
-                selectedPeriod === "30d" 
-                  ? "bg-blue-600 text-white" 
+                selectedPeriod === "30d"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
               data-testid="period-30d"
@@ -161,8 +161,8 @@ export default function AnalyticsPage() {
             <button
               onClick={() => setSelectedPeriod("90d")}
               className={`px-3 py-2 rounded-md text-sm font-medium ${
-                selectedPeriod === "90d" 
-                  ? "bg-blue-600 text-white" 
+                selectedPeriod === "90d"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
               data-testid="period-90d"
@@ -200,7 +200,9 @@ export default function AnalyticsPage() {
               />
               <StatsCard
                 title="Total Revenue"
-                value={`$${revenueSummary?.totalRevenue?.toLocaleString() || 0}`}
+                value={`$${
+                  revenueSummary?.totalRevenue?.toLocaleString() || 0
+                }`}
                 change="+18% from last period"
                 trend="up"
                 icon={DollarSign}
@@ -226,10 +228,13 @@ export default function AnalyticsPage() {
                   </CardHeader>
                   <CardContent>
                     <DashboardChart
-                      data={data.monthlyRevenue.map(item => ({
+                      title="Revenue Trend"
+                      description="Monthly revenue performance"
+                      type="area" // ✅ area chart is good for trends
+                      data={data.ordersSummary.monthlyRevenue.map((item) => ({
                         name: `${item.month}/${item.year}`,
                         value: item.revenue,
-                        orders: item.orders
+                        orders: item.orders,
                       }))}
                       dataKey="value"
                       color="#8884d8"
@@ -238,26 +243,30 @@ export default function AnalyticsPage() {
                 </Card>
               )}
 
-              {data.ordersByType && data.ordersByType.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <BarChart3 className="h-5 w-5" />
-                      <span>Orders by Type</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <DashboardChart
-                      data={data.ordersByType.map(item => ({
-                        name: item._id || "Unknown",
-                        value: item.count
-                      }))}
-                      dataKey="value"
-                      color="#82ca9d"
-                    />
-                  </CardContent>
-                </Card>
-              )}
+              {data?.ordersSummary?.ordersByType &&
+                data.ordersSummary?.ordersByType?.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <BarChart3 className="h-5 w-5" />
+                        <span>Orders by Type</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <DashboardChart
+                        title="Orders by Type"
+                        description="Distribution of order categories"
+                        type="bar" // ✅ bar chart works well for categories
+                        data={data.ordersSummary.ordersByType.map((item) => ({
+                          name: item._id || "Unknown",
+                          value: item.count,
+                        }))}
+                        dataKey="value"
+                        color="#82ca9d"
+                      />
+                    </CardContent>
+                  </Card>
+                )}
             </div>
           </TabsContent>
 
@@ -282,58 +291,45 @@ export default function AnalyticsPage() {
 
             <div className="grid gap-6 md:grid-cols-2">
               {data.signupTrend && data.signupTrend.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>User Registrations</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <DashboardChart
-                      data={data.signupTrend.map(item => ({
-                        name: item._id,
-                        value: item.count
-                      }))}
-                      dataKey="value"
-                      color="#ff7300"
-                    />
-                  </CardContent>
-                </Card>
+                <DashboardChart
+                  data={data.signupTrend.map((item) => ({
+                    name: item._id,
+                    value: item.count,
+                  }))}
+                  title="User Registrations"
+                  description="New users per month"
+                  type="bar"
+                  dataKey="value"
+                  color="#ff7300"
+                />
               )}
 
               {data.roleBreakdown && data.roleBreakdown.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Users by Role</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {data.roleBreakdown.map((role, index) => (
-                        <div key={index} className="flex justify-between items-center">
-                          <span className="capitalize font-medium">{role._id}</span>
-                          <span className="text-2xl font-bold">{role.count}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                <DashboardChart
+                  title="Users by Role"
+                  description="System user distribution"
+                  type="pie"
+                  dataKey="value"
+                  data={data.roleBreakdown.map((role) => ({
+                    name: role._id,
+                    value: role.count,
+                  }))}
+                />
               )}
             </div>
 
             {data.dau && data.dau.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Daily Active Users</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <DashboardChart
-                    data={data.dau.map(item => ({
-                      name: item.day,
-                      value: item.activeUsers
-                    }))}
-                    dataKey="value"
-                    color="#4ade80"
-                  />
-                </CardContent>
-              </Card>
+              <DashboardChart
+                title="Daily Active Users"
+                description="Number of users active each day"
+                type="line" // or "area" যেটা চাই
+                data={data.dau.map((item) => ({
+                  name: item.day, // x-axis label (যেমন: Mon, Tue)
+                  value: item.activeUsers, // y-axis value
+                }))}
+                dataKey="value"
+                color="#4ade80"
+              />
             )}
           </TabsContent>
 
@@ -346,7 +342,9 @@ export default function AnalyticsPage() {
               />
               <StatsCard
                 title="Average Order Value"
-                value={`$${revenueSummary?.avgOrderValue?.toFixed(2) || "0.00"}`}
+                value={`$${
+                  revenueSummary?.avgOrderValue?.toFixed(2) || "0.00"
+                }`}
                 icon={DollarSign}
               />
               <StatsCard
@@ -357,122 +355,143 @@ export default function AnalyticsPage() {
               />
             </div>
 
-            {data.ordersByType && data.ordersByType.length > 0 && (
-              <div className="grid gap-6 md:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Orders by Type</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {data.ordersByType.map((type, index) => (
-                        <div key={index} className="flex justify-between items-center">
-                          <span className="capitalize font-medium">{type._id}</span>
-                          <span className="text-2xl font-bold">{type.count}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+            {data.ordersSummary.ordersByType &&
+              data.ordersSummary.ordersByType.length > 0 && (
+                <div className="grid gap-6 md:grid-cols-2">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Orders by Type</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {data.ordersSummary.ordersByType.map((type, index) => (
+                          <div
+                            key={index}
+                            className="flex justify-between items-center"
+                          >
+                            <span className="capitalize font-medium">
+                              {type._id}
+                            </span>
+                            <span className="text-2xl font-bold">
+                              {type.count}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Order Type Distribution</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <DashboardChart
-                      data={data.ordersByType.map(item => ({
-                        name: item._id,
-                        value: item.count
-                      }))}
-                      dataKey="value"
-                      color="#8884d8"
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Order Type Distribution</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <DashboardChart
+                        data={data.ordersByType.map((item) => ({
+                          name: item._id,
+                          value: item.count,
+                        }))}
+                        dataKey="value"
+                        color="#8884d8"
+                      />
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
           </TabsContent>
 
           <TabsContent value="revenue" className="space-y-6">
             <div className="grid gap-4 md:grid-cols-4">
               <StatsCard
                 title="Total Revenue"
-                value={`$${revenueSummary?.totalRevenue?.toLocaleString() || 0}`}
+                value={`$${
+                  revenueSummary?.totalRevenue?.toLocaleString() || 0
+                }`}
                 icon={DollarSign}
               />
               <StatsCard
                 title="Total Refunds"
-                value={`$${revenueSummary?.totalRefunds?.toLocaleString() || 0}`}
+                value={`$${
+                  revenueSummary?.totalRefunds?.toLocaleString() || 0
+                }`}
                 icon={TrendingUp}
               />
               <StatsCard
                 title="Average Order Value"
-                value={`$${revenueSummary?.avgOrderValue?.toFixed(2) || "0.00"}`}
+                value={`$${
+                  revenueSummary?.avgOrderValue?.toFixed(2) || "0.00"
+                }`}
                 icon={Package}
               />
               <StatsCard
                 title="Net Revenue"
-                value={`$${((revenueSummary?.totalRevenue || 0) - (revenueSummary?.totalRefunds || 0)).toLocaleString()}`}
+                value={`$${(
+                  (revenueSummary?.totalRevenue || 0) -
+                  (revenueSummary?.totalRefunds || 0)
+                ).toLocaleString()}`}
                 icon={DollarSign}
               />
             </div>
 
-            {data.monthlyRevenue && data.monthlyRevenue.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Monthly Revenue Trend</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <DashboardChart
-                    data={data.monthlyRevenue.map(item => ({
-                      name: `${item.month}/${item.year}`,
-                      value: item.revenue,
-                      orders: item.orders
-                    }))}
-                    dataKey="value"
-                    color="#8884d8"
-                  />
-                </CardContent>
-              </Card>
-            )}
+            {data.ordersSummary.monthlyRevenue &&
+              data.ordersSummary.monthlyRevenue.length > 0 && (
+                <DashboardChart
+                  title="Monthly Revenue Trend"
+                  data={data.ordersSummary.monthlyRevenue.map((item) => ({
+                    name: `${item.month}/${item.year}`,
+                    value: item.revenue,
+                    orders: item.orders,
+                  }))}
+                  dataKey="value"
+                  color="#8884d8"
+                />
+              )}
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
             <div className="grid gap-4 md:grid-cols-3">
               <StatsCard
                 title="Failed Login Attempts"
-                value={data.topFailedPhones?.reduce((sum, item) => sum + item.count, 0) || 0}
+                value={
+                  data.topFailedPhones?.reduce(
+                    (sum, item) => sum + item.count,
+                    0
+                  ) || 0
+                }
                 icon={Shield}
               />
-              <StatsCard
-                title="Security Alerts"
-                value="0"
-                icon={Bell}
-              />
-              <StatsCard
-                title="Blocked IPs"
-                value="0"
-                icon={Activity}
-              />
+              <StatsCard title="Security Alerts" value="0" icon={Bell} />
+              <StatsCard title="Blocked IPs" value="0" icon={Activity} />
             </div>
 
             {data.topFailedPhones && data.topFailedPhones.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Failed Login Attempts by Phone</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {data.topFailedPhones.slice(0, 10).map((item, index) => (
-                      <div key={index} className="flex justify-between items-center p-3 bg-red-50 rounded">
-                        <span className="font-medium">{item._id}</span>
-                        <span className="text-red-600 font-bold">{item.count} attempts</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <>
+                <DashboardChart
+                  title="Top Failed Phones"
+                  description="Most frequent failed login attempts"
+                  type="bar"
+                  data={data.topFailedPhones.slice(0, 10).map((item) => ({
+                    name: item._id, // phone number
+                    value: item.count, // number of attempts
+                  }))}
+                  dataKey="value"
+                  color="#f87171" // red tone for failed attempts
+                />
+                {/* optional: keep your list too */}
+                <div className="mt-6 space-y-4">
+                  {data.topFailedPhones.slice(0, 10).map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center p-3 bg-red-50 rounded"
+                    >
+                      <span className="font-medium">{item._id}</span>
+                      <span className="text-red-600 font-bold">
+                        {item.count} attempts
+                      </span>
+                    </div>
+                  ))}
+                </div>{" "}
+              </>
             )}
           </TabsContent>
         </Tabs>

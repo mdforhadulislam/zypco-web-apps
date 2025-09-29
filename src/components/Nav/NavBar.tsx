@@ -180,7 +180,7 @@ const NavData = [
 const NavBar = () => {
   const [navBarScrolled, setNavBarScrolled] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
-  const { user, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const isMobile = useIsMobile();
   const router = useRouter();
 
@@ -377,13 +377,13 @@ const NavBar = () => {
               </Link>
             </li>
           </ul>
-          {user?.token && (
+          {isAuthenticated && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild className="h-13 w-full">
                 <Avatar className="h-12 w-12  rounded-full cursor-pointer">
-                  <AvatarImage src={""} alt={user.name} />
+                  <AvatarImage src={""} alt={user?.name} />
                   <AvatarFallback className="rounded-full bg-black text-white">
-                    {user.name.split("")[0]}
+                    {user?.name.split("")[0]}
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
@@ -396,12 +396,12 @@ const NavBar = () => {
                 <DropdownMenuLabel className="p-0 font-normal">
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="h-8 w-8 rounded-lg">
-                      <AvatarImage src={""} alt={user.name} />
+                      <AvatarImage src={user?.avatar} alt={user?.name} />
                       <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-medium">{user.name}</span>
-                      <span className="truncate text-xs">{user.email}</span>
+                      <span className="truncate font-medium">{user?.name}</span>
+                      <span className="truncate text-xs">{user?.email}</span>
                     </div>
                   </div>
                 </DropdownMenuLabel>
@@ -434,7 +434,7 @@ const NavBar = () => {
             </DropdownMenu>
           )}
 
-          {!user?.token && (
+          {!isAuthenticated && (
             <Link
               href={"/auth/signin"}
               className="bg-2 font-semibold  text-[#FEF400] bg-black  hover:bg-black/90 px-6 py-3 rounded-4xl"
@@ -482,7 +482,7 @@ const NavBar = () => {
                   </div>
                   <div className=" relative w-full h-full">
                     <div className="px-4 w-full absolute bottom-3">
-                      {user?.token && (
+                      {isAuthenticated && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild className="h-13 w-full">
                             <Button
@@ -490,17 +490,17 @@ const NavBar = () => {
                               className="bg-white text-black hover:bg-white p-2 shadow-4xl"
                             >
                               <Avatar className="h-8 w-8 rounded-lg">
-                                <AvatarImage src={""} alt={user.name} />
+                                <AvatarImage src={user?.avatar} alt={user?.name} />
                                 <AvatarFallback className="rounded-lg">
-                                  {user.name.split("")[0]}
+                                  {user?.name.split("")[0]}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-medium">
-                                  {user.name}
+                                  {user?.name}
                                 </span>
                                 <span className="truncate text-xs">
-                                  {user.email}
+                                  {user?.email}
                                 </span>
                               </div>
                               <ChevronsUpDown className="ml-auto size-4" />
@@ -515,17 +515,17 @@ const NavBar = () => {
                             <DropdownMenuLabel className="p-0 font-normal">
                               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="h-8 w-8 rounded-lg">
-                                  <AvatarImage src={""} alt={user.name} />
+                                  <AvatarImage src={""} alt={user?.name} />
                                   <AvatarFallback className="rounded-lg">
                                     CN
                                   </AvatarFallback>
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
                                   <span className="truncate font-medium">
-                                    {user.name}
+                                    {user?.name}
                                   </span>
                                   <span className="truncate text-xs">
-                                    {user.email}
+                                    {user?.email}
                                   </span>
                                 </div>
                               </div>
@@ -557,7 +557,7 @@ const NavBar = () => {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       )}
-                      {!user?.token && (
+                      {!isAuthenticated && (
                         <div className="w-full h-auto flex gap-3 justify-center align-middle items-center">
                           <Link
                             href={"/auth/signin"}

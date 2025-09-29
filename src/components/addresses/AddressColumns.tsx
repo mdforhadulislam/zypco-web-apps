@@ -95,13 +95,13 @@ export const createAddressColumns = ({
       const { address } = row.original;
       return (
         <div className="max-w-xs">
-          <div className="font-medium">{address.street}</div>
+          <div className="font-medium">{address?.street}</div>
           <div className="text-sm text-muted-foreground">
-            {address.city}, {address.state && `${address.state}, `}{address.country}
+            {address?.city}, {address?.state && `${address?.state}, `}{address?.country}
           </div>
-          {address.zipCode && (
+          {address?.zipCode && (
             <div className="text-sm text-muted-foreground">
-              {address.zipCode}
+              {address?.zipCode}
             </div>
           )}
         </div>
@@ -134,7 +134,7 @@ export const createAddressColumns = ({
     header: "Country",
     cell: ({ row }) => (
       <Badge variant="outline" data-testid={`address-country-${row.original._id}`}>
-        {row.original.address.country}
+        {row.original.address?.country}
       </Badge>
     ),
   },

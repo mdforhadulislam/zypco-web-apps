@@ -85,8 +85,8 @@ export default function SettingsPage() {
       if (!user?.phone) return;
       
       const response = await UserService.getUserAddresses(user.phone);
-      if (response.success) {
-        setUserAddresses(response.data || []);
+      if (response.status==200) {
+        setUserAddresses(response.data )
       }
     } catch (error) {
       console.error("Failed to fetch addresses:", error);
@@ -103,7 +103,9 @@ export default function SettingsPage() {
       }
 
       const response = await UserService.updateUser(user.phone, data);
-      if (response.success) {
+      console.log(response);
+      
+      if (response.status ==200) {
         updateUser(data);
         toast.success("Profile updated successfully");
       } else {
@@ -130,7 +132,7 @@ export default function SettingsPage() {
           }
         });
         
-        if (response.success) {
+        if (response.status ==200) {
           toast.success("Notification settings updated");
         } else {
           // Revert on failure
@@ -157,7 +159,7 @@ export default function SettingsPage() {
           }
         });
         
-        if (response.success) {
+        if (response.status ==200) {
           toast.success("Privacy settings updated");
         } else {
           setPrivacySettings(privacySettings);

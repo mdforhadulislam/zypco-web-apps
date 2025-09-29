@@ -31,25 +31,7 @@ export const AdminData = {
       url: "/dashboard/analytics",
       icon: BarChart3,
       items: [
-        { title: "User Analytics", url: "/dashboard/analytics/users" },
-        { title: "Login Analytics", url: "/dashboard/analytics/login" },
-        { title: "Revenue Analytics", url: "/dashboard/analytics/revenue" },
-        { title: "API Key Analytics", url: "/dashboard/analytics/api-keys" },
-        { title: "Addresses Analytics", url: "/dashboard/analytics/addresses" },
-        { title: "Order Analytics", url: "/dashboard/analytics/orders" },
-        {
-          title: "Operational Analytics",
-          url: "/dashboard/analytics/operational",
-        },
-        { title: "Offers Analytics", url: "/dashboard/analytics/offers" },
-        { title: "Countries Analytics", url: "/dashboard/analytics/countries" },
-        {
-          title: "Notifications Analytics",
-          url: "/dashboard/analytics/notifications",
-        },
-        { title: "Contacts Analytics", url: "/dashboard/analytics/contacts" },
-        { title: "Content Analytics", url: "/dashboard/analytics/content" },
-        { title: "Reviews Analytics", url: "/dashboard/analytics/reviews" },
+      
       ],
     },
     {
@@ -139,16 +121,6 @@ export const ModeratorData = {
       icon: LayoutDashboard,
       isActive: true,
       items: [],
-    },
-    {
-      title: "Analytics",
-      url: "/dashboard/analytics",
-      icon: BarChart3,
-      items: [
-        { title: "User Analytics", url: "/dashboard/analytics/users" },
-        { title: "Order Analytics", url: "/dashboard/analytics/orders" },
-        { title: "Revenue Analytics", url: "/dashboard/analytics/revenue" },
-      ],
     },
     {
       title: "Pickups",

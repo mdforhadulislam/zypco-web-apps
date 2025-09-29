@@ -29,6 +29,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { NotificationPanel } from "./NotificationPanel";
 
 // Types
 interface HealthData {
@@ -585,6 +586,8 @@ export function DashboardOverview() {
             </CardContent>
           </Card>
         </div>
+
+        <NotificationPanel />
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-500 border-t pt-4">

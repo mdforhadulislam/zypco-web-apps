@@ -54,9 +54,9 @@ export default function NotificationsPage() {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const response = await NotificationService.getNotifications({ limit: 50 });
-      if (response.success) {
-        setNotifications(response.data || []);
+      const response = await NotificationService.getNotifications({ limit: 100 });
+      if (response.status==200) {
+        setNotifications(response.data);
       } else {
         toast.error(response.message || "Failed to fetch notifications");
       }
@@ -82,8 +82,9 @@ export default function NotificationsPage() {
 
   const handleMarkAsRead = async (notification: any) => {
     try {
+      
       const response = await NotificationService.markAsRead(notification._id);
-      if (response.success) {
+      if (response.status==200) {
         toast.success("Notification marked as read");
         fetchNotifications();
       } else {
@@ -101,7 +102,7 @@ export default function NotificationsPage() {
 
     try {
       const response = await NotificationService.deleteNotification(notification._id);
-      if (response.success) {
+      if (response.status ==200) {
         toast.success("Notification deleted successfully");
         fetchNotifications();
       } else {
