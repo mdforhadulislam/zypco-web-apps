@@ -1,27 +1,20 @@
 "use client";
-import { useState, useEffect } from "react";
-import { RoleGuard } from "@/middleware/roleGuard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { UserService } from "@/services/dashboardService";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/AuthContext";
-import { toast } from "sonner";
+import { RoleGuard } from "@/middleware/roleGuard";
+import { UserService } from "@/services/dashboardService";
+import { Bell, MapPin, Save, Settings, Shield, User } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { 
-  User, 
-  Bell, 
-  Shield, 
-  Key,
-  MapPin,
-  Settings,
-  Save
-} from "lucide-react";
+import { toast } from "sonner";
 
 interface ProfileFormData {
   name: string;
@@ -44,11 +37,12 @@ export default function SettingsPage() {
   const { user, updateUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [userAddresses, setUserAddresses] = useState([]);
-  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
-    email: true,
-    sms: true,
-    push: true,
-  });
+  const [notificationSettings, setNotificationSettings] =
+    useState<NotificationSettings>({
+      email: true,
+      sms: true,
+      push: true,
+    });
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
     profileVisibility: "public",
     dataSharing: false,
@@ -72,21 +66,21 @@ export default function SettingsPage() {
       setValue("name", user.name);
       setValue("email", user.email);
       setValue("phone", user.phone);
-      
+
       // Load user-specific settings
       if (user.phone) {
         fetchUserAddresses();
       }
     }
-  }, [user, setValue]);
+  }, [user]);
 
   const fetchUserAddresses = async () => {
     try {
       if (!user?.phone) return;
-      
+
       const response = await UserService.getUserAddresses(user.phone);
-      if (response.status==200) {
-        setUserAddresses(response.data )
+      if (response.status == 200) {
+        setUserAddresses(response.data);
       }
     } catch (error) {
       console.error("Failed to fetch addresses:", error);
@@ -96,16 +90,15 @@ export default function SettingsPage() {
   const onSubmitProfile = async (data: ProfileFormData) => {
     try {
       setLoading(true);
-      
+
       if (!user?.phone) {
         toast.error("User phone not available");
         return;
       }
 
       const response = await UserService.updateUser(user.phone, data);
-      console.log(response);
-      
-      if (response.status ==200) {
+
+      if (response.status == 200) {
         updateUser(data);
         toast.success("Profile updated successfully");
       } else {
@@ -118,21 +111,24 @@ export default function SettingsPage() {
     }
   };
 
-  const handleNotificationUpdate = async (key: keyof NotificationSettings, value: boolean) => {
+  const handleNotificationUpdate = async (
+    key: keyof NotificationSettings,
+    value: boolean
+  ) => {
     try {
       const updatedSettings = { ...notificationSettings, [key]: value };
       setNotificationSettings(updatedSettings);
-      
+
       // Update user preferences
       if (user?.phone) {
         const response = await UserService.updateUser(user.phone, {
           preferences: {
             notifications: updatedSettings,
             privacy: privacySettings,
-          }
+          },
         });
-        
-        if (response.status ==200) {
+
+        if (response.status == 200) {
           toast.success("Notification settings updated");
         } else {
           // Revert on failure
@@ -146,20 +142,23 @@ export default function SettingsPage() {
     }
   };
 
-  const handlePrivacyUpdate = async (key: keyof PrivacySettings, value: any) => {
+  const handlePrivacyUpdate = async (
+    key: keyof PrivacySettings,
+    value: any
+  ) => {
     try {
       const updatedSettings = { ...privacySettings, [key]: value };
       setPrivacySettings(updatedSettings);
-      
+
       if (user?.phone) {
         const response = await UserService.updateUser(user.phone, {
           preferences: {
             notifications: notificationSettings,
             privacy: updatedSettings,
-          }
+          },
         });
-        
-        if (response.status ==200) {
+
+        if (response.status == 200) {
           toast.success("Privacy settings updated");
         } else {
           setPrivacySettings(privacySettings);
@@ -184,23 +183,38 @@ export default function SettingsPage() {
 
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="profile" className="flex items-center space-x-2">
+            <TabsTrigger
+              value="profile"
+              className="flex items-center space-x-2"
+            >
               <User className="h-4 w-4" />
               <span>Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center space-x-2">
+            <TabsTrigger
+              value="notifications"
+              className="flex items-center space-x-2"
+            >
               <Bell className="h-4 w-4" />
               <span>Notifications</span>
             </TabsTrigger>
-            <TabsTrigger value="privacy" className="flex items-center space-x-2">
+            <TabsTrigger
+              value="privacy"
+              className="flex items-center space-x-2"
+            >
               <Shield className="h-4 w-4" />
               <span>Privacy</span>
             </TabsTrigger>
-            <TabsTrigger value="addresses" className="flex items-center space-x-2">
+            <TabsTrigger
+              value="addresses"
+              className="flex items-center space-x-2"
+            >
               <MapPin className="h-4 w-4" />
               <span>Addresses</span>
             </TabsTrigger>
-            <TabsTrigger value="advanced" className="flex items-center space-x-2">
+            <TabsTrigger
+              value="advanced"
+              className="flex items-center space-x-2"
+            >
               <Settings className="h-4 w-4" />
               <span>Advanced</span>
             </TabsTrigger>
@@ -215,7 +229,10 @@ export default function SettingsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit(onSubmitProfile)} className="space-y-4">
+                <form
+                  onSubmit={handleSubmit(onSubmitProfile)}
+                  className="space-y-4"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name</Label>
@@ -225,7 +242,9 @@ export default function SettingsPage() {
                         data-testid="profile-name-input"
                       />
                       {errors.name && (
-                        <p className="text-sm text-red-600">{errors.name.message}</p>
+                        <p className="text-sm text-red-600">
+                          {errors.name.message}
+                        </p>
                       )}
                     </div>
 
@@ -234,11 +253,15 @@ export default function SettingsPage() {
                       <Input
                         id="email"
                         type="email"
-                        {...register("email", { required: "Email is required" })}
+                        {...register("email", {
+                          required: "Email is required",
+                        })}
                         data-testid="profile-email-input"
                       />
                       {errors.email && (
-                        <p className="text-sm text-red-600">{errors.email.message}</p>
+                        <p className="text-sm text-red-600">
+                          {errors.email.message}
+                        </p>
                       )}
                     </div>
 
@@ -250,16 +273,22 @@ export default function SettingsPage() {
                         disabled
                         data-testid="profile-phone-input"
                       />
-                      <p className="text-xs text-gray-500">Phone number cannot be changed</p>
+                      <p className="text-xs text-gray-500">
+                        Phone number cannot be changed
+                      </p>
                     </div>
 
                     <div className="space-y-2">
                       <Label>Account Status</Label>
                       <div className="flex space-x-2">
-                        <Badge variant={user?.isActive ? "default" : "destructive"}>
+                        <Badge
+                          variant={user?.isActive ? "default" : "destructive"}
+                        >
                           {user?.isActive ? "Active" : "Inactive"}
                         </Badge>
-                        <Badge variant={user?.isVerified ? "default" : "secondary"}>
+                        <Badge
+                          variant={user?.isVerified ? "default" : "secondary"}
+                        >
                           {user?.isVerified ? "Verified" : "Unverified"}
                         </Badge>
                         <Badge variant="outline" className="capitalize">
@@ -272,8 +301,8 @@ export default function SettingsPage() {
                   <Separator />
 
                   <div className="flex justify-end">
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       disabled={loading}
                       data-testid="save-profile-btn"
                     >
@@ -298,39 +327,57 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="email-notifications">Email Notifications</Label>
-                      <p className="text-sm text-gray-500">Receive notifications via email</p>
+                      <Label htmlFor="email-notifications">
+                        Email Notifications
+                      </Label>
+                      <p className="text-sm text-gray-500">
+                        Receive notifications via email
+                      </p>
                     </div>
                     <Switch
                       id="email-notifications"
                       checked={notificationSettings.email}
-                      onCheckedChange={(checked) => handleNotificationUpdate("email", checked)}
+                      onCheckedChange={(checked) =>
+                        handleNotificationUpdate("email", checked)
+                      }
                       data-testid="email-notifications-switch"
                     />
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="sms-notifications">SMS Notifications</Label>
-                      <p className="text-sm text-gray-500">Receive notifications via SMS</p>
+                      <Label htmlFor="sms-notifications">
+                        SMS Notifications
+                      </Label>
+                      <p className="text-sm text-gray-500">
+                        Receive notifications via SMS
+                      </p>
                     </div>
                     <Switch
                       id="sms-notifications"
                       checked={notificationSettings.sms}
-                      onCheckedChange={(checked) => handleNotificationUpdate("sms", checked)}
+                      onCheckedChange={(checked) =>
+                        handleNotificationUpdate("sms", checked)
+                      }
                       data-testid="sms-notifications-switch"
                     />
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="push-notifications">Push Notifications</Label>
-                      <p className="text-sm text-gray-500">Receive push notifications in the app</p>
+                      <Label htmlFor="push-notifications">
+                        Push Notifications
+                      </Label>
+                      <p className="text-sm text-gray-500">
+                        Receive push notifications in the app
+                      </p>
                     </div>
                     <Switch
                       id="push-notifications"
                       checked={notificationSettings.push}
-                      onCheckedChange={(checked) => handleNotificationUpdate("push", checked)}
+                      onCheckedChange={(checked) =>
+                        handleNotificationUpdate("push", checked)
+                      }
                       data-testid="push-notifications-switch"
                     />
                   </div>
@@ -351,13 +398,19 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label htmlFor="profile-visibility">Profile Visibility</Label>
-                      <p className="text-sm text-gray-500">Control who can see your profile</p>
+                      <Label htmlFor="profile-visibility">
+                        Profile Visibility
+                      </Label>
+                      <p className="text-sm text-gray-500">
+                        Control who can see your profile
+                      </p>
                     </div>
                     <select
                       id="profile-visibility"
                       value={privacySettings.profileVisibility}
-                      onChange={(e) => handlePrivacyUpdate("profileVisibility", e.target.value)}
+                      onChange={(e) =>
+                        handlePrivacyUpdate("profileVisibility", e.target.value)
+                      }
                       className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       data-testid="profile-visibility-select"
                     >
@@ -369,12 +422,16 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="data-sharing">Data Sharing</Label>
-                      <p className="text-sm text-gray-500">Allow sharing of anonymized data for analytics</p>
+                      <p className="text-sm text-gray-500">
+                        Allow sharing of anonymized data for analytics
+                      </p>
                     </div>
                     <Switch
                       id="data-sharing"
                       checked={privacySettings.dataSharing}
-                      onCheckedChange={(checked) => handlePrivacyUpdate("dataSharing", checked)}
+                      onCheckedChange={(checked) =>
+                        handlePrivacyUpdate("dataSharing", checked)
+                      }
                       data-testid="data-sharing-switch"
                     />
                   </div>
@@ -398,11 +455,16 @@ export default function SettingsPage() {
                       <Card key={index} className="p-4">
                         <div className="space-y-2">
                           <div className="flex justify-between items-start">
-                            <p className="font-medium">{address.label || "Address"}</p>
-                            <Badge variant="outline">{address.type || "Other"}</Badge>
+                            <p className="font-medium">
+                              {address.label || "Address"}
+                            </p>
+                            <Badge variant="outline">
+                              {address.type || "Other"}
+                            </Badge>
                           </div>
                           <p className="text-sm text-gray-600">
-                            {address.address}<br />
+                            {address.address}
+                            <br />
                             {address.city}, {address.zipCode}
                           </p>
                         </div>
@@ -440,9 +502,13 @@ export default function SettingsPage() {
                         <p className="font-mono text-sm">{user?.id}</p>
                       </div>
                       <div>
-                        <Label className="text-sm text-gray-500">Last Login</Label>
+                        <Label className="text-sm text-gray-500">
+                          Last Login
+                        </Label>
                         <p className="text-sm">
-                          {user?.lastLogin ? new Date(user.lastLogin).toLocaleString() : "Never"}
+                          {user?.lastLogin
+                            ? new Date(user.lastLogin).toLocaleString()
+                            : "Never"}
                         </p>
                       </div>
                     </div>
@@ -459,9 +525,7 @@ export default function SettingsPage() {
                       <Button variant="outline" className="mr-2">
                         System Configuration
                       </Button>
-                      <Button variant="outline">
-                        User Management
-                      </Button>
+                      <Button variant="outline">User Management</Button>
                     </div>
                   )}
                 </div>

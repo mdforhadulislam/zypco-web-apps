@@ -86,7 +86,7 @@ class AddressService {
   // Global address book (admin/moderator only) - using accounts API
   async getAllAddresses(filters?: AddressFilters): Promise<ApiResponse<UserAddress[]>> {
     const params = filters ? withPagination(filters) : {};
-    return api.get<UserAddress[]>("/accounts", params);
+    return api.get<UserAddress[]>("/address", params);
   }
 
   // Address validation

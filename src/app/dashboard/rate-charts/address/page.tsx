@@ -45,7 +45,7 @@ export default function AddressBookPage() {
       setLoading(true);
       const response = await addressService.getAllAddresses(filters);
       
-      if (response.success && response.data) {
+      if (response.success   && response.data) {
         setAddresses(Array.isArray(response.data) ? response.data : [response.data]);
         if (response.meta) {
           setPagination({
@@ -252,7 +252,7 @@ export default function AddressBookPage() {
                     )}
                   </h3>
                   <p className="text-muted-foreground">
-                    {selectedAddress.phone && `User: ${selectedAddress.phone}`}
+                    {selectedAddress.phone && `User: ${selectedAddress?.phone}`}
                   </p>
                 </div>
               </div>
@@ -260,14 +260,14 @@ export default function AddressBookPage() {
               <div>
                 <h4 className="font-semibold mb-2">Address</h4>
                 <div className="space-y-1 text-muted-foreground">
-                  <div>{selectedAddress.address.street}</div>
+                  <div>{selectedAddress?.address?.street}</div>
                   <div>
-                    {selectedAddress.address.city}, {selectedAddress.address.state && `${selectedAddress.address.state}, `}
-                    {selectedAddress.address.country}
+                    {selectedAddress?.address?.city}, {selectedAddress?.address?.state && `${selectedAddress?.address?.state}, `}
+                    {selectedAddress?.address?.country}
                   </div>
-                  {selectedAddress.address.zipCode && <div>ZIP: {selectedAddress.address.zipCode}</div>}
-                  {selectedAddress.address.landmark && (
-                    <div className="text-sm">Landmark: {selectedAddress.address.landmark}</div>
+                  {selectedAddress?.address?.zipCode && <div>ZIP: {selectedAddress?.address?.zipCode}</div>}
+                  {selectedAddress?.address?.landmark && (
+                    <div className="text-sm">Landmark: {selectedAddress?.address?.landmark}</div>
                   )}
                 </div>
               </div>
@@ -276,10 +276,10 @@ export default function AddressBookPage() {
                 <div>
                   <h4 className="font-semibold mb-2">Contact Person</h4>
                   <div className="space-y-1 text-muted-foreground">
-                    <div><strong>Name:</strong> {selectedAddress.contactPerson.name}</div>
-                    <div><strong>Phone:</strong> {selectedAddress.contactPerson.phone}</div>
-                    {selectedAddress.contactPerson.email && (
-                      <div><strong>Email:</strong> {selectedAddress.contactPerson.email}</div>
+                    <div><strong>Name:</strong> {selectedAddress.contactPerson?.name}</div>
+                    <div><strong>Phone:</strong> {selectedAddress.contactPerson?.phone}</div>
+                    {selectedAddress.contactPerson?.email && (
+                      <div><strong>Email:</strong> {selectedAddress.contactPerson?.email}</div>
                     )}
                   </div>
                 </div>
