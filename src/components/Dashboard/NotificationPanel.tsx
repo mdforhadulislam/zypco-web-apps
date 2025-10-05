@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { NOTIFICATION_API } from "@/components/ApiCall/url";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bell, CheckCircle, AlertCircle, Info, X, Settings } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/AuthContext";
-import { NOTIFICATION_API } from "@/components/ApiCall/url";
+import { AlertCircle, Bell, CheckCircle, Info, Settings } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface Notification {
   _id: string;

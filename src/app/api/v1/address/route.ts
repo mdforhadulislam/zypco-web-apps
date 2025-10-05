@@ -10,18 +10,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     await connectDB();
 
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    const phone = searchParams.get("phone");
+    
 
-    let filter: any = { isDeleted: false };
-    if (userId && Types.ObjectId.isValid(userId)) filter.user = userId;
-    if (phone) {
-      const user = await User.findOne({ phone });
-      if (user) filter.user = user._id;
-    }
-
-    const addresses = await Address.find(filter)
+    const addresses = await Address.find()
       .populate("user")
       .populate("country")
       .sort({ createdAt: -1 })

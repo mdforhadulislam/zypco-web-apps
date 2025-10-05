@@ -45,7 +45,7 @@ export default function AddressBookPage() {
       setLoading(true);
       const response = await addressService.getAllAddresses(filters);
       
-      if (response.success   && response.data) {
+      if (response.status==200   && response.data) {
         setAddresses(Array.isArray(response.data) ? response.data : [response.data]);
         if (response.meta) {
           setPagination({

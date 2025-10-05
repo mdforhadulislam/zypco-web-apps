@@ -1,25 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/AuthContext";
-import { addressService, UserAddress } from "@/services/addressService"; 
-import { DataTable } from "@/components/ui/data-table";
 import { createAddressColumns } from "@/components/addresses/AddressColumns";
 import { AddressForm } from "@/components/addresses/AddressForm";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { 
-  Loader2, 
-  MapPin, 
-  Home, 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useAuth } from "@/hooks/AuthContext";
+import { addressService, UserAddress } from "@/services/addressService";
+import {
+  Building,
+  Loader2,
+  MapPin,
   Plus,
-  Star,
-  Building
+  Star
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function UserAddressesPage() {
   const { user } = useAuth();
@@ -42,7 +41,7 @@ export default function UserAddressesPage() {
       setLoading(true);
       const response = await addressService.getUserAddresses(user.phone);
       
-      if (response.success && response.data) {
+      if (response.status==200 && response.data) {
         setAddresses(Array.isArray(response.data) ? response.data : [response.data]);
       }
     } catch (error) {
@@ -55,7 +54,7 @@ export default function UserAddressesPage() {
 
   useEffect(() => {
     loadAddresses();
-  }, [user?.phone]);
+  }, []);
 
   // CRUD handlers
   const handleCreateAddress = async (data: any) => {
@@ -65,7 +64,7 @@ export default function UserAddressesPage() {
       setActionLoading(true);
       const response = await addressService.createUserAddress(user.phone, data);
       
-      if (response.success) {
+      if (response.status==200  ) {
         toast.success("Address added successfully");
         setIsCreateModalOpen(false);
         loadAddresses();
@@ -380,26 +379,26 @@ export default function UserAddressesPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold flex items-center space-x-2">
-                    <span>{selectedAddress.label}</span>
-                    {selectedAddress.isDefault && (
+                    <span>{selectedAddress?.label}</span>
+                    {selectedAddress?.isDefault && (
                       <Star className="h-4 w-4 text-yellow-500 fill-current" />
                     )}
                   </h3>
-                  <Badge variant="outline">{selectedAddress.address.country}</Badge>
+                  <Badge variant="outline">{selectedAddress?.address?.country}</Badge>
                 </div>
               </div>
 
               <div>
                 <h4 className="font-semibold mb-2">Address</h4>
                 <div className="space-y-1 text-muted-foreground">
-                  <div>{selectedAddress.address.street}</div>
+                  <div>{selectedAddress?.address?.street}</div>
                   <div>
-                    {selectedAddress.address.city}, {selectedAddress.address.state && `${selectedAddress.address.state}, `}
-                    {selectedAddress.address.country}
+                    {selectedAddress.address?.city}, {selectedAddress.address?.state && `${selectedAddress.address?.state}, `}
+                    {selectedAddress.address?.country}
                   </div>
-                  {selectedAddress.address.zipCode && <div>ZIP: {selectedAddress.address.zipCode}</div>}
-                  {selectedAddress.address.landmark && (
-                    <div className="text-sm">Landmark: {selectedAddress.address.landmark}</div>
+                  {selectedAddress.address?.zipCode && <div>ZIP: {selectedAddress.address?.zipCode}</div>}
+                  {selectedAddress.address?.landmark && (
+                    <div className="text-sm">Landmark: {selectedAddress.address?.landmark}</div>
                   )}
                 </div>
               </div>
@@ -430,12 +429,12 @@ export default function UserAddressesPage() {
               Are you sure you want to delete this address? This action cannot be undone.
               {selectedAddress?.isDefault && (
                 <div className="mt-2 p-2 bg-yellow-100 rounded text-yellow-800">
-                  <strong>Warning:</strong> This is your default address. You'll need to set a new default after deletion.
+                  <strong>Warning:</strong> This is your default address. You{"'"}ll need to set a new default after deletion.
                 </div>
               )}
               {selectedAddress && (
                 <div className="mt-2 p-2 bg-muted rounded">
-                  <strong>Address:</strong> {selectedAddress.label} - {selectedAddress.address.street}, {selectedAddress.address.city}
+                  <strong>Address:</strong> {selectedAddress?.label} - {selectedAddress.address?.street}, {selectedAddress.address?.city}
                 </div>
               )}
             </AlertDialogDescription>
