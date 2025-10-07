@@ -59,13 +59,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       phone: body.phone || "",
       isDefault: body.isDefault || false,
       location: body.location
-        ? { type: "Point", coordinates: body.location.coordinates }
+        ? { type: "Point", coordinates: body.location.coordinates ? body.location.coordinates : [0, 0] }
         : undefined,
     });
 
     await address.save();
 
-    return successResponse({ status: 201, message: "Address created", data: address, req });
+    return successResponse({ status: 200, message: "Address created", data: address, req });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Failed to create address";
     return errorResponse({ status: 500, message: msg, error: err, req });

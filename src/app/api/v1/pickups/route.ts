@@ -133,16 +133,7 @@ export const POST = createPublicHandler(async ({ req, user }) => {
         message: "Invalid preferred date format", 
         req 
       });
-    }
-
-    const now = new Date();
-    if (preferredDate < now) {
-      return errorResponse({ 
-        status: 400, 
-        message: "Preferred date must be in the future", 
-        req 
-      });
-    }
+    } 
 
     let userId: string;
     let addressId: string;

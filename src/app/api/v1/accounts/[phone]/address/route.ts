@@ -18,9 +18,7 @@ interface AddressBody {
   country: string; // Country ObjectId string
   phone?: string;
   isDefault?: boolean;
-  location?: {
-    coordinates: [number, number]; // [lng, lat]
-  };
+ 
 }
 
 // GET - fetch all addresses for a user
@@ -62,10 +60,10 @@ export async function POST(
 
     const { phone } = await params;
     const user = await User.findOne({ phone });
-    if (!user)
-      return errorResponse({ status: 404, message: "User not found", req });
+    if (!user) return errorResponse({ status: 404, message: "User not found", req });
 
     const body: AddressBody = await req.json();
+    
     const newAddress = new Address({
       user: user._id,
       name: body.name,
@@ -79,9 +77,7 @@ export async function POST(
       country: new Types.ObjectId(body.country),
       phone: body.phone || "",
       isDefault: body.isDefault || false,
-      location: body.location
-        ? { type: "Point", coordinates: body.location.coordinates }
-        : undefined,
+      
     });
     await newAddress.save();
 
@@ -100,12 +96,14 @@ export async function POST(
       .catch((err) => console.error("Address notification failed:", err));
 
     return successResponse({
-      status: 201,
+      status: 200,
       message: "Address created",
       data: newAddress,
       req,
     });
   } catch (error: unknown) {
+    console.log(error);
+    
     const msg =
       error instanceof Error ? error.message : "Failed to create address";
     return errorResponse({ status: 500, message: msg, error, req });
@@ -140,11 +138,73 @@ export async function PUT(
       location?: { type: "Point"; coordinates: [number, number] };
     } = { ...body };
     if (body.country) updateData.country = new Types.ObjectId(body.country);
-    if (body.location)
-      updateData.location = {
-        type: "Point",
-        coordinates: body.location.coordinates,
-      };
+    
+
+    const updatedAddress = await Address.findOneAndUpdate(
+      { _id: body.addressId, user: user._id, isDeleted: false },
+      { $set: updateData },
+      { new: true }
+    );
+
+    if (!updatedAddress)
+      return errorResponse({ status: 404, message: "Address not found", req });
+
+    // Send notification
+    await notificationService
+      .sendNotification({
+        userId: updatedAddress.user,
+        phone: user.phone,
+        email: user.email,
+        title: "Address Updated",
+        message: `Address "${updatedAddress.label}" has been updated successfully.`,
+        type: "info",
+        category: "account",
+        channels: ["email", "inapp"],
+      })
+      .catch((err) =>
+        console.error("Address update notification failed:", err)
+      );
+
+    return successResponse({
+      status: 200,
+      message: "Address updated",
+      data: updatedAddress,
+      req,
+    });
+  } catch (error: unknown) {
+    const msg =
+      error instanceof Error ? error.message : "Failed to update address";
+    return errorResponse({ status: 500, message: msg, error, req });
+  }
+}
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string }> }
+): Promise<NextResponse> {
+  try {
+    await connectDB();
+
+    const { phone } = await params;
+    const user = await User.findOne({ phone });
+    if (!user)
+      return errorResponse({ status: 404, message: "User not found", req });
+
+    const body: Partial<AddressBody> & { addressId: string } = await req.json();
+    if (!body.addressId)
+      return errorResponse({
+        status: 400,
+        message: "Address ID required",
+        req,
+      });
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    const updateData: Partial<IAddress> & {
+      country?: Types.ObjectId;
+      location?: { type: "Point"; coordinates: [number, number] };
+    } = { ...body };
+    if (body.country) updateData.country = new Types.ObjectId(body.country);
+    
 
     const updatedAddress = await Address.findOneAndUpdate(
       { _id: body.addressId, user: user._id, isDeleted: false },

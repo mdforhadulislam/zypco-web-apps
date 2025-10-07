@@ -113,13 +113,67 @@ export async function PUT(
       updateData.country = new Types.ObjectId(body.country) as unknown as any;
     }
 
-    if (body.location && Array.isArray(body.location.coordinates) && body.location.coordinates.length === 2) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      updateData.location = { type: "Point", coordinates: body.location.coordinates } as any;
+
+    const updatedAddress = await Address.findOneAndUpdate(
+      { _id: id, user: user._id},
+      { $set: updateData },
+      { new: true }
+    );
+    if (!updatedAddress) return errorResponse({ status: 404, message: "Address not found", req });
+
+    // async notification, don't block response
+    sendAddressNotification(
+      user,
+      "address_updated",
+      { addressId: updatedAddress._id, label: updatedAddress.label, addressLine: updatedAddress.addressLine },
+      { title: "Address Updated", message: `Address "${updatedAddress.label}" has been updated successfully.`, type: "info", category: "account", channels: ["email", "inapp"] }
+    );
+
+    return successResponse({ status: 200, message: "Address updated", data: updatedAddress, req });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Failed to update address";
+    return errorResponse({ status: 500, message: msg, error, req });
+  }
+}
+// PATCH - update specific address
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ phone: string; id: string }> }
+): Promise<NextResponse> {
+  try {
+    await connectDB();
+
+    const { phone,id } = await params;
+
+    const user = await User.findOne({ phone });
+    if (!user) return errorResponse({ status: 404, message: "User not found", req });
+
+    if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid address id", req });
+
+    const body = (await req.json()) as AddressBody;
+
+    // Build updateData safely, mapping types correctly
+    const updateData: Partial<IAddress> = {};
+
+    if (body.name !== undefined) updateData.name = body.name as string;
+    if (body.label !== undefined) updateData.label = body.label as string;
+    if (body.addressLine !== undefined) updateData.addressLine = body.addressLine as string;
+    if (body.area !== undefined) updateData.area = body.area as string;
+    if (body.subCity !== undefined) updateData.subCity = body.subCity as string;
+    if (body.city !== undefined) updateData.city = body.city as string;
+    if (body.state !== undefined) updateData.state = body.state as string;
+    if (body.zipCode !== undefined) updateData.zipCode = body.zipCode as string;
+    if (body.phone !== undefined) updateData.phone = body.phone as string;
+    if ("isDefault" in body) updateData.isDefault = Boolean(body.isDefault);
+
+    if (body.country) {
+      // convert to ObjectId
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any 
+      updateData.country = new Types.ObjectId(body.country) as unknown as any;
     }
 
     const updatedAddress = await Address.findOneAndUpdate(
-      { _id: id, user: user._id, isDeleted: false },
+      { _id: id, user: user._id, },
       { $set: updateData },
       { new: true }
     );
@@ -149,17 +203,15 @@ export async function DELETE(
     await connectDB();
 
     const { phone,id } = await params;
+    console.log(phone,id);
+    
 
     const user = await User.findOne({ phone });
     if (!user) return errorResponse({ status: 404, message: "User not found", req });
 
     if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid address id", req });
 
-    const deletedAddress = await Address.findOneAndUpdate(
-      { _id: id, user: user._id, isDeleted: false },
-      { $set: { isDeleted: true } },
-      { new: true }
-    );
+    const deletedAddress = await Address.findByIdAndDelete(id);
     if (!deletedAddress) return errorResponse({ status: 404, message: "Address not found", req });
 
     // async notification

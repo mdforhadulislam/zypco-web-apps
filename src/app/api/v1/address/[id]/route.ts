@@ -50,7 +50,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const { id } = params;
     if (!Types.ObjectId.isValid(id)) return errorResponse({ status: 400, message: "Invalid ID", req });
 
-    const deleted = await Address.findByIdAndUpdate(id, { $set: { isDeleted: true } }, { new: true });
+    const deleted = await Address.findByIdAndDelete(id);
     if (!deleted) return errorResponse({ status: 404, message: "Address not found", req });
 
     return successResponse({ status: 200, message: "Address deleted", data: deleted, req });

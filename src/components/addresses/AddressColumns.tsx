@@ -91,13 +91,17 @@ export const createAddressColumns = ({
   {
     accessorKey: "address",
     header: "Address",
-    cell: ({ row }) => {
-      const { address } = row.original;
+    cell: ({row}) => {
+      console.log(row);
+      
+      const address = row.original;
+console.log(address);
+
       return (
         <div className="max-w-xs">
-          <div className="font-medium">{address?.street}</div>
+          <div className="font-medium">{address?.state}</div>
           <div className="text-sm text-muted-foreground">
-            {address?.city}, {address?.state && `${address?.state}, `}{address?.country}
+            {address?.city}, {address?.state && `${address?.state}, `}{address?.country?.name}
           </div>
           {address?.zipCode && (
             <div className="text-sm text-muted-foreground">
@@ -112,7 +116,7 @@ export const createAddressColumns = ({
     accessorKey: "contactPerson",
     header: "Contact Person",
     cell: ({ row }) => {
-      const { contactPerson } = row.original;
+      const  contactPerson  = row.original;
       
       if (!contactPerson) {
         return <span className="text-muted-foreground">-</span>;
@@ -130,11 +134,11 @@ export const createAddressColumns = ({
     },
   },
   {
-    accessorKey: "address.country",
+    accessorKey: "address",
     header: "Country",
     cell: ({ row }) => (
       <Badge variant="outline" data-testid={`address-country-${row.original._id}`}>
-        {row.original.address?.country}
+        {row.original.address?.country?.name}
       </Badge>
     ),
   },
@@ -142,7 +146,7 @@ export const createAddressColumns = ({
     accessorKey: "isDefault",
     header: "Default",
     cell: ({ row }) => {
-      const isDefault = row.getValue("isDefault") as boolean;
+      const isDefault = row.original.isDefault;
       
       return isDefault ? (
         <Badge className="bg-yellow-100 text-yellow-800" data-testid={`address-default-${row.original._id}`}>
@@ -150,7 +154,7 @@ export const createAddressColumns = ({
           Default
         </Badge>
       ) : (
-        <span className="text-muted-foreground text-sm">-</span>
+        <span className="text-muted-foreground text-sm"> Normal </span>
       );
     },
   },

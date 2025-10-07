@@ -87,8 +87,8 @@ export default function UserAddressesPage() {
         selectedAddress._id, 
         data
       );
-      
-      if (response.success) {
+
+      if (response.status==200  ) {
         toast.success("Address updated successfully");
         setIsEditModalOpen(false);
         setSelectedAddress(null);
@@ -112,7 +112,7 @@ export default function UserAddressesPage() {
         selectedAddress._id
       );
       
-      if (response.success) {
+      if (response.status==200  ) {
         toast.success("Address deleted successfully");
         setIsDeleteModalOpen(false);
         setSelectedAddress(null);
@@ -132,7 +132,7 @@ export default function UserAddressesPage() {
     try {
       const response = await addressService.setDefaultAddress(user.phone, address._id);
       
-      if (response.success) {
+      if (response.status==200  ) {
         toast.success("Default address updated successfully");
         loadAddresses();
       }
@@ -168,7 +168,7 @@ export default function UserAddressesPage() {
     onEdit: handleEditClick,
     onDelete: handleDeleteClick,
     onSetDefault: handleSetDefaultAddress,
-    showUserInfo: false,
+    showUserInfo: true,
   });
 
   const defaultAddress = addresses.find(addr => addr.isDefault);
@@ -256,23 +256,22 @@ export default function UserAddressesPage() {
               <div>
                 <h4 className="font-semibold text-lg">{defaultAddress.label}</h4>
                 <div className="text-muted-foreground space-y-1">
-                  <div>{defaultAddress.address.street}</div>
+ 
+                  <div>{defaultAddress.state}</div>
                   <div>
-                    {defaultAddress.address.city}, {defaultAddress.address.state && `${defaultAddress.address.state}, `}
-                    {defaultAddress.address.country}
+                    {defaultAddress.city}, {defaultAddress.state && `${defaultAddress.state}, `}
+                    {defaultAddress.country.name}
                   </div>
-                  {defaultAddress.address.zipCode && <div>{defaultAddress.address.zipCode}</div>}
+                  {defaultAddress.zipCode && <div>{defaultAddress.zipCode}</div>}
                 </div>
               </div>
-              {defaultAddress.contactPerson && (
+              {defaultAddress && (
                 <div>
                   <h4 className="font-semibold">Contact Person</h4>
                   <div className="text-muted-foreground space-y-1">
-                    <div>{defaultAddress.contactPerson.name}</div>
-                    <div>{defaultAddress.contactPerson.phone}</div>
-                    {defaultAddress.contactPerson.email && (
-                      <div>{defaultAddress.contactPerson.email}</div>
-                    )}
+                    <div>{defaultAddress.name}</div>
+                    <div>{defaultAddress.phone}</div>
+                  
                   </div>
                 </div>
               )}
@@ -315,9 +314,9 @@ export default function UserAddressesPage() {
             searchPlaceholder="Search addresses by label, city, or country..."
             onRefresh={handleRefresh}
             showSearch={true}
-            showFilter={false}
+            showFilter={true}
             showExport={false}
-            showCreateNew={false}
+            showCreateNew={true}
             emptyMessage="No addresses found. Add your first address to get started."
           />
         </CardContent>

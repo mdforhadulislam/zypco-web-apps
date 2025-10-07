@@ -244,7 +244,7 @@ export const UserData = {
       icon: Settings2,
       items: [
         { title: "Profile", url: "/dashboard/settings" },
-        { title: "Addresses", url: "/dashboard/settings/addresses" },
+        { title: "Address", url: "/dashboard/settings/address" },
         { title: "API Keys", url: "/dashboard/settings/api-keys" },
         { title: "Login History", url: "/dashboard/settings/login-history" },
       ],

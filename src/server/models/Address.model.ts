@@ -42,22 +42,13 @@ const addressSchema = new Schema<IAddress>(
       type: {
         type: String,
         enum: ["Point"],
-        default: "Point",
+        default: "Point",required: false,
       },
       coordinates: {
         type: [Number], // [longitude, latitude]
-        required: true,
-        validate: {
-          /**
-           * Validator for the `coordinates` field.
-           * Ensures that the field is an array of exactly two numbers.
-           * @param coords The coordinates array to validate.
-           */
-          validator: function (coords: number[]) {
-            return coords.length === 2;
-          },
-          message: "Coordinates must be [longitude, latitude]",
-        },
+        required: false,
+        default: [1, 1],
+        
       },
     },
   },
@@ -66,7 +57,6 @@ const addressSchema = new Schema<IAddress>(
 addressSchema.index({ user: 1, isDefault: -1 });
 addressSchema.index({ country: 1, state: 1, city: 1, subCity: 1 });
 addressSchema.index({ area: 1 });
-addressSchema.index({ location: "2dsphere" }); // For geospatial queries
 
 addressSchema.pre<IAddress>("save", async function (next) {
   if (this.isDefault) {

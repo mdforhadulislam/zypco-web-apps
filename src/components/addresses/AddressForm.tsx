@@ -64,6 +64,7 @@ export function AddressForm({ address, onSubmit, onCancel, loading = false }: Ad
     resolver: zodResolver(addressFormSchema),
     defaultValues: address
       ? {
+
           label: address.label || "",
           isDefault: address.isDefault || false,
           address: {
@@ -105,7 +106,9 @@ export function AddressForm({ address, onSubmit, onCancel, loading = false }: Ad
     const loadCountries = async () => {
       try {
         const response = await countryService.getActiveCountries();
-        if (response.status === 200 && response.data) {
+        console.log(response);
+        
+        if (response.status == 200 && response.data) {
           setCountries(Array.isArray(response.data) ? response.data : [response.data]);
         }
       } catch (error) {
@@ -116,7 +119,7 @@ export function AddressForm({ address, onSubmit, onCancel, loading = false }: Ad
   }, []);
 
   const handleSubmit = (data: AddressFormData) => {
-    const formatted = {
+    const formatted = { 
       label: data.label,
       isDefault: data.isDefault,
       name: data.contactPerson?.name || "",
@@ -129,6 +132,8 @@ export function AddressForm({ address, onSubmit, onCancel, loading = false }: Ad
       zipCode: data.address.zipCode,
       country: data.address.country,
     };
+    console.log(formatted.country);
+    
 
     onSubmit(formatted);
   };
@@ -250,7 +255,7 @@ export function AddressForm({ address, onSubmit, onCancel, loading = false }: Ad
                     </FormControl>
                     <SelectContent>
                       {countries.map((c) => (
-                        <SelectItem key={c._id} value={c.name}>
+                        <SelectItem key={c._id} value={c._id}>
                           {c.name} ({c.code})
                         </SelectItem>
                       ))}
