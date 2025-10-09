@@ -23,7 +23,7 @@ const pickupSchema = new Schema<IPickup>(
     preferredTimeSlot: { type: String, default: "" },
     status: {
       type: String,
-      enum: ["pending", "scheduled", "picked", "cancelled"],
+      enum: ["pending", "scheduled", "in-progress", "completed", "cancelled"],
       default: "pending",
     },
     notes: { type: String, default: "" },

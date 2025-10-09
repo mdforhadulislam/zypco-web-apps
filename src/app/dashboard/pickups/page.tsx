@@ -1,60 +1,120 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { DataTable } from "@/components/Dashboard/DataTable";
-import { RoleGuard } from "@/middleware/roleGuard";
-import { PickupService } from "@/services/dashboardService";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
-  Plus,
-  Package,
-  Clock,
-  CheckCircle,
-  MapPin,
-  Loader2,
-} from "lucide-react";
-import { toast } from "sonner";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/AuthContext";
+import { RoleGuard } from "@/middleware/roleGuard";
+import { PickupService, UserService } from "@/services/dashboardService";
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Edit,
+  Eye,
+  Loader2,
+  MapPin,
+  Package,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+interface Pickup {
+  _id: string;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
+  };
+  address: any;
+  preferredDate: string;
+  preferredTimeSlot: string;
+  status: "pending" | "scheduled" | "in-progress" | "completed" | "cancelled";
+  notes: string;
+  cost: number;
+  moderator?: any;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function PickupsPage() {
-  const [pickups, setPickups] = useState<any[]>([]);
+  const [pickups, setPickups] = useState<Pickup[]>([]);
+  const [addresses, setAddresses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [selectedPickup, setSelectedPickup] = useState<Pickup | null>(null);
   const { user } = useAuth();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    addressLine: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    note: "",
+  const [createFormData, setCreateFormData] = useState({
+    address: "",
     preferredDate: "",
+    preferredTimeSlot: "",
+    notes: "",
+  });
+
+  const [editFormData, setEditFormData] = useState({
+    preferredDate: "",
+    preferredTimeSlot: "",
+    notes: "",
+  });
+
+  const [statusFormData, setStatusFormData] = useState({
+    status: "",
+    cost: 0,
+    notes: "",
   });
 
   useEffect(() => {
     fetchPickups();
-  }, []);
+    if (user) {
+      fetchAddresses();
+    }
+  }, [user]);
 
   const fetchPickups = async () => {
     try {
       setLoading(true);
-      const response = await PickupService.getPickups({ limit: 50 });
-      if (response.status === 200) {
+      const response = await PickupService.getPickups({ limit: 100 });
+      console.log(response);
+
+      if (response.status == 200) {
         setPickups(response.data || []);
       } else {
         toast.error(response.message || "Failed to fetch pickups");
@@ -68,36 +128,47 @@ export default function PickupsPage() {
     }
   };
 
+  const fetchAddresses = async () => {
+    try {
+      if (!user?.phone) return;
+      const response = await UserService.getUserAddresses(user.phone);
+      if (response.status == 200) {
+        setAddresses(response.data || []);
+      } else {
+        toast.error(response.message || "Failed to fetch addresses");
+      }
+    } catch (error) {
+      console.error("Failed to fetch addresses:", error);
+    }
+  };
+
   const handleCreatePickup = async () => {
     try {
       setCreating(true);
 
-      if (!formData.preferredDate) {
-        toast.error("Please select a preferred pickup date");
+      if (!createFormData.address || !createFormData.preferredDate) {
+        toast.error("Please fill all required fields");
         return;
       }
 
       const payload = {
-        ...formData,
-        preferredDate: new Date(formData.preferredDate),
-        status: "scheduled",
-        user: user?._id,
+        user: user?.id,
+        address: createFormData.address,
+        preferredDate: new Date(createFormData.preferredDate).toISOString(),
+        preferredTimeSlot: createFormData.preferredTimeSlot,
+        notes: createFormData.notes,
       };
 
       const response = await PickupService.createPickup(payload);
 
-      if (response.status === 201 || response.status === 200) {
+      if (response.status == 201) {
         toast.success("Pickup scheduled successfully!");
-        setShowModal(false);
-        setFormData({
-          name: "",
-          phone: "",
-          addressLine: "",
-          city: "",
-          state: "",
-          zipCode: "",
-          note: "",
+        setShowCreateModal(false);
+        setCreateFormData({
+          address: "",
           preferredDate: "",
+          preferredTimeSlot: "",
+          notes: "",
         });
         fetchPickups();
       } else {
@@ -110,19 +181,165 @@ export default function PickupsPage() {
     }
   };
 
+  const handleEditPickup = async () => {
+    if (!selectedPickup) return;
+
+    try {
+      setCreating(true);
+
+      const payload = {
+        preferredDate: new Date(editFormData.preferredDate).toISOString(),
+        preferredTimeSlot: editFormData.preferredTimeSlot,
+        notes: editFormData.notes,
+      };
+
+      const response = await PickupService.updatePickup(
+        selectedPickup._id,
+        payload
+      );
+
+      if (response.status == 200) {
+        toast.success("Pickup updated successfully!");
+        setShowEditModal(false);
+        setSelectedPickup(null);
+        fetchPickups();
+      } else {
+        toast.error(response.message || "Failed to update pickup");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Error updating pickup");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!selectedPickup) return;
+
+    try {
+      setCreating(true);
+
+      const payload: any = {
+        status: statusFormData.status,
+      };
+
+      if (statusFormData.cost > 0) {
+        payload.cost = statusFormData.cost;
+      }
+
+      if (statusFormData.notes) {
+        payload.notes = statusFormData.notes;
+      }
+
+      const response = await PickupService.updatePickup(
+        selectedPickup._id,
+        payload
+      );
+
+      if (response.status == 200) {
+        toast.success("Pickup status updated successfully!");
+        setShowStatusModal(false);
+        setSelectedPickup(null);
+        setStatusFormData({ status: "", cost: 0, notes: "" });
+        fetchPickups();
+      } else {
+        toast.error(response.message || "Failed to update status");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Error updating status");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDeletePickup = async () => {
+    if (!selectedPickup) return;
+
+    try {
+      setCreating(true);
+
+      const response = await PickupService.deletePickup(selectedPickup._id);
+
+      if (response.status == 200) {
+        toast.success("Pickup deleted successfully!");
+        setShowDeleteModal(false);
+        setSelectedPickup(null);
+        fetchPickups();
+      } else {
+        toast.error(response.message || "Failed to delete pickup");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Error deleting pickup");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const openEditModal = (pickup: Pickup) => {
+    setSelectedPickup(pickup);
+    setEditFormData({
+      preferredDate:
+        pickup.preferredDate.split("T")[0] +
+        "T" +
+        pickup.preferredDate.split("T")[1].slice(0, 5),
+      preferredTimeSlot: pickup.preferredTimeSlot || "",
+      notes: pickup.notes || "",
+    });
+    setShowEditModal(true);
+  };
+
+  const openStatusModal = (pickup: Pickup) => {
+    setSelectedPickup(pickup);
+    setStatusFormData({
+      status: pickup.status,
+      cost: pickup.cost || 0,
+      notes: pickup.notes || "",
+    });
+    setShowStatusModal(true);
+  };
+
+  const openViewModal = (pickup: Pickup) => {
+    setSelectedPickup(pickup);
+    setShowViewModal(true);
+  };
+
+  const openDeleteModal = (pickup: Pickup) => {
+    setSelectedPickup(pickup);
+    setShowDeleteModal(true);
+  };
+
   const getStatusBadge = (status: string) => {
-    const variants = {
-      scheduled: "secondary",
-      "in-progress": "default",
-      completed: "default",
-      cancelled: "destructive",
-    } as const;
+    const variants: Record<string, any> = {
+      pending: { variant: "outline", color: "text-yellow-600" },
+      scheduled: { variant: "secondary", color: "text-blue-600" },
+      "in-progress": { variant: "default", color: "text-purple-600" },
+      completed: { variant: "default", color: "text-green-600" },
+      cancelled: { variant: "destructive", color: "text-red-600" },
+    };
+
+    const config = variants[status] || { variant: "outline", color: "" };
 
     return (
-      <Badge variant={variants[status as keyof typeof variants] || "outline"}>
+      <Badge variant={config.variant as any} className={config.color}>
         {status}
       </Badge>
     );
+  };
+
+  const canEditPickup = (pickup: Pickup) => {
+    if (user?.role === "admin" || user?.role === "moderator") return true;
+    if (user?.role === "user" && pickup.user._id === user.id) {
+      return ["pending", "scheduled"].includes(pickup.status);
+    }
+    return false;
+  };
+
+  const canUpdateStatus = () => {
+    return user?.role === "admin" || user?.role === "moderator";
+  };
+
+  const canDeletePickup = () => {
+    return user?.role === "admin";
   };
 
   const columns = [
@@ -130,6 +347,9 @@ export default function PickupsPage() {
       key: "_id",
       label: "Pickup ID",
       sortable: true,
+      render: (value: string) => (
+        <span className="font-mono text-sm">{value.slice(-8)}</span>
+      ),
     },
     {
       key: "address",
@@ -137,7 +357,7 @@ export default function PickupsPage() {
       render: (value: any) => (
         <div>
           <p className="font-medium">
-            {value?.street || value?.addressLine || "N/A"}
+            {value?.addressLine || value?.street || "N/A"}
           </p>
           <p className="text-sm text-gray-500">
             {value?.city}, {value?.zipCode}
@@ -148,7 +368,7 @@ export default function PickupsPage() {
     {
       key: "status",
       label: "Status",
-      render: (value: string) => getStatusBadge(value || "scheduled"),
+      render: (value: string) => getStatusBadge(value || "pending"),
     },
     {
       key: "preferredDate",
@@ -158,12 +378,67 @@ export default function PickupsPage() {
         value ? new Date(value).toLocaleString() : "Not scheduled",
     },
     {
-      key: "user",
+      key: "cost",
+      label: "Cost",
+      render: (value: number) => (
+        <span className="font-medium">
+          {value > 0 ? `$${value.toFixed(2)}` : "TBD"}
+        </span>
+      ),
+    },
+    {
+      key: "address",
       label: "User Contact",
       render: (value: any) => (
         <div>
           <p className="font-medium">{value?.name || "N/A"}</p>
           <p className="text-sm text-gray-500">{value?.phone || "No phone"}</p>
+        </div>
+      ),
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      render: (_: any, pickup: Pickup) => (
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => openViewModal(pickup)}
+            data-testid={`view-pickup-${pickup._id}`}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          {canEditPickup(pickup) && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => openEditModal(pickup)}
+              data-testid={`edit-pickup-${pickup._id}`}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
+          {canUpdateStatus() && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => openStatusModal(pickup)}
+              data-testid={`status-pickup-${pickup._id}`}
+            >
+              <AlertCircle className="h-4 w-4" />
+            </Button>
+          )}
+          {canDeletePickup() && (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => openDeleteModal(pickup)}
+              data-testid={`delete-pickup-${pickup._id}`}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       ),
     },
@@ -181,7 +456,10 @@ export default function PickupsPage() {
               Schedule and manage package pickups
             </p>
           </div>
-          <Button onClick={() => setShowModal(true)}>
+          <Button
+            onClick={() => setShowCreateModal(true)}
+            data-testid="create-pickup-btn"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Schedule Pickup
           </Button>
@@ -197,7 +475,9 @@ export default function PickupsPage() {
                   <p className="text-sm font-medium text-gray-600">
                     Total Pickups
                   </p>
-                  <p className="text-2xl font-bold">{pickups.length}</p>
+                  <p className="text-2xl font-bold" data-testid="total-pickups">
+                    {pickups.length}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -207,12 +487,12 @@ export default function PickupsPage() {
               <div className="flex items-center space-x-2">
                 <Clock className="h-5 w-5 text-orange-600" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Scheduled</p>
-                  <p className="text-2xl font-bold">
-                    {
-                      pickups.filter((p: any) => p.status === "scheduled")
-                        .length
-                    }
+                  <p className="text-sm font-medium text-gray-600">Pending</p>
+                  <p
+                    className="text-2xl font-bold"
+                    data-testid="pending-pickups"
+                  >
+                    {pickups.filter((p: any) => p.status === "pending").length}
                   </p>
                 </div>
               </div>
@@ -223,10 +503,11 @@ export default function PickupsPage() {
               <div className="flex items-center space-x-2">
                 <CheckCircle className="h-5 w-5 text-green-600" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    Completed
-                  </p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-sm font-medium text-gray-600">Completed</p>
+                  <p
+                    className="text-2xl font-bold"
+                    data-testid="completed-pickups"
+                  >
                     {
                       pickups.filter((p: any) => p.status === "completed")
                         .length
@@ -244,7 +525,10 @@ export default function PickupsPage() {
                   <p className="text-sm font-medium text-gray-600">
                     In Progress
                   </p>
-                  <p className="text-2xl font-bold">
+                  <p
+                    className="text-2xl font-bold"
+                    data-testid="inprogress-pickups"
+                  >
                     {
                       pickups.filter((p: any) => p.status === "in-progress")
                         .length
@@ -261,21 +545,8 @@ export default function PickupsPage() {
           title="Pickup Requests"
           data={pickups}
           columns={columns}
-          searchKeys={["_id", "address.street", "user.name"]}
+          searchKeys={["_id", "address.addressLine", "user.name"]}
           loading={loading}
-          actions={[
-            {
-              label: "View Details",
-              onClick: (pickup) => toast.info(`Viewing pickup ${pickup._id}`),
-              variant: "default",
-            },
-            {
-              label: "Update Status",
-              onClick: (pickup) => toast.info(`Status update for ${pickup._id}`),
-              variant: "default",
-              condition: () => user?.role === "admin" || user?.role === "moderator",
-            },
-          ]}
         />
 
         {/* Empty State */}
@@ -291,7 +562,7 @@ export default function PickupsPage() {
                   Get started by scheduling your first pickup.
                 </p>
                 <div className="mt-6">
-                  <Button onClick={() => setShowModal(true)}>
+                  <Button onClick={() => setShowCreateModal(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Schedule First Pickup
                   </Button>
@@ -302,61 +573,105 @@ export default function PickupsPage() {
         )}
 
         {/* Create Pickup Modal */}
-        <Dialog open={showModal} onOpenChange={setShowModal}>
-          <DialogContent>
+        <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+          <DialogContent data-testid="create-pickup-modal">
             <DialogHeader>
               <DialogTitle>Schedule a New Pickup</DialogTitle>
+              <DialogDescription>
+                Fill in the details to schedule a pickup request
+              </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              {[
-                ["Name", "name"],
-                ["Phone", "phone"],
-                ["Address Line", "addressLine"],
-                ["City", "city"],
-                ["State", "state"],
-                ["ZIP Code", "zipCode"],
-              ].map(([label, key]) => (
-                <div key={key}>
-                  <Label>{label}</Label>
-                  <Input
-                    value={(formData as any)[key]}
-                    onChange={(e) =>
-                      setFormData({ ...formData, [key]: e.target.value })
-                    }
-                  />
-                </div>
-              ))}
+              <div>
+                <Label>Address *</Label>
+                <Select
+                  value={createFormData.address}
+                  onValueChange={(value) =>
+                    setCreateFormData({ ...createFormData, address: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select from saved addresses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {addresses.length > 0 ? (
+                      addresses.map((addr: any) => (
+                        <SelectItem key={addr._id} value={addr._id}>
+                          {addr.label
+                            ? `${addr.label} — ${addr.city} - ${addr.name}`
+                            : `${addr.city}, ${addr.country}`}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem disabled value="no-address">
+                        No saved addresses found
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+
+                <p className="text-xs text-muted-foreground mt-1">
+                  Choose one of your saved addresses
+                </p>
+              </div>
 
               <div>
-                <Label>Preferred Pickup Date</Label>
+                <Label>Preferred Pickup Date *</Label>
                 <Input
                   type="datetime-local"
-                  value={formData.preferredDate}
+                  value={createFormData.preferredDate}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
+                    setCreateFormData({
+                      ...createFormData,
                       preferredDate: e.target.value,
                     })
                   }
+                  data-testid="create-date-input"
                 />
               </div>
 
               <div>
-                <Label>Pickup Note</Label>
-                <Textarea
-                  value={formData.note}
+                <Label>Preferred Time Slot</Label>
+                <Input
+                  placeholder="e.g., 09:00-12:00"
+                  value={createFormData.preferredTimeSlot}
                   onChange={(e) =>
-                    setFormData({ ...formData, note: e.target.value })
+                    setCreateFormData({
+                      ...createFormData,
+                      preferredTimeSlot: e.target.value,
+                    })
                   }
+                  data-testid="create-timeslot-input"
+                />
+              </div>
+
+              <div>
+                <Label>Notes</Label>
+                <Textarea
+                  placeholder="Any special instructions..."
+                  value={createFormData.notes}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      notes: e.target.value,
+                    })
+                  }
+                  data-testid="create-notes-input"
                 />
               </div>
             </div>
 
             <DialogFooter>
               <Button
+                variant="outline"
+                onClick={() => setShowCreateModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
                 onClick={handleCreatePickup}
                 disabled={creating}
-                className="w-full"
+                data-testid="submit-create-pickup"
               >
                 {creating ? (
                   <>
@@ -370,6 +685,293 @@ export default function PickupsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Edit Pickup Modal */}
+        <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+          <DialogContent data-testid="edit-pickup-modal">
+            <DialogHeader>
+              <DialogTitle>Edit Pickup</DialogTitle>
+              <DialogDescription>Update pickup details</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div>
+                <Label>Preferred Pickup Date</Label>
+                <Input
+                  type="datetime-local"
+                  value={editFormData.preferredDate}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      preferredDate: e.target.value,
+                    })
+                  }
+                  data-testid="edit-date-input"
+                />
+              </div>
+
+              <div>
+                <Label>Preferred Time Slot</Label>
+                <Input
+                  placeholder="e.g., 09:00-12:00"
+                  value={editFormData.preferredTimeSlot}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      preferredTimeSlot: e.target.value,
+                    })
+                  }
+                  data-testid="edit-timeslot-input"
+                />
+              </div>
+
+              <div>
+                <Label>Notes</Label>
+                <Textarea
+                  value={editFormData.notes}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, notes: e.target.value })
+                  }
+                  data-testid="edit-notes-input"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleEditPickup}
+                disabled={creating}
+                data-testid="submit-edit-pickup"
+              >
+                {creating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Pickup"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Update Status Modal */}
+        <Dialog open={showStatusModal} onOpenChange={setShowStatusModal}>
+          <DialogContent data-testid="status-pickup-modal">
+            <DialogHeader>
+              <DialogTitle>Update Pickup Status</DialogTitle>
+              <DialogDescription>
+                Update status and cost information
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div>
+                <Label>Status</Label>
+                <Select
+                  value={statusFormData.status}
+                  onValueChange={(value) =>
+                    setStatusFormData({ ...statusFormData, status: value })
+                  }
+                >
+                  <SelectTrigger data-testid="status-select">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Cost ($)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={statusFormData.cost}
+                  onChange={(e) =>
+                    setStatusFormData({
+                      ...statusFormData,
+                      cost: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  data-testid="status-cost-input"
+                />
+              </div>
+
+              <div>
+                <Label>Notes</Label>
+                <Textarea
+                  value={statusFormData.notes}
+                  onChange={(e) =>
+                    setStatusFormData({
+                      ...statusFormData,
+                      notes: e.target.value,
+                    })
+                  }
+                  data-testid="status-notes-input"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowStatusModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateStatus}
+                disabled={creating}
+                data-testid="submit-status-update"
+              >
+                {creating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Status"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Details Modal */}
+        <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
+          <DialogContent data-testid="view-pickup-modal">
+            <DialogHeader>
+              <DialogTitle>Pickup Details</DialogTitle>
+            </DialogHeader>
+            {selectedPickup && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-muted-foreground">Pickup ID</Label>
+                    <p className="font-mono" data-testid="view-pickup-id">
+                      {selectedPickup._id}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Status</Label>
+                    <div data-testid="view-pickup-status">
+                      {getStatusBadge(selectedPickup.status)}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-muted-foreground">User</Label>
+                  <p className="font-medium">{selectedPickup.user.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedPickup.user.phone} • {selectedPickup.user.email}
+                  </p>
+                </div>
+
+                <div>
+                  <Label className="text-muted-foreground">
+                    Pickup Address
+                  </Label>
+                  <p>
+                    {selectedPickup.address?.addressLine ||
+                      selectedPickup.address?.street}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedPickup.address?.city},{" "}
+                    {selectedPickup.address?.state}{" "}
+                    {selectedPickup.address?.zipCode}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-muted-foreground">
+                      Preferred Date
+                    </Label>
+                    <p>
+                      {new Date(selectedPickup.preferredDate).toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Time Slot</Label>
+                    <p>{selectedPickup.preferredTimeSlot || "Not specified"}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-muted-foreground">Cost</Label>
+                    <p className="font-medium">
+                      {selectedPickup.cost > 0
+                        ? `$${selectedPickup.cost.toFixed(2)}`
+                        : "Not assigned"}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Created</Label>
+                    <p className="text-sm">
+                      {new Date(selectedPickup.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                {selectedPickup.notes && (
+                  <div>
+                    <Label className="text-muted-foreground">Notes</Label>
+                    <p className="text-sm">{selectedPickup.notes}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Modal */}
+        <AlertDialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+          <AlertDialogContent data-testid="delete-pickup-modal">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Pickup</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this pickup? This action cannot
+                be undone.
+                {selectedPickup && (
+                  <div className="mt-2 p-2 bg-muted rounded">
+                    <strong>Pickup ID:</strong> {selectedPickup._id}
+                  </div>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel data-testid="cancel-delete-pickup">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeletePickup}
+                disabled={creating}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                data-testid="confirm-delete-pickup"
+              >
+                {creating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete Pickup"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </RoleGuard>
   );

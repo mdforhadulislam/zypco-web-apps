@@ -135,46 +135,8 @@ export const POST = createPublicHandler(async ({ req, user }) => {
       });
     } 
 
-    let userId: string;
-    let addressId: string;
 
-    if (user) {
-      // Authenticated user
-      userId = user.id;
-      
-      if (body.address && Types.ObjectId.isValid(body.address)) {
-        // Verify address belongs to user or create new one
-        const existingAddress = await Address.findOne({
-          _id: new Types.ObjectId(body.address),
-          user: new Types.ObjectId(user.id)
-        });
-        
-        if (!existingAddress) {
-          return errorResponse({
-            status: 400,
-            message: "Address not found or doesn't belong to you",
-            req,
-          });
-        }
-        addressId = body.address;
-      } else {
-        return errorResponse({
-          status: 400,
-          message: "Address ID is required for authenticated users",
-          req,
-        });
-      }
-    } else {
-      // Non-authenticated user - need to create user and address
-      if (!body.contactInfo || !body.contactInfo.name || !body.contactInfo.phone) {
-        return errorResponse({
-          status: 400,
-          message: "Contact information (name and phone) is required for guest users",
-          req,
-        });
-      }
-
-      if (!body.pickupAddress) {
+      if (!body.address) {
         return errorResponse({
           status: 400,
           message: "Pickup address details are required for guest users",
@@ -182,65 +144,32 @@ export const POST = createPublicHandler(async ({ req, user }) => {
         });
       }
 
-      // Create or find user by phone
-      let guestUser = await User.findOne({ phone: body.contactInfo.phone });
+    
       
-      if (!guestUser) {
-        guestUser = new User({
-          name: body.contactInfo.name,
-          phone: body.contactInfo.phone,
-          email: body.contactInfo.email || "",
-          role: "user",
-          isActive: true,
-          isVerified: false,
-          // Generate a temporary password - user will need to complete registration later
-          password: Math.random().toString(36).slice(-8),
-        });
-        await guestUser.save();
-      }
-
-      userId = guestUser._id.toString();
-
-      // Create address
-      const newAddress = new Address({
-        user: guestUser._id,
-        name: body.pickupAddress.name || "Pickup Address",
-        street: body.pickupAddress.street || "",
-        city: body.pickupAddress.city || "",
-        state: body.pickupAddress.state || "",
-        country: body.pickupAddress.country || "",
-        zipCode: body.pickupAddress.zipCode || "",
-        phone: body.contactInfo.phone,
-        email: body.contactInfo.email || "",
-        isDefault: true,
-        type: "pickup",
-      });
       
-      await newAddress.save();
-      addressId = newAddress._id.toString();
-    }
-
-    // Create pickup request
-    const pickup = new Pickup({
-      user: new Types.ObjectId(userId),
-      address: new Types.ObjectId(addressId),
-      preferredDate: preferredDate,
-      preferredTimeSlot: body.preferredTimeSlot || "",
-      status: "pending",
+      // Create pickup request
+      const pickup = new Pickup({
+        user: new Types.ObjectId(body.user ), 
+        address: new Types.ObjectId(body.address),
+        preferredDate: preferredDate,
+        preferredTimeSlot: body.preferredTimeSlot || "",
+        status: "pending",
       notes: body.notes || "",
       cost: 0, // Default cost, will be calculated by admin/moderator
-      specialInstructions: body.specialInstructions || "",
-      packageDetails: body.packageDetails || {},
     });
-
+    
     await pickup.save();
-
+    
+    
+    
     // Populate for response
     const populatedPickup = await Pickup.findById(pickup._id)
-      .populate("user", "name email phone")
-      .populate("address")
-      .lean();
-
+    .populate("user", "name email phone")
+    .populate("address")
+    .lean();
+    
+    console.log(body);
+    console.log(populatedPickup);
     return successResponse({
       status: 201,
       message: "Pickup request created successfully",

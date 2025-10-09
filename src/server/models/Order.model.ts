@@ -5,7 +5,7 @@ const counterSchema = new Schema({
   seq: { type: Number, default: 0 },
 });
 
-const Counter =   models.Counter || model("Counter", counterSchema);;
+const Counter = models.Counter || model("Counter", counterSchema);
 
 // Address Sub-schema
 const addressSchema = new Schema({
@@ -98,7 +98,11 @@ const orderSchema = new Schema<IOrder>(
     orderDate: { type: Date, default: Date.now, required: true },
 
     payment: { type: paymentSchema, required: true },
-    trackId: { type: String, required: true, unique: true },
+    trackId: {
+      type: String,
+      unique: true,
+      required: true,
+    },
     handover_by: { type: handoverSchema, required: true, default: () => ({}) },
   },
   { timestamps: true }

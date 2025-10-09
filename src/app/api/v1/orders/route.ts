@@ -317,6 +317,30 @@ export const POST = createPublicHandler(async ({ req, user }) => {
       if (!body.payment.pType) body.payment.pType = "cash-on-delivery";
     }
 
+    // set to genaret trackId
+    const generateTrackId = () => {
+      const prefix = "ZYP";
+      const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const timestampPart = Date.now().toString().slice(-5);
+      return `${prefix}-${randomPart}-${timestampPart}`;
+    }
+    body.trackId = generateTrackId();
+    
+    // Ensure trackId is unique (in rare case of collision)
+    let exists = await Order.findOne({ trackId: body.trackId }).lean();
+    while (exists) {
+      body.trackId = generateTrackId();
+      exists = await Order.findOne({ trackId: body.trackId }).lean();
+    }
+    
+    body.orderDate = new Date();
+    body.handover_by = {
+      company: "",
+      tracking: "",
+      payment: 0,
+    };
+    
+
     // Construct order document and save
     const order = new Order(body);
     await order.save();

@@ -31,7 +31,6 @@ interface OrderStats {
 export default function OrdersPage() {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [stats, setStats] = useState<OrderStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   
@@ -81,22 +80,9 @@ export default function OrdersPage() {
     }
   };
 
-  const loadStats = async () => {
-    try {
-      const response = await orderService.getOrderStats();
-      if (response.success && response.data) {
-        setStats(response.data);
-      }
-    } catch (error) {
-      console.error("Failed to load stats:", error);
-    }
-  };
-
   useEffect(() => {
     loadOrders();
-    if (user?.role === "admin" || user?.role === "moderator") {
-      loadStats();
-    }
+  
   }, [filters, user?.role]);
 
   // CRUD handlers
@@ -105,7 +91,7 @@ export default function OrdersPage() {
       setActionLoading(true);
       const response = await orderService.createOrder(data);
       
-      if (response.success) {
+      if (response.status === 201) {
         toast.success("Order created successfully");
         setIsCreateModalOpen(false);
         loadOrders();
@@ -204,9 +190,7 @@ export default function OrdersPage() {
 
   const handleRefresh = () => {
     loadOrders();
-    if (user?.role === "admin" || user?.role === "moderator") {
-      loadStats();
-    }
+   
   };
 
   const handleExport = async () => {
@@ -262,67 +246,7 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Stats Cards - Only for admin/moderator */}
-      {(user.role === "admin" || user.role === "moderator") && stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" data-testid="total-orders">{stats.total}</div>
-              <p className="text-xs text-muted-foreground">
-                <TrendingUp className="inline h-3 w-3 mr-1" />
-                {stats.todayOrders} today
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600" data-testid="pending-orders">
-                {stats.pending}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Awaiting processing
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Delivered Orders</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600" data-testid="delivered-orders">
-                {stats.delivered}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Successfully delivered
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">This Month</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold" data-testid="monthly-orders">{stats.monthlyOrders}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats.weeklyOrders} this week
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+   
 
       {/* Orders Table */}
       <Card>
