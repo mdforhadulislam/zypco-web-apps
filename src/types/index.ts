@@ -50,6 +50,48 @@ export interface Payment {
   status?: "pending" | "completed" | "failed" | "refunded";
 }
 
+export interface CreateOrderData {
+  parcel: {
+    from: string; // Country ID
+    to: string;   // Country ID
+    weight: number;
+    orderType: "document" | "parcel" | "e-commerce";
+    priority: "normal" | "express" | "super-express" | "tax-paid";
+    customerNote?: string;
+
+    sender: {
+      name: string;
+      phone: string;
+      email?: string;
+      address: {
+        address: string;
+        city: string;
+        zipCode?: string;
+        country: string; // Country ID
+      };
+    };
+
+    receiver: {
+      name: string;
+      phone: string;
+      email?: string;
+      address: {
+        address: string;
+        city: string;
+        zipCode?: string;
+        country: string; // Country ID
+      };
+    };
+
+    item: {
+      description: string;
+      quantity: number;
+      weight: number;
+      value: number;
+    }[];
+  };
+}
+
 export interface Parcel {
   from: string;
   to: string;

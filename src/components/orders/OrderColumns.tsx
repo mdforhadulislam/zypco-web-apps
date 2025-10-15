@@ -80,7 +80,7 @@ export const createOrderColumns = ({
       return (
         <div className="flex flex-col space-y-1">
           <div className="text-sm font-medium">
-            {parcel.from} → {parcel.to}
+            {parcel.from.name} → {parcel.to.name}
           </div>
           <div className="text-xs text-muted-foreground">
             {parcel.sender.name} → {parcel.receiver.name}

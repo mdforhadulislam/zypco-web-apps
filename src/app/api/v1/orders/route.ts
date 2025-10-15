@@ -145,7 +145,12 @@ export const GET = createAuthHandler(async ({ req, user }) => {
     sortObj[sortBy] = sortOrder;
 
     const total = await Order.countDocuments(query);
-    const orders = await Order.find(query)
+    const orders = await Order.find(query).populate([
+    { path: 'parcel.from' },
+    { path: 'parcel.to' },
+    { path: 'parcel.sender.address.country' },
+    { path: 'parcel.receiver.address.country' },
+  ])
       .sort(sortObj)
       .skip(skip)
       .limit(limit)
@@ -289,7 +294,7 @@ export const POST = createPublicHandler(async ({ req, user }) => {
     // If payment not provided, create default
     if (!body.payment || typeof body.payment !== "object") {
       body.payment = {
-        pType: "cash-on-delivery",
+        pType: "Due",
         pAmount: 0,
         pOfferDiscount: 0,
         pExtraCharge: 0,
@@ -314,7 +319,7 @@ export const POST = createPublicHandler(async ({ req, user }) => {
           body.payment[f] = Number(body.payment[f]);
         }
       }
-      if (!body.payment.pType) body.payment.pType = "cash-on-delivery";
+      if (!body.payment.pType) body.payment.pType = "Due";
     }
 
     // set to genaret trackId

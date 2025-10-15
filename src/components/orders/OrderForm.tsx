@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -15,20 +24,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Plus, Trash2 } from "lucide-react";
-import { CreateOrderData, Order } from "@/types";
+import { Textarea } from "@/components/ui/textarea";
 import { countryService } from "@/services/countryService";
+import { CreateOrderData, Order } from "@/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import * as z from "zod";
 
 const addressSchema = z.object({
   address: z.string().min(1, "Address address is required"),
@@ -57,19 +59,20 @@ const orderFormSchema = z.object({
     from: z.string().min(1, "Origin country is required"),
     to: z.string().min(1, "Destination country is required"),
     weight: z.number().min(0.1, "Weight must be at least 0.1 kg"),
-    dimensions: z.object({
-      length: z.number().optional(),
-      width: z.number().optional(),
-      height: z.number().optional(),
-    }).optional(),
-    orderType: z.enum( ["document", "parcel", "e-commerce"]),
+    dimensions: z
+      .object({
+        length: z.number().optional(),
+        width: z.number().optional(),
+        height: z.number().optional(),
+      })
+      .optional(),
+    orderType: z.enum(["document", "parcel", "e-commerce"]),
     priority: z.enum(["normal", "express", "super-express", "tax-paid"]),
     customerNote: z.string().optional(),
     sender: contactSchema,
     receiver: contactSchema,
     item: z.array(parcelItemSchema).optional(),
   }),
-
 });
 
 type OrderFormData = z.infer<typeof orderFormSchema>;
@@ -81,78 +84,84 @@ interface OrderFormProps {
   loading?: boolean;
 }
 
-
-export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderFormProps) {
+export function OrderForm({
+  order,
+  onSubmit,
+  onCancel,
+  loading = false,
+}: OrderFormProps) {
   const [addItems, setAddItems] = useState(false);
-    const [countries, setCountries] = useState<any[]>([]);
-
+  const [countries, setCountries] = useState<any[]>([]);
 
   const form = useForm<OrderFormData>({
     resolver: zodResolver(orderFormSchema),
-    defaultValues: order ? {
-      parcel: {
-        from: order.parcel.from,
-        to: order.parcel.to,
-        weight: order.parcel.weight,
-        dimensions: order.parcel.dimensions || {},
-        orderType: order.parcel.orderType,
-        priority: order.parcel.priority,
-        customerNote: order.parcel.customerNote || "",
-        sender: order.parcel.sender,
-        receiver: order.parcel.receiver,
-        item: order.parcel.item || [],
-      },
-    } : {
-      parcel: {
-        from: "",
-        to: "",
-        weight: 0,
-        orderType: "standard",
-        priority: "normal",
-        customerNote: "",
-        sender: {
-          name: "",
-          phone: "",
-          email: "",
-          address: {
-            address: "",
-            city: "",
-            country: "",
-            zipCode: "",
+    defaultValues: order
+      ? {
+          parcel: {
+            from: order.parcel.from,
+            to: order.parcel.to,
+            weight: order.parcel.weight,
+            dimensions: order.parcel.dimensions || {},
+            orderType: order.parcel.orderType,
+            priority: order.parcel.priority,
+            customerNote: order.parcel.customerNote || "",
+            sender: order.parcel.sender,
+            receiver: order.parcel.receiver,
+            item: order.parcel.item || [],
+          },
+        }
+      : {
+          parcel: {
+            from: "",
+            to: "",
+            weight: 0,
+            orderType: "standard",
+            priority: "normal",
+            customerNote: "",
+            sender: {
+              name: "",
+              phone: "",
+              email: "",
+              address: {
+                address: "",
+                city: "",
+                country: "",
+                zipCode: "",
+              },
+            },
+            receiver: {
+              name: "",
+              phone: "",
+              email: "",
+              address: {
+                address: "",
+                city: "",
+                country: "",
+                zipCode: "",
+              },
+            },
+            item: [],
           },
         },
-        receiver: {
-          name: "",
-          phone: "",
-          email: "",
-          address: {
-            address: "",
-            city: "",
-            country: "",
-            zipCode: "",
-          },
-          },
-          item: [],
-        },
-      }
   });
 
-  
-    useEffect(() => {
-      const loadCountries = async () => {
-        try {
-          const response = await countryService.getActiveCountries();
-          console.log(response);
-          
-          if (response.status == 200 && response.data) {
-            setCountries(Array.isArray(response.data) ? response.data : [response.data]);
-          }
-        } catch (error) {
-          console.error("Failed to load countries:", error);
+  useEffect(() => {
+    const loadCountries = async () => {
+      try {
+        const response = await countryService.getActiveCountries();
+        console.log(response);
+
+        if (response.status == 200 && response.data) {
+          setCountries(
+            Array.isArray(response.data) ? response.data : [response.data]
+          );
         }
-      };
-      loadCountries();
-    }, []);
+      } catch (error) {
+        console.error("Failed to load countries:", error);
+      }
+    };
+    loadCountries();
+  }, []);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -166,7 +175,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
         item.totalPrice = item.quantity * item.unitPrice;
       });
     }
-    
+
     onSubmit(data);
   };
 
@@ -187,7 +196,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Origin Country</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger data-testid="from-country-select">
                           <SelectValue placeholder="Select origin country" />
@@ -212,14 +224,17 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Destination Country</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger data-testid="to-country-select">
                           <SelectValue placeholder="Select destination country" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                         {countries.map((country) => (
+                        {countries.map((country) => (
                           <SelectItem key={country._id} value={country._id}>
                             {country.name}
                           </SelectItem>
@@ -245,7 +260,9 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                         step="0.1"
                         placeholder="0.0"
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          field.onChange(parseFloat(e.target.value) || 0)
+                        }
                         data-testid="parcel-weight"
                       />
                     </FormControl>
@@ -260,7 +277,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Service Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger data-testid="order-type-select">
                           <SelectValue />
@@ -283,7 +303,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Priority</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger data-testid="priority-select">
                           <SelectValue />
@@ -292,8 +315,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                       <SelectContent>
                         <SelectItem value="normal">Normal</SelectItem>
                         <SelectItem value="express">Express</SelectItem>
-                        <SelectItem value="super-express">Super Express</SelectItem>
-                        <SelectItem value="tax-paid">Tax Paid</SelectItem> 
+                        <SelectItem value="super-express">
+                          Super Express
+                        </SelectItem>
+                        <SelectItem value="tax-paid">Tax Paid</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -319,6 +344,133 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                 </FormItem>
               )}
             />
+
+
+            <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <FormLabel className="text-base font-semibold">Parcel Items</FormLabel>
+        <button
+          type="button"
+          onClick={() =>
+            form.setValue("parcel.item", [
+              ...(form.getValues("parcel.item") || []),
+              { name: "", quantity: 1, unitPrice: 0, totalPrice: 0 },
+            ])
+          }
+          className="text-sm text-blue-600 hover:underline"
+        >
+          + Add Item
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        {(form.watch("parcel.item") || []).map((item, index) => (
+          <div
+            key={index}
+            className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end border p-3 rounded-lg"
+          >
+            <FormField
+              control={form.control}
+              name={`parcel.item.${index}.name`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Item Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. T-shirt" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name={`parcel.item.${index}.quantity`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Qty</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 0;
+                        field.onChange(value);
+                        const items = form.getValues("parcel.item");
+                        const unit = items[index]?.unitPrice || 0;
+                        form.setValue(
+                          `parcel.item.${index}.totalPrice`,
+                          value * unit
+                        );
+                      }}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name={`parcel.item.${index}.unitPrice`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Unit Price</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      {...field}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0;
+                        field.onChange(value);
+                        const items = form.getValues("parcel.item");
+                        const qty = items[index]?.quantity || 0;
+                        form.setValue(
+                          `parcel.item.${index}.totalPrice`,
+                          qty * value
+                        );
+                      }}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name={`parcel.item.${index}.totalPrice`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Total</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      readOnly
+                      className="bg-gray-50"
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <Button
+              variant={"default"}
+              onClick={() => {
+                const items = form.getValues("parcel.item") || [];
+                form.setValue(
+                  "parcel.item",
+                  items.filter((_, i) => i !== index)
+                );
+              }}
+              className="text-red-500 text-sm hover:underline mt-2 md:mt-6"
+            >
+              Remove
+            </Button>
+          </div>
+        ))}
+      </div>
+
+    </div>
           </CardContent>
         </Card>
 
@@ -336,7 +488,11 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter sender name" {...field} data-testid="sender-name" />
+                      <Input
+                        placeholder="Enter sender name"
+                        {...field}
+                        data-testid="sender-name"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -350,7 +506,11 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                   <FormItem>
                     <FormLabel>Phone Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter phone number" {...field} data-testid="sender-phone" />
+                      <Input
+                        placeholder="Enter phone number"
+                        {...field}
+                        data-testid="sender-phone"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -365,7 +525,11 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                 <FormItem>
                   <FormLabel>Email Address (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter email address" {...field} data-testid="sender-email" />
+                    <Input
+                      placeholder="Enter email address"
+                      {...field}
+                      data-testid="sender-email"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -383,7 +547,11 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                     <FormItem>
                       <FormLabel>Address</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter address" {...field} data-testid="sender-address" />
+                        <Input
+                          placeholder="Enter address"
+                          {...field}
+                          data-testid="sender-address"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -398,7 +566,11 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                       <FormItem>
                         <FormLabel>City</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter city" {...field} data-testid="sender-city" />
+                          <Input
+                            placeholder="Enter city"
+                            {...field}
+                            data-testid="sender-city"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -412,36 +584,43 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                       <FormItem>
                         <FormLabel>ZIP/Postal Code</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter ZIP code" {...field} data-testid="sender-zip" />
+                          <Input
+                            placeholder="Enter ZIP code"
+                            {...field}
+                            data-testid="sender-zip"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="parcel.sender.address.country"
                     render={({ field }) => (
                       <FormItem>
-                    <FormLabel>Origin Country</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger data-testid="sender-country-select">
-                          <SelectValue placeholder="Select origin country" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {countries.map((country) => (
-                          <SelectItem key={country._id} value={country._id}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    
-                    <FormMessage />
-                  </FormItem>
+                        <FormLabel>Origin Country</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger data-testid="sender-country-select">
+                              <SelectValue placeholder="Select origin country" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {countries.map((country) => (
+                              <SelectItem key={country._id} value={country._id}>
+                                {country.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        <FormMessage />
+                      </FormItem>
                     )}
                   />
                 </div>
@@ -464,7 +643,11 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter receiver name" {...field} data-testid="receiver-name" />
+                      <Input
+                        placeholder="Enter receiver name"
+                        {...field}
+                        data-testid="receiver-name"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -478,7 +661,11 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                   <FormItem>
                     <FormLabel>Phone Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter phone number" {...field} data-testid="receiver-phone" />
+                      <Input
+                        placeholder="Enter phone number"
+                        {...field}
+                        data-testid="receiver-phone"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -493,7 +680,11 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                 <FormItem>
                   <FormLabel>Email Address (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter email address" {...field} data-testid="receiver-email" />
+                    <Input
+                      placeholder="Enter email address"
+                      {...field}
+                      data-testid="receiver-email"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -511,7 +702,11 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                     <FormItem>
                       <FormLabel>Street Address</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter street address" {...field} data-testid="receiver-street" />
+                        <Input
+                          placeholder="Enter street address"
+                          {...field}
+                          data-testid="receiver-street"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -526,14 +721,16 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                       <FormItem>
                         <FormLabel>City</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter city" {...field} data-testid="receiver-city" />
+                          <Input
+                            placeholder="Enter city"
+                            {...field}
+                            data-testid="receiver-city"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
-                  
 
                   <FormField
                     control={form.control}
@@ -542,46 +739,50 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false }: OrderF
                       <FormItem>
                         <FormLabel>ZIP/Postal Code</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter ZIP code" {...field} data-testid="receiver-zip" />
+                          <Input
+                            placeholder="Enter ZIP code"
+                            {...field}
+                            data-testid="receiver-zip"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-
                   <FormField
                     control={form.control}
                     name="parcel.receiver.address.country"
                     render={({ field }) => (
                       <FormItem>
-                    <FormLabel>Destination Country</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger data-testid="receiver-country-select">
-                          <SelectValue placeholder="Select destination country" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {countries.map((country) => (
-                          <SelectItem key={country._id} value={country._id}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    
-                    <FormMessage />
-                  </FormItem>
+                        <FormLabel>Destination Country</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger data-testid="receiver-country-select">
+                              <SelectValue placeholder="Select destination country" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {countries.map((country) => (
+                              <SelectItem key={country._id} value={country._id}>
+                                {country.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        <FormMessage />
+                      </FormItem>
                     )}
                   />
-
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
-
 
         {/* Form Actions */}
         <div className="flex justify-end space-x-4" data-testid="form-actions">
